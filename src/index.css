@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { @apply bg-gray-950; }
+  body { @apply bg-gray-950 text-white antialiased; }
+
+  /* Thin scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+}
+
+/* Monaco editor dark background matches our theme */
+.monaco-editor, .monaco-editor-background,
+.monaco-editor .margin { background-color: #0a0a0f !important; }

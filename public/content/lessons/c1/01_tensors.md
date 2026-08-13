@@ -1,0 +1,100 @@
+# 01 - Python, tensors, and shapes
+
+## Why tensors
+
+A tensor is a rectangular collection of numbers. Its **shape** tells how many
+indices are required to select a value.
+
+```python
+import torch
+
+scalar = torch.tensor(3.0)                  # shape: ()
+vector = torch.tensor([1.0, 2.0, 3.0])      # shape: (3,)
+matrix = torch.tensor([[1, 2], [3, 4]])     # shape: (2, 2)
+batch = torch.zeros(4, 8, 32)               # shape: (B=4, T=8, C=32)
+```
+
+In this course:
+
+- `B` means independent sequences in one batch;
+- `T` means token positions in each sequence;
+- `C` means channels, features, or embedding dimensions;
+- `V` means vocabulary size;
+- `H` means attention heads.
+
+## Indexing and slicing
+
+Given `x` with shape `(B, T, C)`:
+
+```python
+x[0]          # first sequence: (T, C)
+x[:, 0]       # first position in every sequence: (B, C)
+x[:, :, 0]    # first channel everywhere: (B, T)
+x[:, -4:, :]  # last four positions: (B, 4, C)
+```
+
+A colon means "all values on this axis." A negative index counts from the end.
+
+## Reshape, transpose, and contiguous
+
+Multi-head attention changes `(B, T, C)` into `(B, H, T, C/H)`:
+
+```python
+B, T, C, H = 2, 5, 12, 3
+x = torch.randn(B, T, C)
+heads = x.view(B, T, H, C // H).transpose(1, 2)
+assert heads.shape == (B, H, T, C // H)
+```
+
+`view` reorganizes axes without changing values. `transpose` swaps axes. After a
+transpose, call `.contiguous()` before a later `view` because the logical order
+may differ from memory order.
+
+## Broadcasting
+
+PyTorch can combine compatible shapes by virtually repeating dimensions:
+
+```python
+token_vectors = torch.randn(2, 5, 12)  # (B, T, C)
+position_bias = torch.randn(5, 12)      # (T, C)
+combined = token_vectors + position_bias
+assert combined.shape == (2, 5, 12)
+```
+
+The missing batch axis is broadcast across both sequences.
+
+## Matrix multiplication
+
+For matrices, `(m, n) @ (n, p) -> (m, p)`. The inner dimensions must match.
+PyTorch applies the same rule to the final two axes and broadcasts earlier axes.
+
+```python
+queries = torch.randn(2, 4, 8, 16)  # (B, H, T, head_size)
+keys = torch.randn(2, 4, 8, 16)
+scores = queries @ keys.transpose(-2, -1)
+assert scores.shape == (2, 4, 8, 8)
+```
+
+Every query position now has one score for every key position.
+
+## Parameters and gradients
+
+`torch.nn.Parameter` is a tensor an optimizer may update. After `loss.backward()`,
+its `.grad` stores the derivative of loss with respect to that parameter.
+
+```python
+w = torch.nn.Parameter(torch.tensor(2.0))
+loss = (w - 7) ** 2
+loss.backward()
+print(w.grad)  # -10: increasing w will reduce the loss
+```
+
+## Build it yourself
+
+Complete [workbook/01_tensors.py](../workbook/01_tensors.py). Before every
+assertion, write the expected shape on paper.
+
+## Exit check
+
+Explain why `(B, H, T, D) @ (B, H, D, T)` produces `(B, H, T, T)`. If you
+cannot explain every axis, repeat the matrix multiplication section.

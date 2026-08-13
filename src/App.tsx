@@ -1,0 +1,23 @@
+import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { loadProgress, ProgressState } from '@/engine/progress'
+import { HomePage } from '@/pages/HomePage'
+import { MapPage } from '@/pages/MapPage'
+import { LevelPage } from '@/pages/LevelPage'
+
+export default function App() {
+  const [progress, setProgress] = useState<ProgressState>(loadProgress)
+
+  return (
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Routes>
+        <Route path="/"        element={<HomePage progress={progress} />} />
+        <Route path="/map"     element={<MapPage progress={progress} />} />
+        <Route path="/level/:levelId" element={
+          <LevelPage onProgressChange={setProgress} />
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
