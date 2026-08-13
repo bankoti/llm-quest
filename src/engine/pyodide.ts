@@ -65,8 +65,10 @@ export async function runChallenge(
 
   const t0 = performance.now()
   try {
+    // NOTE: return JSON string, not a Python dict — a dict crosses the JS
+    // bridge as a PyProxy whose properties are NOT plain JS fields.
     const result = await py.runPythonAsync(`
-import sys, io, traceback
+import io, json
 from contextlib import redirect_stdout, redirect_stderr
 
 _out = io.StringIO()
@@ -84,10 +86,10 @@ except Exception as e:
     _ok = False
     _error_msg = f"{type(e).__name__}: {e}"
 
-{"ok": _ok, "output": _out.getvalue(), "error": _error_msg}
+json.dumps({"ok": _ok, "output": _out.getvalue(), "error": _error_msg})
 `)
     const durationMs = performance.now() - t0
-    const r = result as { ok: boolean; output: string; error: string | null }
+    const r = JSON.parse(String(result)) as { ok: boolean; output: string; error: string | null }
     return { ok: r.ok, output: r.output, error: r.error ?? undefined, durationMs }
   } catch (e) {
     return { ok: false, output: '', error: String(e), durationMs: performance.now() - t0 }
