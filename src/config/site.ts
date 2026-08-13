@@ -12,6 +12,9 @@ export const SITE = {
   // Social / meta
   twitterHandle: '',           // fill in later
   ogImage: '/og.png',          // fill in later
+  // Admin: visit ?admin=<adminKey> to enable admin mode (?admin=off to exit).
+  // Client-side only — change before launch, and know it ships in the bundle.
+  adminKey: 'quest-master-42',
   // Pricing
   priceUsd: 250,
   currency: 'USD',

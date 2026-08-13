@@ -7,6 +7,7 @@ import { LessonPanel } from '@/components/Lesson/LessonPanel'
 import { Arena } from '@/components/Arena/Arena'
 import { XPBar } from '@/components/Progress/XPBar'
 import { GoDeeper } from '@/components/GoDeeper'
+import { isAdminMode } from '@/engine/admin'
 
 interface Props { onProgressChange: (p: ProgressState) => void }
 
@@ -61,7 +62,7 @@ export function LevelPage({ onProgressChange }: Props) {
   }
 
   const levelState = progress.levels[level.id]
-  if (levelState?.status === 'locked') {
+  if (levelState?.status === 'locked' && !isAdminMode()) {
     return (
       <div className="flex items-center justify-center h-screen text-gray-500 font-mono">
         <div className="text-center">

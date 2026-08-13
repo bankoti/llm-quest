@@ -4,10 +4,15 @@ import { XPBar } from '@/components/Progress/XPBar'
 import { StreakBadge } from '@/components/Progress/StreakBadge'
 import { getProgressSummary, ProgressState } from '@/engine/progress'
 import { MAX_XP } from '@/data/curriculum'
+import { isAdminMode } from '@/engine/admin'
+import { AdminPanel } from '@/components/AdminPanel'
 
-interface Props { progress: ProgressState }
+interface Props {
+  progress: ProgressState
+  onProgressChange: (p: ProgressState) => void
+}
 
-export function MapPage({ progress }: Props) {
+export function MapPage({ progress, onProgressChange }: Props) {
   const { completed, total, rank } = getProgressSummary(progress)
 
   return (
@@ -34,6 +39,7 @@ export function MapPage({ progress }: Props) {
 
       {/* Map */}
       <div className="max-w-4xl mx-auto px-6 py-10">
+        {isAdminMode() && <AdminPanel onProgressChange={onProgressChange} />}
         {completed === 0 && (
           <div className="mb-10 p-6 rounded-2xl border border-violet-800/40 bg-violet-950/20">
             <h2 className="text-white font-semibold text-lg mb-1">Welcome to {SITE.name}</h2>

@@ -12,7 +12,7 @@ export default function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/"        element={<HomePage progress={progress} />} />
-        <Route path="/map"     element={<MapPage progress={progress} />} />
+        <Route path="/map"     element={<MapPage progress={progress} onProgressChange={setProgress} />} />
         <Route path="/level/:levelId" element={
           <LevelPage onProgressChange={setProgress} />
         } />
