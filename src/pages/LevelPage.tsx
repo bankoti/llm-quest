@@ -96,6 +96,7 @@ export function LevelPage({ onProgressChange }: Props) {
           <span className="text-gray-600 shrink-0">/</span>
           <span className="text-sm font-semibold text-white truncate">{level.title}</span>
           {level.type === 'boss' && <span title="Boss fight" className="shrink-0">👑</span>}
+          {level.type === 'debug' && <span title="Debug level — find the bug" className="shrink-0">🐛</span>}
         </div>
         <div className="w-40 shrink-0">
           <XPBar xp={progress.totalXp} animated={false} />

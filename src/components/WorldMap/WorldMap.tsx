@@ -58,6 +58,7 @@ export function WorldMap({ progress }: Props) {
                 const isLocked = status === 'locked' && !admin
                 const isComplete = status === 'complete'
                 const isBoss = level.type === 'boss'
+                const isDebug = level.type === 'debug'
 
                 return (
                   <div key={level.id} className="flex items-center gap-2">
@@ -105,6 +106,8 @@ export function WorldMap({ progress }: Props) {
                         <span className="text-gray-600">🔒</span>
                       ) : isBoss ? (
                         <span>⚔️</span>
+                      ) : isDebug ? (
+                        <span title="Debug level">🐛</span>
                       ) : (
                         <span style={{ color: course.accent }}>{li + 1}</span>
                       )}

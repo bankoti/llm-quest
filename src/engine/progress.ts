@@ -35,10 +35,27 @@ function defaultState(): ProgressState {
   return { levels, totalXp: 0, streakDays: 0, lastActiveDate: today() }
 }
 
+// Backfill entries for levels added after the user first saved progress
+// (e.g. debug levels). A new level is unlocked if the level before it in
+// ALL_LEVELS order is already complete, otherwise locked.
+function migrate(state: ProgressState): ProgressState {
+  ALL_LEVELS.forEach((level, i) => {
+    if (state.levels[level.id]) return
+    const prev = i > 0 ? state.levels[ALL_LEVELS[i - 1].id] : undefined
+    const unlocked = i === 0 || prev?.status === 'complete'
+    state.levels[level.id] = {
+      status: unlocked ? 'unlocked' : 'locked',
+      xpEarned: 0,
+      attempts: 0,
+    }
+  })
+  return state
+}
+
 export function loadProgress(): ProgressState {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw) as ProgressState
+    if (raw) return migrate(JSON.parse(raw) as ProgressState)
   } catch {}
   return defaultState()
 }
