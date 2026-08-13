@@ -38,6 +38,11 @@ export function HomePage({ progress }: Props) {
           <p className="text-gray-400 text-lg mb-2 leading-relaxed">
             {SITE.description}
           </p>
+          <p className="text-gray-500 text-sm mb-2 leading-relaxed max-w-xl mx-auto">
+            AI-friendly by design: use Claude, ChatGPT, whatever you like.
+            The graders only check that your system works — the skill you build
+            here is knowing <em>what to ask for</em> and whether the answer is right.
+          </p>
           <p className="text-gray-600 text-sm mb-10 font-mono">
             {MAX_XP.toLocaleString()} XP · {total} levels · runs entirely in your browser
           </p>

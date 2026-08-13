@@ -46,6 +46,8 @@ export function MapPage({ progress, onProgressChange }: Props) {
             <p className="text-gray-400 text-sm leading-relaxed">
               {total} levels. 8 courses. Build an LLM from scratch, then ship a
               production AI system. Start at Level 1 — every level unlocks the next.
+              Asking an AI assistant is allowed and encouraged: passing a level means
+              you understood the concept well enough to specify it.
             </p>
             <div className="mt-3 text-xs font-mono text-gray-500">
               Total available: {MAX_XP.toLocaleString()} XP · {rank.title} → Distinguished

@@ -139,6 +139,11 @@ export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
         {!pyodideReady && runState === 'idle' && (
           <span className="text-xs text-gray-600 font-mono">Warming up Python runtime…</span>
         )}
+
+        <span className="ml-auto text-xs text-gray-600 font-mono hidden md:block"
+              title="Use any AI assistant. The tests grade whether you understood what to build.">
+          🤝 AI allowed — tests grade understanding, not typing
+        </span>
       </div>
 
       {/* Output panel */}
