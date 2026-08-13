@@ -115,6 +115,7 @@ export function LevelPage({ onProgressChange }: Props) {
             </div>
           ) : (
             <Arena
+              key={level.id}
               levelId={level.id}
               starterCode={starterCode}
               testCode={testCode}

@@ -14,8 +14,21 @@ interface Props {
 
 type RunState = 'idle' | 'loading-pyodide' | 'running' | 'pass' | 'fail'
 
+// Drafts survive refresh/navigation — losing 30 min of typed code is fatal UX.
+const draftKey = (levelId: string) => `llmquest_code_v1:${levelId}`
+
+function loadDraft(levelId: string): string | null {
+  try { return localStorage.getItem(draftKey(levelId)) } catch { return null }
+}
+function saveDraft(levelId: string, code: string): void {
+  try { localStorage.setItem(draftKey(levelId), code) } catch {}
+}
+function clearDraft(levelId: string): void {
+  try { localStorage.removeItem(draftKey(levelId)) } catch {}
+}
+
 export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
-  const [code, setCode] = useState(starterCode)
+  const [code, setCode] = useState(() => loadDraft(levelId) ?? starterCode)
   const [runState, setRunState] = useState<RunState>('idle')
   const [result, setResult] = useState<RunResult | null>(null)
   const [pyodideReady, setPyodideReady] = useState(false)
@@ -27,6 +40,21 @@ export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
       .then(() => { setPyodideReady(true); setRunState('idle') })
       .catch(() => setRunState('idle'))
   }, [])
+
+  // Debounced autosave of the draft
+  useEffect(() => {
+    if (code === starterCode) return
+    const t = setTimeout(() => saveDraft(levelId, code), 400)
+    return () => clearTimeout(t)
+  }, [code, levelId, starterCode])
+
+  const resetToStarter = useCallback(() => {
+    if (code !== starterCode && !confirm('Discard your code and restore the starter?')) return
+    clearDraft(levelId)
+    setCode(starterCode)
+    setResult(null)
+    setRunState('idle')
+  }, [code, starterCode, levelId])
 
   const run = useCallback(async () => {
     if (runState === 'running' || runState === 'loading-pyodide') return
@@ -96,6 +124,17 @@ export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
               ? 'Running…'
               : 'Run  (Ctrl+↵)'}
         </motion.button>
+
+        <button
+          onClick={resetToStarter}
+          disabled={code === starterCode}
+          title="Discard changes and restore the starter code"
+          className="text-xs font-mono px-3 py-2 rounded-lg text-gray-400 hover:text-white
+                     border border-gray-700 hover:border-gray-500 disabled:opacity-30
+                     disabled:cursor-not-allowed transition-colors"
+        >
+          ↺ Reset code
+        </button>
 
         {!pyodideReady && runState === 'idle' && (
           <span className="text-xs text-gray-600 font-mono">Warming up Python runtime…</span>
