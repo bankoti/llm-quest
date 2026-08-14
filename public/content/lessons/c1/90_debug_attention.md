@@ -1,8 +1,8 @@
-# Debug — Leaky Attention
+# Debug: Leaky Attention
 
 New level type. You are not writing code from scratch: an AI assistant already
 wrote it. It runs, it returns plausible numbers, and it is wrong in exactly one
-conceptual way. Your job is the one AI cannot do for itself — judge it.
+conceptual way. Your job is the one AI cannot do for itself: judge it.
 
 ## Why this skill
 
@@ -26,7 +26,7 @@ answer for yourself:
 
 ## How to work
 
-Run it first. Read the failure message — it tells you what property broke, not
+Run it first. Read the failure message; it tells you what property broke, not
 where. Form a hypothesis, fix the one line, run again. Asking an AI is fair
 game here too; describing the symptom precisely enough to get the right answer
 IS the exercise.

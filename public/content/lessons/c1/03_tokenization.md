@@ -1,5 +1,9 @@
 # 03 - Tokenization: text becomes model input
 
+A model never sees text. It sees integers, and the mapping from text to
+integers is a design decision whose consequences persist for the life of the
+checkpoint.
+
 ## The contract
 
 ![Tokenizer contract](content/images/c1/tokenizer_contract.svg)
@@ -61,6 +65,11 @@ Trace one training step by hand: write out `attention changes attention` as
 bytes, count adjacent pairs, and decide which merge wins. Several pairs tie;
 real tokenizers break ties with a deterministic rule, because encode and decode
 must stay reproducible forever.
+
+Warm up with `banana`: the adjacent pairs are `ba`, `an`, `na`, `an`, `na`.
+Both `an` and `na` appear twice, so the tie-break rule decides the first merge.
+If `an` wins, the sequence becomes `b an an a` and the next count starts over
+on the new symbols.
 
 The implementation you will build intentionally omits production features such
 as regex pre-tokenization, normalization policy, reserved special tokens, and

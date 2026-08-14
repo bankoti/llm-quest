@@ -1,5 +1,9 @@
 # 04 - From token IDs to training batches
 
+One off-by-one in this file and the model trains to predict a token it can
+already see. The loss plummets, the samples are garbage, and nothing raises an
+error. This level exists to make that bug impossible for you.
+
 ## Inputs and targets are shifted
 
 ![Input and target windows](content/images/c1/xy_windows.svg)

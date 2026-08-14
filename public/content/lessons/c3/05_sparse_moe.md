@@ -1,5 +1,8 @@
 # 05 - Sparse Mixture-of-Experts Families
 
+"8x7B" does not mean 56B parameters, and "13B active" does not mean 13B
+latency. MoE naming hides exactly the arithmetic this level makes you do.
+
 A sparse mixture-of-experts (MoE) layer replaces one dense feed-forward network
 with a router and several expert networks. For token state `x`, a top-`k` router
 selects a small expert subset:
@@ -18,6 +21,20 @@ Mixtral routes each token to two of eight feed-forward experts. OLMoE provides a
 open view of MoE training and token-choice routing. DeepSeek-V3 combines routed
 and shared experts and describes auxiliary-loss-free load balancing. These are
 not interchangeable implementations merely because all use the MoE label.
+
+Run the arithmetic once for Mixtral 8x7B (D = 4096, F = 14336, 32 layers):
+
+```text
+one SwiGLU expert: 3 * D * F      = 176M
+FFN per layer:     8 experts      = 1.41B
+FFN total:         x32 layers     = 45B
+active FFN:        2 experts x 32 = 11.3B
+```
+
+Attention, embeddings, and norms add roughly another 1.5B that is always
+active. The total is about 47B parameters and each token touches about 13B.
+Neither number alone describes the machine you must buy: memory holds all 47B
+while per-token FLOPs follow 13B.
 
 ## The systems cost
 

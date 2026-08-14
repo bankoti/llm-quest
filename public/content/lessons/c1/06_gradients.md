@@ -1,5 +1,8 @@
 # 06 - Gradients, backpropagation, and optimization
 
+Training is a loop that nudges numbers. This level makes you watch one nudge
+at a time until nothing about `loss.backward()` is mysterious.
+
 ## What training changes
 
 Let model parameters be `theta` and loss be `L(theta)`. A gradient contains one
@@ -49,6 +52,26 @@ for _ in range(20):
 
 The solution is `weight = 4`. `zero_grad` is required because PyTorch accumulates
 gradients by default.
+
+## Trace the first two steps by hand
+
+With `weight = 0`, `lr = 0.1`, prediction `3w`, and loss `(3w - 12)^2`:
+
+```text
+step 1: pred = 0     loss = 144
+        dL/dw = 2*(0 - 12)*3 = -72
+        w <- 0 - 0.1*(-72) = 7.2       overshot the answer (4)
+step 2: pred = 21.6  loss = 92.16
+        dL/dw = 2*(21.6 - 12)*3 = 57.6
+        w <- 7.2 - 5.76 = 1.44         overshot the other way
+```
+
+Substitute once and every update is `w <- -0.8*w + 7.2`: the distance to 4
+shrinks by a factor of 0.8 while flipping sign, a damped oscillation into the
+answer. Redo the arithmetic with `lr = 10` and the update becomes
+`w <- -179*w + 720`; every step multiplies the error by 179 and the loss
+explodes. That is the entire mechanism behind "learning rate too high,"
+visible in two lines of arithmetic.
 
 ## AdamW in plain language
 

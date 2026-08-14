@@ -1,5 +1,9 @@
 # 11 - KV Caches and Autoregressive Decoding
 
+Every production LLM you have used spends most of its decode time reading this
+cache. Learn its arithmetic and its correctness contract now; Course 7 assumes
+both.
+
 ## Why caching works
 
 ![KV cache growth during decode](content/images/c2/kv_cache_growth.svg)

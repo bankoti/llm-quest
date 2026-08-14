@@ -1,5 +1,9 @@
 # 01 - Python, tensors, and shapes
 
+Every bug you will hit in this course, from a silent broadcasting mistake to a
+leaky attention mask, shows up first as a wrong shape. Learn to predict shapes
+before running code and you get a free debugger for everything that follows.
+
 ## Why tensors
 
 ![Tensors and shapes](content/images/c1/tensors_shapes.svg)
@@ -79,6 +83,26 @@ assert scores.shape == (2, 4, 8, 8)
 ```
 
 Every query position now has one score for every key position.
+
+## Trace one by hand
+
+Predict both results before reading the answers:
+
+```python
+a = torch.tensor([[1., 2.], [3., 4.]])   # (2, 2)
+b = torch.tensor([10., 20.])             # (2,)
+
+a + b        # broadcasting
+a @ b        # matrix-vector product
+```
+
+`a + b` stretches `b` across both rows: `[[11, 22], [13, 24]]`, shape `(2, 2)`.
+`a @ b` treats `b` as a column. Row one gives `1*10 + 2*20 = 50`, row two gives
+`3*10 + 4*20 = 110`, so the result is `[50., 110.]` with shape `(2,)`.
+
+If you predicted both shapes and at least one value, you are ready for the
+challenge. If either surprised you, reread the two sections above; those two
+rules explain every shape in this course.
 
 ## Parameters and gradients
 

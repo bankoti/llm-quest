@@ -4,7 +4,7 @@
 
 Training loss on held-out text falls predictably as you increase model size,
 dataset size, and compute. Kaplan et al. (2020) showed the relationship is a
-power law in each axis. Hoffmann et al. (2022) — the Chinchilla paper — refined
+power law in each axis. Hoffmann et al. (2022), the Chinchilla paper, refined
 it: the compute-optimal frontier requires roughly equal token and parameter
 scaling. For a fixed compute budget `C` (FLOPs), the optimal model trains
 approximately `N* = 0.2 * sqrt(C)` parameters on `D* = 10 * N*` tokens.
@@ -47,8 +47,8 @@ transformer configurations.
 ## Why this matters for architecture choice
 
 If data is abundant and compute is fixed, Chinchilla scaling favors smaller
-models trained longer. Llama 3 8B was trained on 15T tokens — roughly 20x
-the Chinchilla optimum for its parameter count — because inference cost, not
+models trained longer. Llama 3 8B was trained on 15T tokens, roughly 20x
+the Chinchilla optimum for its parameter count, because inference cost, not
 training cost, is the binding production constraint.
 
 ## Exit check

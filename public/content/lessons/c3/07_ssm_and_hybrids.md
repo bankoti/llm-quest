@@ -1,5 +1,9 @@
 # 07 - State-Space Models and Hybrids
 
+Attention keeps everything and looks back; a state-space model keeps a
+fixed-size summary and moves on. That single design difference drives every
+tradeoff in this level.
+
 Attention retrieves from an explicit set of prior token representations. A
 state-space layer instead updates a recurrent state:
 
@@ -7,6 +11,18 @@ state-space layer instead updates a recurrent state:
 state_t  = A_t * state_(t-1) + B_t * input_t
 output_t = C_t * state_t     + D * input_t
 ```
+
+Trace it with scalars. Let A = 0.5, B = 1, C = 2, D = 0, and inputs `[3, 1]`:
+
+```text
+t=1: state = 0.5*0 + 3 = 3      output = 6
+t=2: state = 0.5*3 + 1 = 2.5    output = 5
+```
+
+The state after step 2 is one number, and it would still be one number after a
+million steps. Input 1's influence survives only as the `0.5*3` term folded
+into that number; nothing lets step 900,000 ask specifically about step 1 the
+way a query can address a key.
 
 Mamba makes state-space parameters input-dependent, giving the model selective
 control over what enters, persists in, and leaves state. Training can evaluate a

@@ -1,5 +1,9 @@
 # 05 - The bigram baseline
 
+Before the Transformer, spend one level on a model so small you can print
+every parameter. It validates your entire pipeline and sets a loss number that
+any later model has to beat.
+
 ## The smallest trainable language model
 
 ![Bigram count matrix](content/images/c1/bigram_counts.svg)
@@ -41,6 +45,23 @@ probabilities = counts / counts.sum(dim=1, keepdim=True)
 The neural version learns logits by minimizing cross entropy. The count version
 directly estimates probabilities from frequency. Their predictions should become
 similar with enough data and optimization.
+
+## Count it by hand
+
+Take the corpus `abcab` with vocabulary `a, b, c` (V=3). The adjacent pairs are
+`ab`, `bc`, `ca`, `ab`. With add-one smoothing the count table starts at one
+everywhere:
+
+```text
+         next: a    b    c
+after a  [     1,   3,   1 ]   <- ab occurred twice
+after b  [     1,   1,   2 ]   <- bc occurred once
+after c  [     2,   1,   1 ]   <- ca occurred once
+```
+
+Row `a` normalizes to `[0.2, 0.6, 0.2]`: after an `a`, predict `b` with
+probability 0.6. The neural bigram should approach the same distribution; it
+just gets there by gradient descent instead of division.
 
 ## Why keep this baseline
 

@@ -1,5 +1,8 @@
 # 11 - Config and Checkpoint Forensics
 
+A config file is a set of claims. This level teaches you to audit them: derive
+every number a vendor reports from the artifacts they actually shipped.
+
 Model inspection starts with machine-readable artifacts, not a diagram. Download
 only the config and tokenizer metadata when weights are too large. Record the
 repository, checkpoint identifier, revision hash, license, and library version
@@ -23,6 +26,20 @@ top_k <= num_experts
 
 Do not assume `head_dim = hidden_size / num_heads`; some configurations set an
 explicit head dimension. Do not assume all layers share one attention topology.
+
+Practice the derivation on Llama 3 8B's values: hidden 4096, 32 query heads,
+8 KV heads, head_dim 128:
+
+```text
+Q projection:        4096 * 32*128   = 16.8M
+K + V projections:   2 * 4096 * 8*128 = 8.4M
+output projection:   32*128 * 4096   = 16.8M
+attention per layer:                   41.9M
+x32 layers:                            1.34B
+```
+
+Numbers that reconcile this way become claims you can defend. Numbers that do
+not reconcile are where the interesting findings start.
 
 The challenge below validates a compact model-like config and derives GQA
 grouping, attention projection parameters, and KV bytes. Invent one invalid

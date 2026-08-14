@@ -1,5 +1,9 @@
 # 09 - IO-Aware Attention
 
+FlashAttention made exact attention faster by refusing to write a matrix to
+memory. Understanding why is the cleanest introduction to a rule that governs
+modern inference: arithmetic is cheap, moving bytes is not.
+
 ## The apparent contradiction
 
 ![IO-aware attention tiling](content/images/c2/io_aware.svg)

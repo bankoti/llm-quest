@@ -1,5 +1,9 @@
 # 08 - Assemble a decoder-only Transformer
 
+Every part is on the bench: tokenizer, batches, attention, MLP. This level is
+pure assembly, and the skill it trains is refusing to move on while any shape
+is unjustified.
+
 ## The data flow
 
 ```text
@@ -71,6 +75,19 @@ total: about 12 C^2 parameters per block
 
 Embeddings add roughly `V*C + T*C`; weight tying avoids another `V*C` output
 matrix. Parameter count measures storage, not total training compute.
+
+Check the formula against a real model. GPT-2 small has C = 768 and 12 blocks:
+
+```text
+per block:  12 * 768^2           = 7.1M
+12 blocks:                         85M
+embeddings: 50257*768 + 1024*768 = 39.4M
+total:      about 124M             (reported: 124M)
+```
+
+With biases and norms ignored, the estimate lands within rounding of the
+published number. Run the same arithmetic on your challenge config before you
+build it.
 
 ## Assemble in this order
 

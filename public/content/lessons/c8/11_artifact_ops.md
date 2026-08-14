@@ -2,7 +2,7 @@
 
 An LLM system's behavior is determined by more than its weights. The model,
 the tokenizer, the retrieval index, the prompt templates, the reranker, the
-safety filters — change any one and the system's outputs change. If you
+safety filters: change any one and the system's outputs change. If you
 cannot say exactly which versions were live at a given moment, you cannot
 debug an incident, reproduce an evaluation, or roll back safely.
 
@@ -49,4 +49,4 @@ running in prod byte-identical to what we evaluated?"
 ## Your challenge
 
 Implement `manifest_digest(artifacts)`: a SHA-256 hex digest over the sorted
-artifact entries — order-independent, and sensitive to any single change.
+artifact entries, order-independent and sensitive to any single change.

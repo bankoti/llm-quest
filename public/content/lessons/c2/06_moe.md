@@ -1,5 +1,9 @@
 # 06 - Sparse Mixture of Experts
 
+A sparse MoE lets a model store far more parameters than any single token pays
+for. The router is twenty lines of code; its consequences reach into every
+serving decision downstream.
+
 ![Sparse MoE routing](content/images/c2/moe_router.svg)
 
 
@@ -19,6 +23,21 @@ The implementation in `components.py` uses token-choice top-k routing. Its
 balance loss encourages average router probability and actual assignment share
 to agree. Real systems differ in routing rules, overflow handling, shared
 experts, and whether they drop tokens.
+
+## Route one token by hand
+
+Four experts, k = 2, router logits `[2.0, 1.0, 0.5, -1.0]`:
+
+```text
+softmax     -> [0.61, 0.22, 0.14, 0.03]
+top-2       -> experts 0 and 1
+renormalize -> [0.73, 0.27]
+y = 0.73 * Expert0(x) + 0.27 * Expert1(x)
+```
+
+Experts 2 and 3 do no work for this token and receive no gradient from it.
+Multiply that by millions of tokens and load balance across experts becomes a
+training-stability problem, which is why the balance loss exists.
 
 ## Invariants
 

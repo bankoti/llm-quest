@@ -1,7 +1,7 @@
 # 09 - Non-Inferiority Testing
 
-When you replace a component — a bigger model with a distilled one, an
-expensive reranker with a cheaper one — the question is rarely "is the new
+When you replace a component (a bigger model with a distilled one, an
+expensive reranker with a cheaper one), the question is rarely "is the new
 one better?" It is "is the new one not meaningfully worse, given that it is
 10x cheaper?" That question has a name: non-inferiority.
 
@@ -33,7 +33,7 @@ non-inferiority gate checks every segment you care about:
 pass = all(challenger[s] >= reference[s] - margin  for every segment s)
 ```
 
-One failing segment fails the gate. This is deliberate — the segments were
+One failing segment fails the gate. This is deliberate: the segments were
 chosen because each one matters independently.
 
 ## Choosing segments and margins
@@ -42,7 +42,7 @@ chosen because each one matters independently.
   slice (dietary restrictions, medical, financial).
 - Tighter margins for higher-stakes segments are legitimate; a uniform margin
   is the simplest defensible start.
-- Zero margin means "must be at least as good" — appropriate when the swap
+- Zero margin means "must be at least as good", appropriate when the swap
   has no cost benefit to trade against.
 
 ## Your challenge

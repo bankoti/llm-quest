@@ -1,5 +1,9 @@
 # 07 - Assemble the Modern Decoder
 
+One config object away from Llama: this level snaps the previous components
+together and turns each architecture choice into a flag you can flip and
+measure.
+
 ![Modern decoder block](content/images/c2/modern_block.svg)
 
 
@@ -26,6 +30,21 @@ rope_base                      -> rotary frequency schedule
 The model is deliberately small and readable. It does not implement fused
 kernels, paged KV caches, tensor parallelism, checkpoint conversion, or every
 numerical detail of a released checkpoint.
+
+## Predict before you flip
+
+Before toggling a flag, write down what should change. Moving from a dense FFN
+to 8 experts with k = 2, for example:
+
+```text
+total FFN parameters:          about 8x
+active FFN compute per token:  about 2x
+attention parameters:          unchanged
+```
+
+If a flip changes something you did not predict (parameter count, loss scale,
+tokens per second), stop and explain it before moving on. Predicting the delta
+is the skill this level trains.
 
 ## Debugging order
 

@@ -1,5 +1,9 @@
 # 01 - RMSNorm
 
+Half the machinery in a modern decoder exists to keep activations in a healthy
+numeric range. This component does it with a single statistic, and you can
+verify its behavior on a two-number vector.
+
 ## LayerNorm first
 
 ![LayerNorm vs RMSNorm](content/images/c2/rmsnorm_vs_layernorm.svg)
@@ -23,6 +27,18 @@ RMSNorm(x) = gamma * x / rms(x)
 
 Both normalize each token independently across channels. Neither mixes tokens or
 batch items.
+
+Work one vector by hand. For `x = [3, 4]` with gamma = 1 and epsilon = 0:
+
+```text
+mean(x^2)  = (9 + 16) / 2 = 12.5
+rms(x)     = sqrt(12.5)   = 3.536
+RMSNorm(x) = [3/3.536, 4/3.536] = [0.849, 1.131]
+```
+
+Now scale the input by 10: `x = [30, 40]` gives rms = 35.36 and exactly the
+same output. That is the scale invariance the exercise asks you to test. Note
+the output mean is 0.99, nowhere near zero; RMSNorm never promised that.
 
 ## An implementation detail that matters
 

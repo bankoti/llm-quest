@@ -1,5 +1,9 @@
 # 07 - Causal self-attention
 
+Attention is a soft dictionary lookup: every position asks a question, every
+earlier position advertises what it knows, and the answer is a weighted blend.
+The math is four matrix operations; this level makes you own each one.
+
 ## The problem attention solves
 
 The bigram model cannot condition on distant tokens. Attention lets each position
@@ -36,6 +40,24 @@ weights @ V:       (B, T, D)
 
 Each row of the `(T, T)` matrix says how one destination position mixes source
 positions.
+
+## One head, two tokens, by hand
+
+Use head size D = 1 so every vector is a scalar. Suppose the projections give:
+
+```text
+position 1: q = 1   k = 1    v = 10
+position 2: q = 2   k = -1   v = 20
+```
+
+Position 1 may attend only to itself: its weight row is `[1.0]` and its output
+is `10`. Position 2 attends to both. Its raw scores are `q2*k1 = 2` and
+`q2*k2 = -2`; softmax over `[2, -2]` gives `[0.982, 0.018]`, so its output is
+`0.982*10 + 0.018*20 = 10.18`.
+
+Notice what happened: position 2 mostly copied position 1's value because its
+query matched position 1's key. Content decided the mixing. The matrices in
+the real implementation just do this for every position at once.
 
 ## Why scale
 

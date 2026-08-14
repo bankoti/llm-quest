@@ -1,5 +1,9 @@
 # 04 - Local, Global, and Layerwise Attention
 
+Attention cost is a choice about which edges exist. This level treats the mask
+as an adjacency graph and teaches you to compute what a topology can and
+cannot reach.
+
 ![Local, global attention patterns](content/images/c3/local_global_masks.svg)
 
 
@@ -25,6 +29,11 @@ If every layer has window `w`, a rough upper bound on backward graph reach after
 `L` layers is `1 + L(w-1)`. Residuals and nonlinear content affect what survives,
 and training determines whether the model learns to relay it. A graph path is
 necessary for influence but not proof of useful retrieval.
+
+Mistral 7B makes it concrete: window 4,096 and 32 layers give a theoretical
+reach of `1 + 32 * 4,095 = 131,041` positions, thirty-two times the window.
+Whether the model reliably relays information across that many hops is an
+empirical question; the graph only says a path exists.
 
 Ask four separate questions:
 

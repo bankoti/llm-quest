@@ -1,5 +1,8 @@
 # 03 - Multi-head, multi-query, and grouped-query attention
 
+At decode time the cache, not the arithmetic, is the bill. Key/value heads set
+the size of that bill, and GQA is the knob that controls them.
+
 ## The design axis
 
 ![MHA vs GQA vs MQA](content/images/c2/gqa_heads.svg)
@@ -27,6 +30,18 @@ batching and precision details, cache elements per token are proportional to:
 
 Reducing `Hkv` lowers cache memory and the bandwidth needed to read it each decode
 step. Query activations are produced only for the current token and are not cached.
+
+Put numbers on it with a Llama 3 8B shape: 32 layers, head size 128, BF16:
+
+```text
+MHA (Hkv = 32): 2 * 32 * 32 * 128 * 2 bytes = 512 KiB per token
+GQA (Hkv = 8):  2 * 32 *  8 * 128 * 2 bytes = 128 KiB per token
+```
+
+At an 8,192-token context that is 4 GiB versus 1 GiB per sequence. The quality
+cost of dropping from 32 KV heads to 8 was judged acceptable; the drop to 1
+(MQA) often is not. That judgment, rerun for each model family, is why GQA is
+the current default.
 
 ## Tensor flow
 

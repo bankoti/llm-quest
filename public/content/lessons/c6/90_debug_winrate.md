@@ -1,4 +1,4 @@
-# Debug — The Generous Judge
+# Debug: The Generous Judge
 
 Model A wins every pairwise eval. It ships. Users notice nothing. The
 aggregator an AI assistant wrote has one conceptual bug.
@@ -16,7 +16,7 @@ win_rate(A) = (wins_A + 0.5 × ties) / total
 ```
 
 Count ties as wins for A and a judge that cannot tell the models apart
-reports A winning 100% of the time. That is not a small bias — it is the
+reports A winning 100% of the time. That is not a small bias; it is the
 difference between "ship it" and "there is no effect".
 
 ## What to look for

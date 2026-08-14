@@ -1,6 +1,6 @@
-# Debug — Flattering Precision
+# Debug: Flattering Precision
 
-Your laziest retriever — the one that returns a single document — is scoring
+Your laziest retriever, the one that returns a single document, is scoring
 100% on the eval an AI assistant wrote. One conceptual bug.
 
 ## The domain

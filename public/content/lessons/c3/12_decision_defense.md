@@ -1,5 +1,9 @@
 # 12 - Architecture Decision Defense
 
+This boss is a dress rehearsal for a real job task: someone hands you a
+checkpoint and asks whether to ship on it. The deliverable is a defensible
+decision, and the defense is graded harder than the choice.
+
 The final project audits an unfamiliar open checkpoint and recommends whether it
 belongs in a concrete system. Architecture facts and product decisions must stay
 separate: the same checkpoint can be a sound batch teacher and a poor interactive

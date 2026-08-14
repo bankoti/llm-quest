@@ -1,5 +1,9 @@
 # 01 - Encoder-Only Models: BERT
 
+The first architecture fork: give up generation, gain full bidirectional
+context. BERT-style encoders still carry a large share of production ranking
+and extraction traffic, so read this family as a working tool.
+
 ![Encoder vs decoder attention](content/images/c3/bert_vs_gpt_mask.svg)
 
 
@@ -14,6 +18,11 @@ L_MLM = -sum(i in M) log p(x_i | corrupted(x))
 This differs from next-token prediction in both the visibility mask and the
 supervised positions. The representation at each token can combine evidence
 from the complete unmasked input.
+
+One sentence shows the difference. In `the [MASK] barked at the mailman`, the
+evidence that the answer is `dog` sits to the right of the mask. A causal model
+predicting at that position would see only `the`; the encoder sees the whole
+sentence and gets the answer almost for free.
 
 Unlike a decoder LM, changing token `t+1` may change the representation at `t`.
 That is useful for understanding a complete input and incompatible with direct

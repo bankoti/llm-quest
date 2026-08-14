@@ -31,7 +31,7 @@ Apply a policy gradient update weighted by the advantage. No value network is
 needed because the baseline is the group mean. A KL penalty against the
 reference model prevents reward hacking.
 
-The policy learns to produce responses that score above the group mean — a
+The policy learns to produce responses that score above the group mean, a
 relative improvement signal rather than an absolute one.
 
 ## Format rewards
