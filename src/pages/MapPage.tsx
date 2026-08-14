@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { SITE } from '@/config/site'
 import { WorldMap } from '@/components/WorldMap/WorldMap'
 import { XPBar } from '@/components/Progress/XPBar'
@@ -13,6 +15,16 @@ interface Props {
 }
 
 export function MapPage({ progress, onProgressChange }: Props) {
+  // Landing-page course cards link to /map#course-N — scroll there on arrival.
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (!hash) return
+    // wait one frame so the course sections have mounted
+    requestAnimationFrame(() => {
+      document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }, [hash])
+
   const { completed, total, rank } = getProgressSummary(progress)
 
   return (

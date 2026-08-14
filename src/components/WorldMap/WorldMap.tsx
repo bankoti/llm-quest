@@ -22,6 +22,7 @@ export function WorldMap({ progress }: Props) {
         return (
           <motion.div
             key={course.id}
+            id={`course-${course.id}`}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: ci * 0.06 }}

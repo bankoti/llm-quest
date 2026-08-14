@@ -71,9 +71,12 @@ export function HomePage({ progress }: Props) {
           className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full"
         >
           {COURSES.map(c => (
-            <div
+            <button
               key={c.id}
-              className="p-3 rounded-lg border border-gray-800 bg-gray-900/50 text-left"
+              onClick={() => navigate(`/map#course-${c.id}`)}
+              className="p-3 rounded-lg border border-gray-800 bg-gray-900/50 text-left cursor-pointer
+                         transition-colors hover:bg-gray-800/70 hover:border-gray-600
+                         focus:outline-none focus:ring-2 focus:ring-violet-500/60"
             >
               <div
                 className="text-xs font-mono font-semibold mb-1"
@@ -82,7 +85,7 @@ export function HomePage({ progress }: Props) {
                 Course {c.id}
               </div>
               <div className="text-xs text-gray-300 leading-snug">{c.shortTitle}</div>
-            </div>
+            </button>
           ))}
         </motion.div>
       </div>
