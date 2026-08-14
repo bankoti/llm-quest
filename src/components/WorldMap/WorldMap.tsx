@@ -51,6 +51,26 @@ export function WorldMap({ progress }: Props) {
               </div>
             </div>
 
+            {/* What this course is about */}
+            <div className="pl-5 mb-4 max-w-2xl">
+              <p className="text-sm text-gray-400 leading-relaxed">{course.description}</p>
+              <details className="mt-1.5">
+                <summary
+                  className="text-xs font-mono cursor-pointer select-none text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  What you&apos;ll be able to do
+                </summary>
+                <ul className="mt-1.5 space-y-1">
+                  {course.outcomes.map(o => (
+                    <li key={o} className="text-xs text-gray-400 flex gap-2 leading-relaxed">
+                      <span className="font-mono" style={{ color: course.accent }}>+</span>
+                      <span>{o}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+
             {/* Level nodes */}
             <div className="flex items-center gap-2 flex-wrap pl-5">
               {course.levels.map((level, li) => {

@@ -26,6 +26,8 @@ export interface Course {
   shortTitle: string
   color: string           // Tailwind color name used for world theming
   accent: string          // hex for SVG/canvas use
+  description: string     // what the course covers, shown before starting
+  outcomes: string[]      // what the student can do after finishing
   levels: Level[]
   prerequisite: number | null
 }
@@ -39,6 +41,12 @@ export const COURSES: Course[] = [
     color: 'violet',
     accent: '#7c3aed',
     prerequisite: null,
+    description: 'Build a working GPT-style language model from raw text, one tested component at a time. No frameworks doing the thinking for you: you write the tokenizer, the attention, the whole decoder.',
+    outcomes: [
+      'Write byte-pair tokenization, batching, and causal self-attention by hand',
+      'Explain how gradients actually move loss into weights',
+      'Assemble a full GPT-style transformer that passes a causality test',
+    ],
     levels: [
       { id:'c1-l1', courseId:1, index:1, title:'Tensors & Shapes',       description:'Read tensor operations that power every model.',              xp:100, type:'challenge', lessonFile:'c1/01_tensors.md',         challengeFile:'c1/01_tensors.py',         estimateMinutes:20 },
       { id:'c1-l2', courseId:1, index:2, title:'Tokenization',           description:'Build character and byte-level BPE tokenizers.',              xp:120, type:'challenge', lessonFile:'c1/03_tokenization.md',     challengeFile:'c1/02_tokenizer.py',       estimateMinutes:25 },
@@ -58,6 +66,12 @@ export const COURSES: Course[] = [
     color: 'blue',
     accent: '#2563eb',
     prerequisite: 1,
+    description: 'Everything that changed between GPT-2 and Llama 3. The components modern open models actually ship: RMSNorm, RoPE, grouped-query attention, mixture-of-experts, and the memory math behind FlashAttention.',
+    outcomes: [
+      'Implement RMSNorm, RoPE, GQA, and sparse MoE routing',
+      'Calculate KV cache sizes and speculative decoding budgets',
+      'Explain why FlashAttention wins on memory bandwidth, not FLOPs',
+    ],
     levels: [
       { id:'c2-l1', courseId:2, index:1, title:'RMSNorm & RoPE',         description:'Replace LayerNorm and add rotary position embeddings.',        xp:150, type:'challenge', lessonFile:'c2/01_rmsnorm.md',          challengeFile:'c2/01_norm_and_rope.py',   estimateMinutes:30 },
       { id:'c2-l2', courseId:2, index:2, title:'Grouped-Query Attention', description:'Share key/value heads to cut KV cache size.',                 xp:150, type:'challenge', lessonFile:'c2/03_gqa.md',              challengeFile:'c2/02_gqa_and_masks.py',   estimateMinutes:30 },
@@ -76,6 +90,12 @@ export const COURSES: Course[] = [
     color: 'cyan',
     accent: '#0891b2',
     prerequisite: 2,
+    description: 'Read any model architecture like a spec sheet. Compare encoder, decoder, and state-space families, then derive parameter counts, FLOPs, and memory straight from a real config file.',
+    outcomes: [
+      'Trace information flow through encoder, decoder, and hybrid designs',
+      'Derive parameters, FLOPs, and KV memory from a raw model config',
+      'Defend an architecture choice against credible alternatives',
+    ],
     levels: [
       { id:'c3-l1', courseId:3, index:1, title:'Information Flow',        description:'Trace data through encoder, decoder, and hybrid architectures.', xp:150, type:'challenge', lessonFile:'c3/01_encoder_only_bert.md', challengeFile:'c3/01_information_flow.py',   estimateMinutes:30 },
       { id:'c3-l2', courseId:3, index:2, title:'Attention Topology',      description:'Compare full, local, sparse, and cross-attention patterns.',     xp:150, type:'challenge', lessonFile:'c3/04_local_global_attention.md', challengeFile:'c3/02_attention_topology.py', estimateMinutes:30 },
@@ -94,6 +114,12 @@ export const COURSES: Course[] = [
     color: 'emerald',
     accent: '#059669',
     prerequisite: 3,
+    description: 'Decide where AI belongs in a system before writing any model code. Baselines, latency and error budgets, cost break-evens, and a risk register: the working method of a solution architect.',
+    outcomes: [
+      'Choose model placement from constraints, not hype',
+      'Allocate latency and error budgets across components',
+      'Build cost break-even and risk analyses that survive review',
+    ],
     levels: [
       { id:'c4-l1', courseId:4, index:1, title:'Route Decision',         description:'Choose where AI belongs in a stack before choosing a model.',  xp:150, type:'challenge', lessonFile:'c4/05_placement_patterns.md', challengeFile:'c4/01_route_decision.py',    estimateMinutes:30 },
       { id:'c4-l2', courseId:4, index:2, title:'Baseline Report',        description:'Instrument and measure a classical baseline.',                 xp:150, type:'challenge', lessonFile:'c4/03_baseline_and_instrumentation.md', challengeFile:'c4/02_baseline_report.py', estimateMinutes:30 },
@@ -112,6 +138,12 @@ export const COURSES: Course[] = [
     color: 'amber',
     accent: '#d97706',
     prerequisite: 4,
+    description: 'Build search that finds the right document and generation that sticks to it. BM25 and dense retrieval from the math up, hybrid fusion, reranking, and citation-validated grounded generation.',
+    outcomes: [
+      'Implement BM25, two-tower dense retrieval, and reciprocal rank fusion',
+      'Apply hard constraints and cross-encoder reranking to candidates',
+      'Validate that generated answers cite the retrieved evidence',
+    ],
     levels: [
       { id:'c5-l1', courseId:5, index:1, title:'BM25 Math',             description:'Derive term-frequency scoring from first principles.',         xp:150, type:'challenge', lessonFile:'c5/01_lexical_bm25.md',      challengeFile:'c5/01_bm25_math.py',        estimateMinutes:30 },
       { id:'c5-l2', courseId:5, index:2, title:'Dense Similarity',      description:'Build a two-tower embedding retriever.',                      xp:150, type:'challenge', lessonFile:'c5/02_dense_and_ann.md',     challengeFile:'c5/02_dense_similarity.py', estimateMinutes:30 },
@@ -130,6 +162,12 @@ export const COURSES: Course[] = [
     color: 'rose',
     accent: '#e11d48',
     prerequisite: 5,
+    description: 'Measure model quality so it holds up under scrutiny. Ranking metrics, calibration, LLM-judge bias audits, inter-rater agreement, distillation, and drift detection.',
+    outcomes: [
+      "Compute NDCG, ECE, and Cohen's kappa from scratch",
+      'Audit an LLM judge for position and verbosity bias',
+      'Distil a student model and detect distribution drift',
+    ],
     levels: [
       { id:'c6-l1', courseId:6, index:1, title:'NDCG & Ranking Metrics', description:'Measure retrieval quality with position-discounted gain.',    xp:150, type:'challenge', lessonFile:'c6/03_metrics_and_uncertainty.md', challengeFile:'c6/01_ndcg.py',           estimateMinutes:30 },
       { id:'c6-l2', courseId:6, index:2, title:'Distil a Student',       description:'Train a compact model to mimic a teacher on relevance.',     xp:200, type:'challenge', lessonFile:'c6/07_distillation.md',       challengeFile:'c6/02_distill_student.py', estimateMinutes:40 },
@@ -148,6 +186,12 @@ export const COURSES: Course[] = [
     color: 'orange',
     accent: '#ea580c',
     prerequisite: 6,
+    description: 'Keep an AI system up when its parts fail. Fallbacks, cache versioning, deadline propagation, circuit breakers, admission control, and canary gates: the reliability toolkit for serving LLMs.',
+    outcomes: [
+      'Design fallbacks that return valid output during total outages',
+      'Implement circuit breakers, admission control, and deadline budgets',
+      'Gate rollouts automatically on error-rate evidence',
+    ],
     levels: [
       { id:'c7-l1', courseId:7, index:1, title:'Fallback Behavior',      description:'Return a valid response when every AI component is down.',    xp:200, type:'challenge', lessonFile:'c7/06_resilience.md',         challengeFile:'c7/01_fallback.py',        estimateMinutes:35 },
       { id:'c7-l2', courseId:7, index:2, title:'Cache Identity',         description:'Version artifact identities so rollback never breaks state.', xp:150, type:'challenge', lessonFile:'c7/02_cache_and_decoding.md',        challengeFile:'c7/02_cache_identity.py',  estimateMinutes:25 },
@@ -166,6 +210,12 @@ export const COURSES: Course[] = [
     color: 'fuchsia',
     accent: '#a21caf',
     prerequisite: 7,
+    description: 'The final integration: take a system from experiment design to defended launch. Causal experiments, evidence-based launch gates, non-inferiority tests, failure matrices, and incident response.',
+    outcomes: [
+      'Design launch experiments with guardrails and gates that fail closed',
+      'Prove a new model does not regress on critical slices',
+      'Map every failure mode to a bounded, verified control',
+    ],
     levels: [
       { id:'c8-l1', courseId:8, index:1, title:'Experiment Design',      description:'Define a causal launch experiment with guardrails.',          xp:200, type:'challenge', lessonFile:'c8/10_product_experiment.md', challengeFile:'c8/01_experiment.py',      estimateMinutes:35 },
       { id:'c8-l2', courseId:8, index:2, title:'Launch Gate',            description:'Pass/fail a release on evidence, not opinion.',               xp:200, type:'challenge', lessonFile:'c8/08_operational_readiness.md', challengeFile:'c8/02_launch_gate.py',  estimateMinutes:35 },
@@ -184,6 +234,12 @@ export const COURSES: Course[] = [
     color: 'rose',
     accent: '#e11d48',
     prerequisite: 3,
+    description: 'How frontier labs train models. Chinchilla scaling laws, web-scale data pipelines, DPO and GRPO alignment math, real Llama 3 and DeepSeek configs, and a full training recipe you must defend.',
+    outcomes: [
+      'Derive compute-optimal model and data sizes from a FLOP budget',
+      'Implement DPO loss and GRPO advantages from the papers',
+      'Design a training recipe that fits compute, memory, and alignment constraints',
+    ],
     levels: [
       { id:'c9-l1', courseId:9, index:1, title:'Scaling Laws',            description:'Derive compute-optimal parameter and token counts from first principles.',   xp:150, type:'challenge', lessonFile:'c9/01_scaling_laws.md',    challengeFile:'c9/01_scaling_laws.py',    estimateMinutes:30 },
       { id:'c9-l2', courseId:9, index:2, title:'Data Pipeline',           description:'Estimate token retention, domain mix, and embedding costs.',               xp:150, type:'challenge', lessonFile:'c9/02_data_pipeline.md',   challengeFile:'c9/02_data_pipeline.py',   estimateMinutes:25 },

@@ -85,6 +85,7 @@ export function HomePage({ progress }: Props) {
           {COURSES.map(c => (
             <button
               key={c.id}
+              title={c.description}
               onClick={() => navigate(`/map#course-${c.id}`)}
               className="p-3 rounded-lg border border-gray-800 bg-gray-900/50 text-left cursor-pointer
                          transition-colors hover:bg-gray-800/70 hover:border-gray-600
