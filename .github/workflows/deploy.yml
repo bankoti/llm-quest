@@ -1,8 +1,9 @@
 name: Deploy to GitHub Pages
 
+# Repo is private: GitHub Pages is unavailable on the Free plan, so pushes
+# must not trigger deploys (they fail at deploy-pages with a 404).
+# Manual trigger kept for the day the repo goes public or moves to Pro.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
