@@ -305,4 +305,40 @@ export const HINTS: Record<string, [string, string, string]> = {
     'MTTD = detect_time - start_time; MTTR = resolve_time - start_time (or per the docstring definitions). Parse timestamps carefully.',
     'Aggregate across incidents exactly as specified (mean of each duration). Watch unit conversions — the log may be seconds, the answer minutes.',
   ],
+
+  'c9-l1': [
+    'Chinchilla formula: N* = 0.2 * sqrt(C), D* = 10 * N*. Training FLOPs = 6 * N * D.',
+    'inference_memory_gb: params * bytes_per_param / 1e9 (1 GB = 1e9 bytes). Check: 7B params * 2 bytes = 14GB.',
+    'chinchilla_optimal returns a dict with keys "params" and "tokens". Make sure D* = exactly 10 * N* (integer).',
+  ],
+  'c9-l2': [
+    'retained_tokens = int(raw * rate). embedding_matrix_bytes = vocab * hidden * bpp. domain_token_counts: each domain = total * fraction.',
+    'The ValueError fires when abs(sum(mix.values()) - 1.0) > 1e-6. Compute sum first, check it, then multiply.',
+    'All three functions are one-liners once you know the formula. The tricky part is the ValueError condition and the int() truncation.',
+  ],
+  'c9-l3': [
+    'DPO loss = -log_sigmoid(beta*(log_pi_chosen - log_pi_ref_chosen) - beta*(log_pi_rejected - log_pi_ref_rejected)). Start with log_sigmoid.',
+    'log_sigmoid(x) = -log(1 + exp(-x)) = x - log(1 + exp(x)) for large x. Use the negative form for numerical stability.',
+    'At zero margin both terms cancel -> log_sigmoid(0) = log(0.5) -> loss = -log(0.5) = log(2). Check your implementation hits this exactly.',
+  ],
+  'c9-l4': [
+    'grpo_advantages: compute mean and std of rewards. advantage = (r - mean) / std. If std==0 return all zeros.',
+    'kl_penalty(log_pi, log_pi_ref): let diff = log_pi_ref - log_pi; return exp(diff) - diff - 1. This is always >= 0.',
+    'grpo_loss = -mean(adv_i * log_prob_i) + kl_coeff * mean(kl_penalty_i). Average over all tokens in the response.',
+  ],
+  'c9-l5': [
+    'gqa_groups = num_q_heads // num_kv_heads. For Llama 3 8B: 32 // 8 = 4.',
+    'attn = hidden*(q_heads*head_dim) + hidden*(kv_heads*head_dim)*2 + (q_heads*head_dim)*hidden. Three projection matrices for Q, K, V plus O projection.',
+    'ffn SwiGLU uses THREE matrices: gate (h*i), up (h*i), down (i*h). Not two. kv_cache = 2*kv_heads*head_dim*bpp*seq*layers.',
+  ],
+  'c9-d1': [
+    'Run TrainingBudget(2e23).recommend() and compute model_gb = params * 2 / 1e9. Does it fit in 40GB?',
+    'fixed_recommend must cap params at gpu_memory_gb * 1e9 / bytes_per_param. Then set tokens = compute_flops / (6 * params).',
+    'Return a dict with "params" and "tokens". Verify: params*2/1e9 <= 40 AND 6*params*tokens <= 2e23.',
+  ],
+  'c9-l6': [
+    'Start with memory: params <= 40e9/2 = 20B. Then tokens = 2e23 / (6*params). Check kv_cache last.',
+    'KV cache = 2*kv_heads*head_dim*2*layers*256*8192 bytes. Try 8 kv_heads, 128 head_dim, 32 layers -> compute that GB.',
+    'DPO alignment: set beta=0.1, log_pi_chosen_minus_ref > 0 (e.g. 0.5), log_pi_rejected_minus_ref < 0 (e.g. -0.5). All four constraints must pass simultaneously.',
+  ],
 }
