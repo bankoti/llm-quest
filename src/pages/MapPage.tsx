@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { SITE } from '@/config/site'
 import { WorldMap } from '@/components/WorldMap/WorldMap'
 import { XPBar } from '@/components/Progress/XPBar'
@@ -8,6 +8,7 @@ import { getProgressSummary, ProgressState } from '@/engine/progress'
 import { MAX_XP } from '@/data/curriculum'
 import { isAdminMode } from '@/engine/admin'
 import { AdminPanel } from '@/components/AdminPanel'
+import { dueCount } from '@/engine/review'
 
 interface Props {
   progress: ProgressState
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export function MapPage({ progress, onProgressChange }: Props) {
+  const navigate = useNavigate()
+  const [due] = useState(dueCount)
   // Landing-page course cards link to /map#course-N — scroll there on arrival.
   const { hash } = useLocation()
   useEffect(() => {
@@ -39,6 +42,29 @@ export function MapPage({ progress, onProgressChange }: Props) {
         </div>
 
         <div className="flex items-center gap-3 ml-auto">
+          <button
+            onClick={() => navigate('/review')}
+            className="relative text-xs font-mono px-3 py-1.5 rounded-lg border border-gray-700
+                       text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
+            title="Spaced review: retrieval practice on what you have completed"
+          >
+            🔁 Review
+            {due > 0 && (
+              <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full
+                               bg-amber-500 text-gray-950 text-[10px] font-bold
+                               flex items-center justify-center">
+                {due}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => navigate('/cert')}
+            className="text-xs font-mono px-3 py-1.5 rounded-lg border border-gray-700
+                       text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
+            title="Certificate and mastery transcript"
+          >
+            📜 Certificate
+          </button>
           <StreakBadge days={progress.streakDays} />
           <div className="text-xs font-mono text-gray-500">
             {completed}/{total} levels

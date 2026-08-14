@@ -64,19 +64,40 @@ export function saveProgress(state: ProgressState): void {
   localStorage.setItem(KEY, JSON.stringify(state))
 }
 
-export function completeLevel(levelId: string): ProgressState {
+// Any learning activity counts toward the streak — passing a level or
+// clearing review cards. Exported so the review engine can share it.
+export function touchStreak(state: ProgressState): void {
+  const t = today()
+  const prev = state.lastActiveDate
+  if (prev === t) return
+  const prevDate = new Date(prev)
+  prevDate.setDate(prevDate.getDate() + 1)
+  const yesterday = prevDate.toISOString().slice(0, 10)
+  state.streakDays = t === yesterday ? state.streakDays + 1 : 1
+  state.lastActiveDate = t
+}
+
+// xpMultiplier < 1 when paid hints were used (see Arena hint ladder).
+export function completeLevel(levelId: string, xpMultiplier = 1): ProgressState {
   const state = loadProgress()
   const level = ALL_LEVELS.find(l => l.id === levelId)
   if (!level) return state
 
-  // Mark complete and award XP
+  // Replaying an already-complete level never re-awards XP.
+  if (state.levels[levelId]?.status === 'complete') {
+    touchStreak(state)
+    saveProgress(state)
+    return state
+  }
+
+  const earned = Math.round(level.xp * xpMultiplier)
   state.levels[levelId] = {
     ...state.levels[levelId],
     status: 'complete',
-    xpEarned: level.xp,
+    xpEarned: earned,
     completedAt: Date.now(),
   }
-  state.totalXp += level.xp
+  state.totalXp += earned
 
   // Unlock next level
   const idx = ALL_LEVELS.findIndex(l => l.id === levelId)
@@ -87,19 +108,7 @@ export function completeLevel(levelId: string): ProgressState {
     }
   }
 
-  // Update streak
-  const t = today()
-  const prev = state.lastActiveDate
-  if (prev === t) {
-    // already active today
-  } else {
-    const prevDate = new Date(prev)
-    prevDate.setDate(prevDate.getDate() + 1)
-    const yesterday = prevDate.toISOString().slice(0, 10)
-    state.streakDays = t === yesterday ? state.streakDays + 1 : 1
-    state.lastActiveDate = t
-  }
-
+  touchStreak(state)
   saveProgress(state)
   return state
 }

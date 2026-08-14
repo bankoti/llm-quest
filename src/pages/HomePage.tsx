@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { SITE } from '@/config/site'
 import { COURSES, MAX_XP } from '@/data/curriculum'
 import { ProgressState, getProgressSummary } from '@/engine/progress'
+import { dueCount } from '@/engine/review'
 
 interface Props { progress: ProgressState }
 
@@ -10,18 +11,29 @@ export function HomePage({ progress }: Props) {
   const navigate = useNavigate()
   const { completed, total } = getProgressSummary(progress)
   const hasStarted = completed > 0
+  const due = dueCount()
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-gray-800">
         <span className="font-bold text-violet-400 text-lg font-mono">{SITE.name}</span>
-        <button
-          onClick={() => navigate('/map')}
-          className="text-sm font-mono text-gray-400 hover:text-white transition-colors"
-        >
-          {hasStarted ? `Resume (${completed}/${total})` : 'Start Learning →'}
-        </button>
+        <div className="flex items-center gap-5">
+          {due > 0 && (
+            <button
+              onClick={() => navigate('/review')}
+              className="text-sm font-mono text-amber-300 hover:text-amber-200 transition-colors"
+            >
+              🔁 {due} due for review
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/map')}
+            className="text-sm font-mono text-gray-400 hover:text-white transition-colors"
+          >
+            {hasStarted ? `Resume (${completed}/${total})` : 'Start Learning →'}
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}

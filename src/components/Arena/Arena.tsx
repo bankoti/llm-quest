@@ -9,10 +9,19 @@ interface Props {
   starterCode: string
   testCode: string
   xp: number
-  onPass: () => void
+  hints: string[]                        // 0-3 escalating hints
+  onPass: (hintsUsed: number) => void
 }
 
 type RunState = 'idle' | 'loading-pyodide' | 'running' | 'pass' | 'fail'
+
+// Hint economics: hint 1 is free, hints 2-3 cost 10% of the level XP each.
+// The cost keeps retrieval effortful (the testing effect) while making sure
+// nobody rage-quits at the exact moment they were about to learn something.
+const FAILS_TO_UNLOCK_FIRST_HINT = 2
+export function hintXpMultiplier(hintsUsed: number): number {
+  return 1 - 0.1 * Math.max(0, hintsUsed - 1)
+}
 
 // Drafts survive refresh/navigation — losing 30 min of typed code is fatal UX.
 const draftKey = (levelId: string) => `llmquest_code_v1:${levelId}`
@@ -27,11 +36,13 @@ function clearDraft(levelId: string): void {
   try { localStorage.removeItem(draftKey(levelId)) } catch {}
 }
 
-export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
+export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Props) {
   const [code, setCode] = useState(() => loadDraft(levelId) ?? starterCode)
   const [runState, setRunState] = useState<RunState>('idle')
   const [result, setResult] = useState<RunResult | null>(null)
   const [pyodideReady, setPyodideReady] = useState(false)
+  const [failCount, setFailCount] = useState(0)
+  const [revealed, setRevealed] = useState(0)
 
   // Pre-warm Pyodide in the background as soon as Arena mounts
   useEffect(() => {
@@ -68,9 +79,11 @@ export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
 
     if (r.ok) {
       // small delay so user sees the pass animation before parent advances
-      setTimeout(() => onPass(), 1200)
+      setTimeout(() => onPass(revealed), 1200)
+    } else {
+      setFailCount(n => n + 1)
     }
-  }, [code, testCode, levelId, onPass, runState])
+  }, [code, testCode, levelId, onPass, runState, revealed])
 
   // Ctrl+Enter to run
   useEffect(() => {
@@ -80,6 +93,13 @@ export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [run])
+
+  const effectiveXp = Math.round(xp * hintXpMultiplier(revealed))
+  const nextHintIndex = revealed
+  const hasMoreHints = nextHintIndex < hints.length
+  // Hint N (1-based) unlocks after FAILS_TO_UNLOCK_FIRST_HINT + N - 1 failed runs.
+  const failsNeeded = FAILS_TO_UNLOCK_FIRST_HINT + nextHintIndex - failCount
+  const nextHintCostsXp = nextHintIndex >= 1
 
   return (
     <div className="flex flex-col grow shrink-0" style={{ minHeight: '70vh' }}>
@@ -146,6 +166,50 @@ export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
         </span>
       </div>
 
+      {/* Hint ladder */}
+      {hints.length > 0 && (failCount > 0 || revealed > 0) && (
+        <div className="mt-3 rounded-lg border border-gray-800 bg-gray-900/50 p-3">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono text-gray-500">
+              💡 Hints {revealed}/{hints.length}
+            </span>
+            {hasMoreHints && failsNeeded <= 0 && (
+              <button
+                onClick={() => setRevealed(n => n + 1)}
+                className="text-xs font-mono px-3 py-1.5 rounded-lg border border-amber-700/50
+                           text-amber-300 hover:bg-amber-950/40 transition-colors"
+              >
+                Reveal hint {nextHintIndex + 1}
+                {nextHintCostsXp ? ' (−10% XP)' : ' (free)'}
+              </button>
+            )}
+            {hasMoreHints && failsNeeded > 0 && (
+              <span className="text-xs font-mono text-gray-600">
+                Hint {nextHintIndex + 1} unlocks after {failsNeeded} more failed run{failsNeeded === 1 ? '' : 's'}
+              </span>
+            )}
+            {revealed > 1 && (
+              <span className="ml-auto text-xs font-mono text-gray-500">
+                Level XP now {effectiveXp}
+              </span>
+            )}
+          </div>
+          <AnimatePresence>
+            {hints.slice(0, revealed).map((h, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-2 text-sm text-amber-200/90 leading-relaxed"
+              >
+                <span className="text-amber-500 font-mono text-xs mr-2">#{i + 1}</span>
+                {h}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
       {/* Output panel */}
       <AnimatePresence mode="wait">
         {result && (
@@ -168,7 +232,7 @@ export function Arena({ levelId, starterCode, testCode, xp, onPass }: Props) {
                   <span className="ml-auto text-green-600 text-xs">{result.durationMs.toFixed(0)}ms</span>
                 </div>
                 <pre className="text-green-400/80 text-xs whitespace-pre-wrap">{result.output}</pre>
-                <XPFlash xp={xp} />
+                <XPFlash xp={effectiveXp} />
               </div>
             ) : (
               <div>

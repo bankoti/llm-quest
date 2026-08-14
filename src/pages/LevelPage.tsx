@@ -8,6 +8,8 @@ import { Arena } from '@/components/Arena/Arena'
 import { XPBar } from '@/components/Progress/XPBar'
 import { GoDeeper } from '@/components/GoDeeper'
 import { isAdminMode } from '@/engine/admin'
+import { HINTS } from '@/data/hints'
+import { hintXpMultiplier } from '@/components/Arena/Arena'
 
 interface Props { onProgressChange: (p: ProgressState) => void }
 
@@ -21,6 +23,7 @@ export function LevelPage({ onProgressChange }: Props) {
   const [testCode, setTestCode]       = useState<string | null>(null)
   const [progress, setProgress]       = useState(loadProgress)
   const [passed, setPassed]           = useState(false)
+  const [earnedXp, setEarnedXp]       = useState(0)
 
   useEffect(() => {
     if (!level) return
@@ -37,11 +40,13 @@ export function LevelPage({ onProgressChange }: Props) {
     })
   }, [level])
 
-  function handlePass() {
+  function handlePass(hintsUsed: number) {
     if (!level) return
-    const newProgress = completeLevel(level.id)
+    const wasComplete = progress.levels[level.id]?.status === 'complete'
+    const newProgress = completeLevel(level.id, hintXpMultiplier(hintsUsed))
     setProgress(newProgress)
     onProgressChange(newProgress)
+    setEarnedXp(wasComplete ? 0 : newProgress.levels[level.id]?.xpEarned ?? level.xp)
     setPassed(true)
   }
 
@@ -121,6 +126,7 @@ export function LevelPage({ onProgressChange }: Props) {
               starterCode={starterCode}
               testCode={testCode}
               xp={level.xp}
+              hints={HINTS[level.id] ?? []}
               onPass={handlePass}
             />
           )}
@@ -148,7 +154,7 @@ export function LevelPage({ onProgressChange }: Props) {
             <p className="text-gray-400 text-sm mb-4">Level complete</p>
             <div className="flex items-center justify-center gap-2 mb-6">
               <span className="text-yellow-400 text-2xl">+</span>
-              <span className="text-yellow-300 font-bold text-2xl">{level.xp} XP</span>
+              <span className="text-yellow-300 font-bold text-2xl">{earnedXp} XP</span>
             </div>
             <XPBar xp={progress.totalXp} />
             <button
