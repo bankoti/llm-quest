@@ -25,9 +25,11 @@ In this course:
 
 - `B` means independent sequences in one batch;
 - `T` means token positions in each sequence;
-- `C` means channels, features, or embedding dimensions;
-- `V` means vocabulary size;
-- `H` means attention heads.
+- `C` means channels: how many numbers describe each position.
+
+Two more letters join later, each when its concept arrives: `V` (vocabulary
+size) with the tokenizer in the next level, and `H` (attention heads) when you
+build attention in level 6.
 
 ## Indexing and slicing
 
@@ -44,7 +46,9 @@ A colon means "all values on this axis." A negative index counts from the end.
 
 ## Reshape, transpose, and contiguous
 
-Multi-head attention changes `(B, T, C)` into `(B, H, T, C/H)`:
+A preview of level 6: attention will split the `C` channels into `H`
+independent heads, turning `(B, T, C)` into `(B, H, T, C/H)`. You do not need
+to know why yet; the point here is the reshape itself:
 
 ```python
 B, T, C, H = 2, 5, 12, 3
@@ -74,6 +78,8 @@ The missing batch axis is broadcast across both sequences.
 
 For matrices, `(m, n) @ (n, p) -> (m, p)`. The inner dimensions must match.
 PyTorch applies the same rule to the final two axes and broadcasts earlier axes.
+The variable names below come from attention, where every position scores every
+other position; for now they are just tensors with shapes.
 
 ```python
 queries = torch.randn(2, 4, 8, 16)  # (B, H, T, head_size)

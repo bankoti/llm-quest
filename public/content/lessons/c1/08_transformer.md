@@ -59,8 +59,11 @@ position:
 C -> 4C -> GELU -> C
 ```
 
-The wider hidden layer provides capacity for nonlinear feature transformations.
-Modern models often replace this GELU MLP with gated variants such as SwiGLU.
+GELU is a smooth cousin of ReLU: it passes positive values through and damps
+negative ones, supplying the network's nonlinearity. The wider hidden layer
+provides capacity for nonlinear feature transformations. Modern models often
+replace this GELU MLP with gated variants such as SwiGLU, which you will build
+in Course 2.
 
 ## Parameter accounting
 
@@ -101,9 +104,10 @@ At every operation, annotate the output shape. Stop when you cannot justify one.
 
 ## Build it yourself
 
-Complete the challenge below. Start with
-one layer, one head, width 32, and dropout zero. Get the forward shape and causal
-test passing before adding depth or dropout.
+Complete the challenge below. Start with one layer, one head, width 32, and
+dropout zero (dropout randomly zeroes a fraction of activations during training
+to fight overfitting; zero disables it). Get the forward shape and causal test
+passing before adding depth or dropout.
 
 ## Exit check
 

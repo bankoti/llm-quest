@@ -19,7 +19,7 @@ Total parameter capacity grows with `E`, while active feed-forward compute grows
 mostly with `k`. This is conditional computation, not free computation: routing,
 communication, expert imbalance, memory, and capacity limits matter.
 
-The implementation in `components.py` uses token-choice top-k routing. Its
+The implementation in the challenge below uses token-choice top-k routing. Its
 balance loss encourages average router probability and actual assignment share
 to agree. Real systems differ in routing rules, overflow handling, shared
 experts, and whether they drop tokens.

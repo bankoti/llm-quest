@@ -8,5 +8,5 @@ def rms_norm(x: np.ndarray, weight: np.ndarray, eps: float = 1e-6) -> np.ndarray
     raise NotImplementedError
 
 def rotate_half(x: np.ndarray) -> np.ndarray:
-    """(x0,x1,x2,x3) -> (-x1,x0,-x3,x2). Split last axis in half."""
+    """Rotate adjacent pairs: (x0,x1,x2,x3) -> (-x1,x0,-x3,x2)."""
     raise NotImplementedError

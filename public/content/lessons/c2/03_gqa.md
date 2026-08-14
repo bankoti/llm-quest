@@ -31,7 +31,8 @@ batching and precision details, cache elements per token are proportional to:
 Reducing `Hkv` lowers cache memory and the bandwidth needed to read it each decode
 step. Query activations are produced only for the current token and are not cached.
 
-Put numbers on it with a Llama 3 8B shape: 32 layers, head size 128, BF16:
+Put numbers on it with a Llama 3 8B shape: 32 layers, head size 128, BF16
+(2 bytes per stored number):
 
 ```text
 MHA (Hkv = 32): 2 * 32 * 32 * 128 * 2 bytes = 512 KiB per token
@@ -42,6 +43,9 @@ At an 8,192-token context that is 4 GiB versus 1 GiB per sequence. The quality
 cost of dropping from 32 KV heads to 8 was judged acceptable; the drop to 1
 (MQA) often is not. That judgment, rerun for each model family, is why GQA is
 the current default.
+
+Level 6 of this course covers the cache mechanics in full. For now it is
+enough that cache size scales with `Hkv` and not with `Hq`.
 
 ## Tensor flow
 

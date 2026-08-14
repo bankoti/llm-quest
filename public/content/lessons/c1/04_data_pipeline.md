@@ -34,8 +34,10 @@ inputs:  (B, T)
 targets: (B, T)
 ```
 
-After embedding, inputs become `(B, T, C)`. The model eventually returns logits
-with shape `(B, T, V)`.
+After embedding, a learned table that turns each token ID into a vector of `C`
+numbers (you build it in the next level), inputs become `(B, T, C)`. The model
+eventually returns logits with shape `(B, T, V)`: one raw, unnormalized score
+for each of the `V` vocabulary entries at every position.
 
 ## Random windows
 
