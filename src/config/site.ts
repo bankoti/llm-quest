@@ -7,7 +7,7 @@ export const SITE = {
   domain: 'zeroone.dev',
   tagline: 'LLM Engineering from First Principles',
   description:
-    'Eight courses. 65 levels. Build a GPT from scratch, then ship a production AI system — all in code.',
+    'Eight courses. 57 levels. Build a GPT from scratch, then ship a production AI system — all in code.',
   repoUrl: 'https://github.com/bankoti/llm-from-first-principles',
   // Social / meta
   twitterHandle: '',           // fill in later
