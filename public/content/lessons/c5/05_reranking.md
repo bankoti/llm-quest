@@ -36,7 +36,7 @@ meet latency; measure quality versus depth. Batch query-item pairs where the
 runtime supports it, and define behavior on timeout: return fused candidates,
 not an error.
 
-Complete `workbook/05_rerank.py`, a transparent linear feature ranker. Then add a
+Complete the challenge below, a transparent linear feature ranker. Then add a
 feature whose scale is 1,000 times larger and observe why unnormalized features
 can dominate.
 

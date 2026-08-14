@@ -37,4 +37,4 @@ numerical detail of a released checkpoint.
 
 ## Practice
 
-Complete `workbook/04_modern_decoder.py` and run both dense and MoE variants.
+Complete the challenge below and compare the dense and MoE variants.

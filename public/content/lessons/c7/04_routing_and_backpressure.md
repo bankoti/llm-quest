@@ -37,7 +37,7 @@ deadline. Retry only transient errors with bounded exponential backoff and jitte
 Permanent schema or policy failures go to quarantine/dead-letter review, not an
 infinite loop.
 
-Complete `workbook/05_admission_control.py`. It compares estimated wait plus work
+Complete the challenge below. It compares estimated wait plus work
 and response reserve against remaining deadline, while enforcing queue capacity.
 
 **Checkpoint:** Simulate a burst of long prompts. Show which requests are served,

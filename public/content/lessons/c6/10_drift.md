@@ -17,7 +17,7 @@ PSI = sum_i (current_i - reference_i) * ln(current_i / reference_i)
 ```
 
 It is a heuristic sensitive to bins and sample size, not a universal alarm
-threshold. Complete `workbook/06_population_drift.py` and handle zero bins with a
+threshold. Complete the challenge below and handle zero bins with a
 declared epsilon.
 
 ## Monitor leading and lagging evidence

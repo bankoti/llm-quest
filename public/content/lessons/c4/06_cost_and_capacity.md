@@ -49,7 +49,7 @@ Vary traffic by 0.5x/1x/3x, cache hit rate, token p95, and refresh frequency.
 Name the variable that reverses the decision. Use ranges rather than false
 precision for uncertain prices or utilization.
 
-Complete `workbook/05_cost_break_even.py`. Its tiny arithmetic is intentionally
+Complete the challenge below. Its tiny arithmetic is intentionally
 transparent so the architecture review can inspect assumptions.
 
 **Checkpoint:** Produce a monthly low/base/high table and a unit-cost equation.

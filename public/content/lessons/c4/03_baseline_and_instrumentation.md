@@ -47,6 +47,6 @@ time. Re-evaluate on the frozen set. If a taxonomy fix resolves most high-severi
 failures, do it. Remaining errors then specify what semantic, generative, or
 labeling experiment must beat.
 
-**Checkpoint:** Complete `workbook/02_baseline_report.py`. Write three failure
+**Checkpoint:** Complete the challenge below. Write three failure
 examples with query, expected item, actual rank, error class, and likely repair.
 Do not summarize only with one score.

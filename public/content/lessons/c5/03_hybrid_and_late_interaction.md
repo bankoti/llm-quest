@@ -37,7 +37,7 @@ These are architecture options on a continuum:
 | ColBERT-like | token vectors | late MaxSim | storage and rerank work |
 | cross-encoder | raw pair | full joint attention | cannot scan whole corpus |
 
-Complete `workbook/03_rank_fusion.py`. Test duplicate IDs, absent documents,
+Complete the challenge below. Test duplicate IDs, absent documents,
 empty rankings, and deterministic ties.
 
 **Checkpoint:** Evaluate each candidate source alone and fused. A fusion gain is

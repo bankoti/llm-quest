@@ -38,7 +38,7 @@ stores all prior keys and values. Inspect cache code and profile memory.
 
 ## Lab
 
-Run `labs/02_attention_topology.py`. Calculate reachability for stacked local
+In the challenge below, calculate reachability for stacked local
 layers and a local/global mix. Add a pattern where every fourth layer is global.
 For sequence length 8,192 and window 4,096, report both theoretical attention
 edges and retained cache under full-retention versus window-aware serving.

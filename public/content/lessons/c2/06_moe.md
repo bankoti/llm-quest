@@ -29,7 +29,7 @@ experts, and whether they drop tokens.
 
 ## Practice
 
-Complete `workbook/03_sparse_moe.py`, then force the router toward one expert and
+Complete the challenge below, then force the router toward one expert and
 observe the balance loss.
 
 ## Exit check

@@ -49,7 +49,7 @@ prioritize review; they do not prove safety. Every high risk needs an owner,
 preventive or detective control, verification method, residual risk decision,
 and review date.
 
-Complete `workbook/06_risk_register.py`. Then add one low-likelihood,
+Complete the challenge below. Then add one low-likelihood,
 high-impact scenario that a simple average would under-prioritize.
 
 **Checkpoint:** Show that the deterministic fallback does not bypass policy

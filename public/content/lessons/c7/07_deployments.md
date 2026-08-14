@@ -25,8 +25,8 @@ safe version identifiers for incident correlation.
 7. retain previous warm artifact through observation window.
 
 Shadowing tests capacity and compatibility but not user impact. Canary compares
-served behavior and must account for traffic mix. Complete
-`workbook/06_canary_gate.py`: a quality gain cannot compensate for an error-rate
+served behavior and must account for traffic mix. Complete the challenge
+below: a quality gain cannot compensate for an error-rate
 or latency guardrail breach.
 
 ## Data and index release

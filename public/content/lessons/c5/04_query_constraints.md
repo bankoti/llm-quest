@@ -46,7 +46,7 @@ asking a clarification question, or using a reversible default.
 fallback. A production extractor additionally needs a deadline, schema version,
 locale handling, audit sample, and adversarial tests.
 
-Complete `workbook/04_constrained_search.py`. Add a meat item with a higher
+Complete the challenge below. Add a meat item with a higher
 semantic score and verify the hard vegan constraint still wins.
 
 **Checkpoint:** List every constraint that can affect user safety or contractual

@@ -43,7 +43,7 @@ Weight quality by slice, latency, reliability, privacy, unit cost, operational
 fit, and reversibility. Keep raw measurements beside normalized scores. A total
 score without uncertainty can hide that two options are statistically tied.
 
-Complete `workbook/04_architecture_scorecard.py`. Its essential behavior is that
+Complete the challenge below. Its essential behavior is that
 a hard-constraint failure removes an option regardless of weighted quality.
 
 ## Avoid benchmark substitution

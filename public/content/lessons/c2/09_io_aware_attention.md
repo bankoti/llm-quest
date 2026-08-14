@@ -71,7 +71,7 @@ the number of dot products remains quadratic.
 
 ## Experiment
 
-Complete `workbook/05_flash_io.py`. Compute the bytes required by a naive score
+Complete the challenge below. Compute the bytes required by a naive score
 matrix and compare them with a tiled algorithm's on-chip tile. This exercise is a
 traffic model, not a claim about wall-clock speed.
 

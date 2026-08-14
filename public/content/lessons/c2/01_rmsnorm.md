@@ -24,11 +24,11 @@ RMSNorm(x) = gamma * x / rms(x)
 Both normalize each token independently across channels. Neither mixes tokens or
 batch items.
 
-## Read the implementation
+## An implementation detail that matters
 
-Open `RMSNorm` in `src/mini_llm/architectures/components.py`. Notice that the
-calculation temporarily uses float32. This is a numerical stability choice when
-model activations use lower precision.
+Production implementations temporarily run the RMS calculation in float32 even
+when model activations use lower precision. This is a numerical stability
+choice.
 
 The essential invariant is not zero mean. It is unit root-mean-square before the
 learned scale:
@@ -51,7 +51,7 @@ placement and QK normalization rather than treating normalization as one flag.
 
 ## Exercise
 
-Complete `workbook/01_norm_and_rope.py`. Test scale invariance by comparing
+Complete the challenge below. Test scale invariance by comparing
 `norm(x)` and `norm(10*x)`. They should be close when epsilon is negligible.
 
 ## Exit check

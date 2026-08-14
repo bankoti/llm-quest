@@ -41,7 +41,7 @@ Kappa is sensitive to prevalence and does not prove either rater is correct.
 Use confusion matrices and disagreement examples. Weighted kappa or Krippendorff’s
 alpha may fit ordinal/multiple-rater settings; choose before analysis.
 
-Complete `workbook/05_agreement.py`. Then inspect disagreements in high-severity
+Complete the challenge below. Then inspect disagreements in high-severity
 slices. Adjudication should update either the label or rubric; preserve the
 original annotations.
 

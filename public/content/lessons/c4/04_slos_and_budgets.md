@@ -40,7 +40,7 @@ Average token cost is insufficient when tail prompts or retries dominate.
 
 ## Exercise
 
-Complete `workbook/03_slo_budget.py`. Reject a design that allocates no reserve
+Complete the challenge below. Reject a design that allocates no reserve
 or exceeds the critical path. Then change vector retrieval from sequential to
 parallel and explain why total latency changes while per-stage budgets do not.
 

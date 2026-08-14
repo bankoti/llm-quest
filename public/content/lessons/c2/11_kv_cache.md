@@ -69,9 +69,9 @@ factorization.
 
 ## Practice
 
-Complete `workbook/06_kv_cache.py`. Derive cache bytes and the MHA-to-GQA ratio.
-Then design, in comments, an equivalence test for `ModernDecoderLM`; the teaching
-model intentionally recomputes context, so you must specify the cache API before
+Complete the challenge below. Derive cache bytes and the MHA-to-GQA ratio.
+Then design, on paper, an equivalence test for a cached decoder: cached and
+uncached generation must emit identical tokens. Specify the cache API before
 optimizing it.
 
 ## Exit check

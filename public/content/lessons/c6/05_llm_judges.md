@@ -23,8 +23,8 @@ judge(B, A) -> winner_2 after mapping positions back to systems
 ```
 
 Consistent decisions survive the swap. Inconsistent rows should be ties,
-escalations, or separately analyzed, not arbitrarily counted. Complete
-`workbook/04_judge_order.py`.
+escalations, or separately analyzed, not arbitrarily counted. The challenge
+below implements exactly this audit.
 
 ## Validate against humans
 

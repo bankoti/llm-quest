@@ -22,7 +22,7 @@ It can still point to a source that does not support the claim.
 
 `explain_product` demonstrates deterministic generation from approved catalog
 fields. `validate_citations` checks allowed field names and existence. Complete
-`workbook/06_citation_validation.py`, then write the missing semantic entailment
+the challenge below, then write the missing semantic entailment
 test explicitly rather than pretending the function performs it.
 
 ## Constrain the response contract

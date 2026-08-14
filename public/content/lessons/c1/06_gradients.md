@@ -86,7 +86,7 @@ This numerical estimate is slow but valuable when implementing a new operation.
 
 ## Build it yourself
 
-Complete [workbook/05_gradients.py](../workbook/05_gradients.py). Print the loss,
+Complete the challenge below. Print the loss,
 weight, and gradient at each step. Then set the learning rate to `10` and explain
 the resulting behavior before restoring it.
 

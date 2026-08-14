@@ -17,7 +17,7 @@ are categories, not measurements: token 20 is not "twice" token 10.
 
 ## Level 1: characters
 
-The character tokenizer in `src/mini_llm/tokenizer.py` sorts all unique corpus
+A character tokenizer sorts all unique corpus
 characters, assigns an integer to each, and reverses that mapping for decoding.
 
 Advantages:
@@ -31,12 +31,6 @@ Costs:
 - sequences are long;
 - a model must relearn common multi-character patterns;
 - a corpus-only vocabulary cannot encode unseen characters.
-
-Run:
-
-```bash
-PYTHONPATH=src python -m mini_llm.cli inspect
-```
 
 ## Level 2: bytes
 
@@ -63,26 +57,18 @@ Training stores an ordered merge list. Encoding applies learned merges by rank.
 Larger vocabularies shorten sequences but enlarge the model's embedding and output
 matrices. Tokenizer vocabulary is therefore an architectural tradeoff.
 
-Try the educational BPE implementation:
+Trace one training step by hand: write out `attention changes attention` as
+bytes, count adjacent pairs, and decide which merge wins. Several pairs tie;
+real tokenizers break ties with a deterministic rule, because encode and decode
+must stay reproducible forever.
 
-```bash
-PYTHONPATH=src python -m mini_llm.cli tokenize "attention changes attention" --vocab-size 300
-```
+The implementation you will build intentionally omits production features such
+as regex pre-tokenization, normalization policy, reserved special tokens, and
+optimized training.
 
-Read `BytePairTokenizer` in `src/mini_llm/tokenizer.py`. It intentionally omits
-production features such as regex pre-tokenization, normalization policy, reserved
-special tokens, and optimized training.
-
-After inspecting the merges, use the same tokenizer for an end-to-end run:
-
-```bash
-PYTHONPATH=src python -m mini_llm.cli train \
-  --tokenizer bpe --tokenizer-vocab-size 300 \
-  --steps 300 --out runs/tiny-gpt-bpe.pt
-```
-
-The serialized merge list is stored in the checkpoint, so generation applies the
-exact token mapping used during training.
+One operational detail survives to production: the ordered merge list is stored
+with the model checkpoint, so generation applies the exact token mapping used
+during training.
 
 ## Special tokens
 
@@ -106,9 +92,8 @@ changes the meaning of embedding rows and invalidates the checkpoint.
 
 ## Build it yourself
 
-Complete [workbook/02_tokenizer.py](../workbook/02_tokenizer.py). First implement
-characters. Then implement one BPE merge pass and compare it with
-`BytePairTokenizer._merge`.
+Complete the challenge below. First implement character encoding. Then
+implement one BPE merge pass and check it against your hand-traced example.
 
 ## Exit check
 

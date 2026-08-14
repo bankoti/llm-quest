@@ -67,24 +67,21 @@ Long context:
 - higher compute and memory cost;
 - requires data containing useful long relationships.
 
-## Inspect the implementation
+## The invariant to verify
 
-Read `src/mini_llm/data.py`, then run this in a Python shell:
+However batches are produced, targets are inputs shifted one position left:
 
 ```python
-import torch
-from mini_llm.data import TokenDataset
-
-dataset = TokenDataset(torch.arange(100), block_size=8)
-x, y = dataset.sample("train", batch_size=4, device=torch.device("cpu"))
-print(x)
-print(y)
 assert torch.equal(x[:, 1:], y[:, :-1])
 ```
 
+Concretely, for tokens `[10, 11, 12, 13]` and block size 3, one window is
+`x = [10, 11, 12]` with `y = [11, 12, 13]`: at every position the model is
+trained to predict the very next token.
+
 ## Build it yourself
 
-Complete [workbook/03_batches.py](../workbook/03_batches.py). Add a deliberate
+Complete the challenge below. Add a deliberate
 off-by-one bug, observe which assertion catches it, and then repair it.
 
 ## Exit check

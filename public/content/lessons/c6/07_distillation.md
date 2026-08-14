@@ -21,7 +21,7 @@ full logit formulation. Open `production/distillation.py`: `pair_features`
 creates lexical overlap, hashed similarity, and bias; `teacher_score` generates
 deterministic weak labels; a tiny MLP learns them.
 
-Complete `workbook/02_distill_student.py`. The expected loss decrease checks
+Complete the challenge below. The expected loss decrease checks
 optimization only. It does not prove generalization, teacher correctness,
 calibration, ranking quality, or latency.
 

@@ -42,7 +42,7 @@ For any sparse model, inspect:
 
 ## Lab and failure analysis
 
-Run `labs/03_capacity_and_compute.py`. Extend the report to include shared
+In the challenge below, extend the parameter report to include shared
 experts and attention weights. Then simulate 1,000 tokens all routed to one
 expert. The arithmetic count is unchanged, but utilization and latency are not.
 

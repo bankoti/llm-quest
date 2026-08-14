@@ -20,23 +20,12 @@ Although named "embedding," each row here directly has one value per output
 token. A Transformer instead embeds into width `C`, computes hidden features, and
 projects those features to `V` logits at the end.
 
-## Train it
+## What training produces
 
-```bash
-PYTHONPATH=src python -m mini_llm.cli train \
-  --model bigram \
-  --steps 200 \
-  --out runs/bigram.pt
-
-PYTHONPATH=src python -m mini_llm.cli generate \
-  --checkpoint runs/bigram.pt \
-  --prompt "The " \
-  --tokens 200
-```
-
-The loss should fall, but generated text will have locally plausible character
-pairs and poor long-range structure. That is expected evidence of the model's
-context limitation.
+Train this model for a few hundred steps on any small corpus and the loss falls
+quickly, but generated text has locally plausible character pairs and poor
+long-range structure. That is expected evidence of the model's context
+limitation, not a bug.
 
 ## A count-based version
 
@@ -70,12 +59,12 @@ the more complex architecture or its optimization.
 
 ## Experiment
 
-Train for 10, 50, 200, and 1,000 steps. Record train loss, validation loss, and a
-fixed-prompt sample. Do not judge quality from loss alone and do not judge it from
-one lucky sample.
+If you train this model yourself, do it at 10, 50, 200, and 1,000 steps. Record
+train loss, validation loss, and a fixed-prompt sample. Do not judge quality
+from loss alone and do not judge it from one lucky sample.
 
-Then complete [workbook/04_bigram.py](../workbook/04_bigram.py) without opening
-`src/mini_llm/models.py` until your forward pass has the right shapes.
+Then complete the challenge below; get the forward-pass shapes right before
+worrying about anything else.
 
 ## Exit check
 

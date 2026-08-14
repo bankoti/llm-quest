@@ -72,21 +72,19 @@ total: about 12 C^2 parameters per block
 Embeddings add roughly `V*C + T*C`; weight tying avoids another `V*C` output
 matrix. Parameter count measures storage, not total training compute.
 
-## Read the implementation in order
+## Assemble in this order
 
-Open `src/mini_llm/models.py` and read:
-
-1. `CausalSelfAttention`
-2. `FeedForward`
-3. `TransformerBlock`
-4. `GPT.forward`
-5. `GPT.generate`
+1. causal self-attention (previous level)
+2. the position-wise feed-forward network
+3. one block: `x = x + attn(norm(x))`, then `x = x + ffn(norm(x))`
+4. the forward pass: embeddings, blocks, final norm, logits
+5. generation: crop context, forward, sample, append, repeat
 
 At every operation, annotate the output shape. Stop when you cannot justify one.
 
 ## Build it yourself
 
-Complete [workbook/07_transformer.py](../workbook/07_transformer.py). Start with
+Complete the challenge below. Start with
 one layer, one head, width 32, and dropout zero. Get the forward shape and causal
 test passing before adding depth or dropout.
 

@@ -49,4 +49,4 @@ freshness, operability, unit cost, and reversibility. Do not let a weighted scor
 compensate for a hard violation.
 
 **Checkpoint:** For each pattern, name its source of truth, online failure mode,
-version boundary, and fallback. Complete `workbook/04_architecture_scorecard.py`.
+version boundary, and fallback.

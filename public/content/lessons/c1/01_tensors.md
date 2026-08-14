@@ -94,7 +94,7 @@ print(w.grad)  # -10: increasing w will reduce the loss
 
 ## Build it yourself
 
-Complete [workbook/01_tensors.py](../workbook/01_tensors.py). Before every
+Complete the challenge below. Before every
 assertion, write the expected shape on paper.
 
 ## Exit check

@@ -40,9 +40,8 @@ tools, not mutually exclusive categories.
 
 ## Inspect the teaching recurrence
 
-`SelectiveStateSpaceLayer` is transparent educational code, not the exact Mamba
-selective-scan algorithm or optimized kernel. Run `labs/04_state_space.py` and
-verify:
+The recurrence in the challenge below is transparent educational code, not the
+exact Mamba selective-scan algorithm or optimized kernel. Verify:
 
 - changing a future input cannot alter an earlier output;
 - recurrent state size does not grow with decoded length;

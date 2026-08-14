@@ -19,7 +19,7 @@ ECE = sum_m (|B_m| / n) * |accuracy(B_m) - confidence(B_m)|
 
 Expected calibration error depends on binning and can hide local failures. Also
 report Brier score or log loss, reliability plots, and critical-slice behavior.
-Complete `workbook/03_calibration.py` and test a perfectly calibrated toy set and
+Complete the challenge below and test a perfectly calibrated toy set and
 an overconfident wrong set.
 
 ## Fit without leaking

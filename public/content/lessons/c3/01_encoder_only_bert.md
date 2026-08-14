@@ -23,12 +23,11 @@ The original BERT also used next-sentence prediction. Later encoder recipes vary
 so do not make that auxiliary task a definition of the family. Bidirectional
 self-attention plus denoising or representation learning is the durable center.
 
-## Read the teaching implementation
+## The teaching model
 
-Open `src/mini_llm/architectures/families.py` and find
-`BidirectionalEncoder`. It uses PyTorch encoder layers and learned positions
-while exposing masked-token logits and loss. It is BERT-shaped teaching code,
-not a checkpoint reproduction.
+Picture a minimal encoder-only model: standard bidirectional encoder layers,
+learned positions, and masked-token logits with their loss. BERT-shaped
+teaching code, not a checkpoint reproduction.
 
 Trace shapes for `B=2`, `T=16`, `D=64`, and vocabulary `V=512`. The embedding
 and every residual stream are `[2,16,64]`; logits are `[2,16,512]`. The loss

@@ -27,7 +27,7 @@ it becomes **open** and fails fast to fallback. After a cooldown, **half-open**
 permits limited probes; success closes it, failure reopens it. Partition breakers
 by dependency/model/region so one fault does not disable everything.
 
-Complete `workbook/04_circuit_breaker.py`. The teaching state machine uses counts;
+Complete the challenge below. The teaching state machine uses counts;
 production needs windows, concurrency safety, clocks, metrics, and distributed
 coordination where appropriate.
 

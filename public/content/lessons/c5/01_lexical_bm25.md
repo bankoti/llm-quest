@@ -34,8 +34,8 @@ variation. It can also overvalue keyword overlap: “vegan chicken” and “chi
 share a token but differ on a hard constraint. These are distinct from tokenizer
 bugs and missing metadata.
 
-Open `LexicalRetriever._score`. Match its constants to the equation and compute
-one term by hand. Then complete `workbook/01_bm25_math.py`.
+Match the constants in your implementation to the equation and compute one term
+by hand. Then complete the challenge below.
 
 ## Tests
 

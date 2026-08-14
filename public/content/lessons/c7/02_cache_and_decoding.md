@@ -43,7 +43,7 @@ algorithm’s assumptions. Speedup depends on acceptance rate, draft cost, batch
 and kernels. Measure quality equivalence and tail latency, not only accepted
 tokens.
 
-Complete `workbook/03_token_budget.py`. It converts remaining deadline and decode
+Complete the challenge below. It converts remaining deadline and decode
 rate into a bounded output limit; production schedulers also need queue and
 prefill estimates.
 

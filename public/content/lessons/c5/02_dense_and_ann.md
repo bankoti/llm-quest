@@ -40,7 +40,7 @@ normalization, dimensionality, and preprocessing version. Changing any requires
 re-embedding or an explicit compatibility proof. Publish an immutable index and
 switch an alias after evaluation.
 
-Complete `workbook/02_dense_similarity.py`. Then perturb one dimension and see
+Complete the challenge below. Then perturb one dimension and see
 why unnormalized dot product can prefer magnitude rather than direction.
 
 **Checkpoint:** Design an exact-versus-ANN harness with a frozen query sample and

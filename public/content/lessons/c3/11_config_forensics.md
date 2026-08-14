@@ -24,9 +24,9 @@ top_k <= num_experts
 Do not assume `head_dim = hidden_size / num_heads`; some configurations set an
 explicit head dimension. Do not assume all layers share one attention topology.
 
-Run `labs/05_config_audit.py`. It validates a compact model-like config and
-derives GQA grouping, attention projection parameters, and KV bytes. Add one
-invalid fixture for every invariant.
+The challenge below validates a compact model-like config and derives GQA
+grouping, attention projection parameters, and KV bytes. Invent one invalid
+fixture for every invariant.
 
 ## Pass 2: follow construction
 

@@ -74,24 +74,19 @@ through an output projection. `C` must be divisible by `H`.
 
 ## Verify causality
 
-The model test changes future tokens while holding a prefix fixed, then asserts
-that logits for the prefix do not change. This is stronger than merely checking a
-triangular mask exists.
-
-```bash
-PYTHONPATH=src python -m unittest tests.test_models.ModelTests.test_gpt_shapes_loss_and_causality -v
-```
+The strongest test changes future tokens while holding a prefix fixed, then
+asserts that outputs for the prefix do not change. This is stronger than merely
+checking that a triangular mask exists, and it is exactly what the challenge
+below checks.
 
 ## Build it yourself
 
-Complete [workbook/06_attention.py](../workbook/06_attention.py). Use one head and
+Complete the challenge below. Use one head and
 explicit matrix operations. Print the attention matrix and verify:
 
 - every row sums to one;
 - every position above the causal diagonal is zero;
 - changing a future value cannot change an earlier output.
-
-Only then read `CausalSelfAttention` in `src/mini_llm/models.py`.
 
 ## Exit check
 

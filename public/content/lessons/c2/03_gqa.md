@@ -49,7 +49,7 @@ empirical architecture decision, not a theorem that one setting always wins.
 
 ## Exercise
 
-Complete `workbook/02_gqa_and_masks.py`, Part A. Calculate the KV cache ratio for
+In the challenge below, calculate the KV cache ratio for
 `Hq=32` with `Hkv` equal to 32, 8, and 1. Then implement KV-head repetition and
 verify the exact output head ordering.
 

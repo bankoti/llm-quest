@@ -6,7 +6,7 @@ duration, ramp, exclusions, analysis, and stop conditions.
 
 Use stable deterministic assignment. Record assignment and actual exposure.
 Run instrumentation checks or an A/A test and detect sample-ratio mismatch before
-interpreting lift. `workbook/01_experiment.py` demonstrates assignment and absolute
+interpreting lift. The challenge below demonstrates assignment and absolute
 lift; production analysis needs uncertainty, interference, novelty, and multiple-
 testing handling.
 
@@ -24,8 +24,8 @@ Choose `launch`, `limited launch`, or `do not launch`. A limited launch specifie
 population, duration, missing evidence, and automatic stop. Record dissent and
 assumptions. Launch approval expires when critical versions or conditions change.
 
-Complete `workbook/02_launch_gate.py`; its Boolean conjunction reinforces that
-quality cannot offset a security or rollback failure.
+The Launch Gate level that follows reinforces the same rule as a Boolean
+conjunction: quality cannot offset a security or rollback failure.
 
 **Exit gate:** decision follows the predeclared matrix; simulation is not presented
 as product proof; all blockers are resolved or launch is explicitly declined.

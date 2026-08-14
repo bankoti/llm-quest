@@ -15,7 +15,7 @@ Some teaching code uses binary gains. Record the exact definition. Empty-query
 and no-relevant-item behavior must be explicit or different libraries will
 disagree.
 
-Complete `workbook/01_ndcg.py`. Add duplicate IDs, `k=0`, and no-relevance cases.
+Complete the challenge below. Add duplicate IDs, `k=0`, and no-relevance cases.
 Decide whether duplicates count once before implementing.
 
 ## Compare paired outputs

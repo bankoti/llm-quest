@@ -25,7 +25,7 @@ Verify deadline propagation, cancellation, retry budget, circuit breaker,
 idempotency, fallback quality, policy/auth, alerts, and automatic recovery.
 Fallback capacity must handle expected diverted traffic.
 
-Complete `workbook/05_failure_matrix.py`; it checks scenario/control coverage but
+Complete the challenge below; it checks scenario/control coverage but
 cannot prove the controls work. Attach test or trace evidence for every required
 row.
 
