@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 250" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="250" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">An 800 ms budget, spent explicitly</text>
+<rect x="60" y="90" width="30.0" height="44" rx="4" fill="#4b556333" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="75.0" y="82" font-family="'Segoe UI', system-ui, sans-serif" font-size="9" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gateway 40</text>
+<rect x="90.0" y="90" width="90.0" height="44" rx="4" fill="#67e8f933" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="135.0" y="112" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">retrieval</text>
+<text x="135.0" y="126" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="9.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">120ms</text>
+<rect x="180.0" y="90" width="67.5" height="44" rx="4" fill="#60a5fa33" stroke="#60a5fa" stroke-width="1.5" opacity="1"/>
+<text x="213.75" y="112" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">rerank</text>
+<text x="213.75" y="126" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="9.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">90ms</text>
+<rect x="247.5" y="90" width="337.5" height="44" rx="4" fill="#a78bfa33" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="416.25" y="112" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">generation</text>
+<text x="416.25" y="126" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="9.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">450ms</text>
+<rect x="585.0" y="90" width="75.0" height="44" rx="4" fill="#fbbf2433" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="622.5" y="112" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">post + reserve</text>
+<text x="622.5" y="126" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="9.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">100ms</text>
+<line x1="60" y1="150" x2="660" y2="150" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="60" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">0</text>
+<text x="660" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">800 ms p99 promise</text>
+<text x="360" y="200" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">budget the p99, not the mean — and leave reserve: a budget with no slack</text>
+<text x="360" y="218" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">is a promise you break on the first bad day</text>
+</svg>

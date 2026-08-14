@@ -2,6 +2,9 @@
 
 ## The smallest trainable language model
 
+![Bigram count matrix](content/images/c1/bigram_counts.svg)
+
+
 A bigram model predicts the next token using only the current token. With
 vocabulary size `V`, it stores a `V x V` table. Row `i` contains the logits for
 what follows token `i`.

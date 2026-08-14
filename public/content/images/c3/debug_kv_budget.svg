@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 230" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="230" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">The bug: sizing the cache by query heads</text>
+<text x="80" y="70" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#67e8f9" text-anchor="start" font-weight="400" opacity="1">32 query heads</text>
+<rect x="80" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="102" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="124" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="146" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="168" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="190" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="212" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="234" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="256" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="278" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="300" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="322" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="344" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="366" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="388" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<rect x="410" y="80" width="18" height="22" rx="3" fill="#67e8f922" stroke="#67e8f9" stroke-width="1" opacity="1"/>
+<text x="444" y="94" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">…×32</text>
+<text x="80" y="138" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#34d399" text-anchor="start" font-weight="400" opacity="1">8 KV heads (shared)</text>
+<rect x="80" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<rect x="124" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<rect x="168" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<rect x="212" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<rect x="256" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<rect x="300" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<rect x="344" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<rect x="388" y="148" width="38" height="24" rx="3" fill="#34d39926" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="520" y="92" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12" fill="#e5e7eb" text-anchor="start" font-weight="400" opacity="1">bytes = 2·L·T·H·d·b</text>
+<text x="520" y="118" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12" fill="#34d399" text-anchor="start" font-weight="400" opacity="1">H = kv_heads = 8 ✓</text>
+<text x="520" y="142" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12" fill="#fb7185" text-anchor="start" font-weight="400" opacity="1">H = query heads = 32 ✗</text>
+<text x="520" y="164" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11.5" fill="#fb7185" text-anchor="start" font-weight="400" opacity="1">→ 4× overcount</text>
+<text x="360" y="208" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">GQA exists precisely so the cache scales with KV heads, not query heads</text>
+</svg>

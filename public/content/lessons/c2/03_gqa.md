@@ -2,6 +2,9 @@
 
 ## The design axis
 
+![MHA vs GQA vs MQA](content/images/c2/gqa_heads.svg)
+
+
 Let `Hq` be query heads and `Hkv` be key/value heads.
 
 ```text

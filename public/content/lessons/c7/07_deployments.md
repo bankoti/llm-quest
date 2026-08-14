@@ -13,6 +13,9 @@ safe version identifiers for incident correlation.
 
 ## Deployment stages
 
+![Progressive deployment stages](content/images/c7/deployment_stages.svg)
+
+
 1. reproduce artifact and offline gates;
 2. deploy dark and run smoke/contract tests;
 3. shadow traffic without affecting responses;

@@ -21,6 +21,9 @@ not interchangeable implementations merely because all use the MoE label.
 
 ## The systems cost
 
+![MoE routing across devices](content/images/c3/moe_systems_cost.svg)
+
+
 Sparse arithmetic does not guarantee low latency. In expert parallel execution,
 tokens must be grouped by destination, exchanged across devices, processed, and
 returned. Skewed routing creates stragglers; small per-expert batches waste

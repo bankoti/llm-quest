@@ -7,6 +7,9 @@ versioned and observable.
 
 ## Bound every queue
 
+![Observability three types](content/images/c7/observability_triangle.svg)
+
+
 Unbounded queues turn overload into extreme latency and memory exhaustion. For
 each worker pool define maximum depth or token budget, admission priority,
 estimated wait, deadline-aware rejection, and overload response. Reject early

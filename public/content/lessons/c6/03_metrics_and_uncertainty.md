@@ -20,6 +20,9 @@ Decide whether duplicates count once before implementing.
 
 ## Compare paired outputs
 
+![Metric confidence intervals](content/images/c6/uncertainty_bars.svg)
+
+
 Evaluate systems on the same rows and analyze per-query differences. Paired
 bootstrap resampling can estimate a confidence interval for metric delta without
 assuming independent result positions. For binary events, report numerator,

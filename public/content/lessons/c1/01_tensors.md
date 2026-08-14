@@ -2,6 +2,9 @@
 
 ## Why tensors
 
+![Tensors and shapes](content/images/c1/tensors_shapes.svg)
+
+
 A tensor is a rectangular collection of numbers. Its **shape** tells how many
 indices are required to select a value.
 

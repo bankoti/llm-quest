@@ -7,6 +7,9 @@ waste compute on responses nobody will read.
 
 ## The budget decomposition
 
+![Latency stack to first byte](content/images/c7/latency_stack.svg)
+
+
 Time to a useful response splits into stages:
 
 ```text

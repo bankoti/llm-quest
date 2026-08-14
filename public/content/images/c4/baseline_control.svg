@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 240" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="240" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Build the control before the treatment</text>
+<rect x="40" y="90" width="100" height="44" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="90.0" y="116.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">traffic</text>
+<line x1="140" y1="112" x2="178" y2="112" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="178" y1="112" x2="185.71199878032053" y2="107.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="178" y1="112" x2="185.71199878032053" y2="116.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="180" y="60" width="170" height="44" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="265.0" y="80.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">baseline heuristic</text>
+<text x="265.0" y="96.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">rules / lookup / regex</text>
+<rect x="180" y="130" width="170" height="44" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="265.0" y="150.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">AI treatment</text>
+<text x="265.0" y="166.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">candidate</text>
+<line x1="146" y1="112" x2="178" y2="82" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="178" y1="82" x2="180.45303671687577" y2="73.34074998249505" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="178" y1="82" x2="186.7993433401778" y2="80.11014371401723" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="146" y1="112" x2="178" y2="152" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="178" y1="152" x2="186.44049792713628" y2="155.12377892015556" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="178" y1="152" x2="179.19479696248771" y2="160.9203396918744" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="350" y1="82" x2="420" y2="100" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="420" y1="100" x2="428.6244452938959" y2="97.42726927709163" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="420" y1="100" x2="426.31358733597597" y2="106.41393911344686" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="350" y1="152" x2="420" y2="128" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="420" y1="128" x2="425.79042727444596" y2="121.11008331114574" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="420" y1="128" x2="428.7998406883226" y2="129.88753910161932" stroke="#4b5563" stroke-width="1.6"/>
+<rect x="422" y="92" width="150" height="44" rx="8" fill="#fbbf2422" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="497.0" y="112.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">same metrics</text>
+<text x="497.0" y="128.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">frozen eval set</text>
+<line x1="572" y1="114" x2="610" y2="114" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="610" y1="114" x2="617.7119987803205" y2="109.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="610" y1="114" x2="617.7119987803205" y2="118.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="612" y="92" width="80" height="44" rx="8" fill="#fb718522" stroke="#fb7185" stroke-width="1.5" opacity="1"/>
+<text x="652.0" y="112.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">verdict</text>
+<text x="652.0" y="128.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">is AI needed?</text>
+<text x="360" y="208" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">if the baseline hits the target, ship the baseline — the AI must beat a real control,</text>
+<text x="360" y="226" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">measured by instrumentation that exists BEFORE any model is trained</text>
+</svg>

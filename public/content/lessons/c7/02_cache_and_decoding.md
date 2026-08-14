@@ -1,5 +1,8 @@
 # 02 - KV Cache, Prefix Reuse, and Decoding Acceleration
 
+![Prefill vs decode phases](content/images/c7/kv_cache_prefill.svg)
+
+
 For ordinary cached attention:
 
 ```text

@@ -2,6 +2,9 @@
 
 ## LayerNorm first
 
+![LayerNorm vs RMSNorm](content/images/c2/rmsnorm_vs_layernorm.svg)
+
+
 For one token vector `x` of width `C`, LayerNorm subtracts its mean and divides by
 its standard deviation before applying learned scale and bias:
 

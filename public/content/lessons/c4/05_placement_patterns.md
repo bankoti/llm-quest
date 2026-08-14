@@ -1,5 +1,8 @@
 # 05 - Choose Where AI Runs
 
+![AI placement spectrum](content/images/c4/placement_spectrum.svg)
+
+
 Model placement often matters more than model family. Compare patterns against
 the measured failure, existing stack, and budgets.
 

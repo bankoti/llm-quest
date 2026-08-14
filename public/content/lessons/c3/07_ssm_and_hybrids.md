@@ -15,6 +15,9 @@ than appending a K/V entry for every prior token.
 
 ## The tradeoff is addressability
 
+![SSM fixed state vs attention KV cache](content/images/c3/ssm_vs_attention.svg)
+
+
 Linear sequence work and fixed recurrent state are attractive, but the state is
 a compression of history. Attention can directly score a query against a
 particular prior position; a recurrent model must preserve useful information

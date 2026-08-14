@@ -28,6 +28,9 @@ or network.
 
 ## Offline versus online break-even
 
+![Break-even request volume](content/images/c4/break_even.svg)
+
+
 Suppose offline labeling and student training cost `F`, student serving costs
 `c_s` per request, and a live teacher costs `c_t`. Ignoring retraining for a first
 estimate:

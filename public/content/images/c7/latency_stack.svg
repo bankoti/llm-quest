@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="280" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Where the ms live: from request to first byte</text>
+<rect x="82" y="60" width="19.200000000000003" height="32" rx="5" fill="#4b556328" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="107.2" y="80" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="start" font-weight="400" opacity="1">network (ingress)  12ms</text>
+<rect x="82" y="98" width="64.0" height="32" rx="5" fill="#fbbf2428" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="152.0" y="118" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="start" font-weight="400" opacity="1">queue wait  40ms</text>
+<rect x="82" y="136" width="144.0" height="32" rx="5" fill="#a78bfa28" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="232.0" y="156" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="start" font-weight="400" opacity="1">prefill (prompt processing)  90ms</text>
+<line x1="82" y1="174" x2="638" y2="174" stroke="#fb7185" stroke-width="1.8" opacity="1" stroke-dasharray="4,3"/>
+<text x="360" y="168" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#fb7185" text-anchor="middle" font-weight="400" opacity="1">TTFT: first token emitted →</text>
+<rect x="82" y="174" width="448.0" height="32" rx="5" fill="#34d39928" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="536.0" y="194" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="start" font-weight="400" opacity="1">decode N tokens  280ms</text>
+<rect x="82" y="212" width="12.8" height="32" rx="5" fill="#4b556328" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="100.8" y="232" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#e5e7eb" text-anchor="start" font-weight="400" opacity="1">network (egress)  8ms</text>
+<text x="360" y="264" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">TTFT = time to first token — what the user FEELS as latency; total time = TTFT + N × decode_step</text>
+</svg>

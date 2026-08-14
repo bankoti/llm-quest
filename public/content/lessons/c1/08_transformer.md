@@ -26,6 +26,9 @@ reduces parameters and often improves language models.
 
 ## Residual stream
 
+![Transformer block stack](content/images/c1/transformer_stack.svg)
+
+
 Each sublayer adds a learned change to the running representation:
 
 ```python

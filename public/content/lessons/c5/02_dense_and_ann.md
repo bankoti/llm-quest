@@ -19,6 +19,9 @@ behavior, then replace the adapter in a real experiment.
 
 ## Exact versus approximate search
 
+![ANN neighbor search](content/images/c5/ann_space.svg)
+
+
 Brute-force search compares the query with every item and is an exact control.
 Approximate nearest-neighbor (ANN) indexes trade recall for latency and memory.
 Graph indexes expose construction and search breadth; inverted or product-

@@ -1,5 +1,8 @@
 # 01 - Encoder-Only Models: BERT
 
+![Encoder vs decoder attention](content/images/c3/bert_vs_gpt_mask.svg)
+
+
 BERT trains a Transformer encoder with access to both left and right context.
 Its masked-language-model (MLM) objective reconstructs selected tokens from
 their surroundings. For input `x`, only selected positions `M` contribute:

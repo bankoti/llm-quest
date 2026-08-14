@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="280" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Sparse MoE: each token activates only top-k experts</text>
+<rect x="40" y="110" width="90" height="44" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="85.0" y="130.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">token</text>
+<text x="85.0" y="146.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">hidden state</text>
+<line x1="130" y1="132" x2="178" y2="132" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="178" y1="132" x2="185.71199878032053" y2="127.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="178" y1="132" x2="185.71199878032053" y2="136.6395123463932" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="180" y="110" width="92" height="44" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="226.0" y="130.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">router</text>
+<text x="226.0" y="146.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">softmax gate</text>
+<rect x="360" y="40" width="100" height="40" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="410.0" y="58.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">E0</text>
+<text x="410.0" y="74.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gate 0.62</text>
+<line x1="272" y1="132" x2="356" y2="60" stroke="#34d399" stroke-width="1.6"/>
+<line x1="356" y1="60" x2="358.83603137931635" y2="51.45851734091012" stroke="#34d399" stroke-width="1.6"/>
+<line x1="356" y1="60" x2="364.8747406034666" y2="58.50367810241878" stroke="#34d399" stroke-width="1.6"/>
+<rect x="360" y="96" width="100" height="40" rx="8" fill="#4b556322" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="410.0" y="114.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">E1</text>
+<text x="410.0" y="130.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">skipped</text>
+<line x1="272" y1="132" x2="356" y2="116" stroke="#4b5563" stroke-width="1" opacity="1" stroke-dasharray="3,4"/>
+<rect x="360" y="152" width="100" height="40" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="410.0" y="170.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">E2</text>
+<text x="410.0" y="186.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gate 0.31</text>
+<line x1="272" y1="132" x2="356" y2="172" stroke="#34d399" stroke-width="1.6"/>
+<line x1="356" y1="172" x2="364.957541374329" y2="171.12681472345005" stroke="#34d399" stroke-width="1.6"/>
+<line x1="356" y1="172" x2="360.9681770656104" y2="179.5044797717592" stroke="#34d399" stroke-width="1.6"/>
+<rect x="360" y="208" width="100" height="40" rx="8" fill="#4b556322" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="410.0" y="226.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">E3</text>
+<text x="410.0" y="242.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">skipped</text>
+<line x1="272" y1="132" x2="356" y2="228" stroke="#4b5563" stroke-width="1" opacity="1" stroke-dasharray="3,4"/>
+<line x1="460" y1="60" x2="540" y2="120" stroke="#34d399" stroke-width="1.6"/>
+<line x1="540" y1="120" x2="548.9533064320923" y2="120.91558939107777" stroke="#34d399" stroke-width="1.6"/>
+<line x1="540" y1="120" x2="543.3858916164205" y2="128.33880914530687" stroke="#34d399" stroke-width="1.6"/>
+<line x1="460" y1="172" x2="540" y2="140" stroke="#34d399" stroke-width="1.6"/>
+<line x1="540" y1="140" x2="545.437339479383" y2="132.8281564862343" stroke="#34d399" stroke-width="1.6"/>
+<line x1="540" y1="140" x2="548.8834827359433" y2="141.44351462763518" stroke="#34d399" stroke-width="1.6"/>
+<rect x="542" y="108" width="130" height="44" rx="8" fill="#fbbf2422" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="607.0" y="128.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Σ gateᵢ · Eᵢ(x)</text>
+<text x="607.0" y="144.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">weighted combine</text>
+<text x="360" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">capacity of all experts, compute of k — but every expert must fit in memory</text>
+</svg>

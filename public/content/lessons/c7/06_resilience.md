@@ -19,6 +19,9 @@ deterministic context-limit errors. Retry storms amplify outages.
 
 ## Circuit breaker
 
+![Circuit breaker state machine](content/images/c7/circuit_breaker.svg)
+
+
 A breaker tracks recent failures. In **closed** state calls flow. After a threshold
 it becomes **open** and fails fast to fallback. After a cooldown, **half-open**
 permits limited probes; success closes it, failure reopens it. Partition breakers

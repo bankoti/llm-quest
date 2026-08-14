@@ -5,6 +5,9 @@ service recovered only when someone turned the retry helper off. One bug.
 
 ## The domain
 
+![Linear vs exponential backoff](content/images/c7/retry_backoff.svg)
+
+
 When a dependency fails, every waiting client becomes a synchronized herd.
 Exponential backoff exists to disperse that herd — each attempt doubles the
 delay, so pressure decays geometrically:

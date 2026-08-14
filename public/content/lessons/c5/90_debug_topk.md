@@ -6,6 +6,9 @@ system is working perfectly — toward the wrong objective.
 
 ## The domain
 
+![Ascending vs descending argsort](content/images/c5/debug_topk.svg)
+
+
 `np.argsort` sorts **ascending**. It is the single most common footgun in
 retrieval code, because taking `[:k]` from an ascending sort hands you the k
 *worst* documents with complete confidence. The idiomatic fixes:

@@ -1,5 +1,8 @@
 # 06 - Sparse Mixture of Experts
 
+![Sparse MoE routing](content/images/c2/moe_router.svg)
+
+
 A sparse MoE replaces one feed-forward network with a router and `E` experts.
 For each token, the router computes probabilities and selects only `k` experts:
 

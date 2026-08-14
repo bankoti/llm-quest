@@ -7,6 +7,9 @@ the convention and instrumentation versions.
 
 ## Traces explain one request
 
+![Observability three types](content/images/c7/observability_triangle.svg)
+
+
 Create spans for admission, routing, cache, interpretation, retrieval branches,
 reranking, policy, model prefill/decode where available, tools, and response.
 Propagate trace context across queues. Record duration, status, route, artifact

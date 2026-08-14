@@ -1,5 +1,8 @@
 # 07 - Teacher-Student Distillation Mechanics
 
+![Teacher-student distillation](content/images/c6/distillation_flow.svg)
+
+
 Distillation transfers behavior from a teacher to a smaller or cheaper student.
 For relevance, the teacher may emit class probabilities, scores, pairwise
 preferences, or margins. The student can optimize a mix of hard human labels and

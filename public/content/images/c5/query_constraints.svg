@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="260" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Split the query: hard constraints filter, soft text ranks</text>
+<rect x="40" y="96" width="190" height="48" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="135.0" y="124.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">&quot;red running shoes
+under $100, size 42&quot;</text>
+<line x1="230" y1="120" x2="268" y2="120" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="268" y1="120" x2="275.7119987803205" y2="115.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="268" y1="120" x2="275.7119987803205" y2="124.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="270" y="96" width="120" height="48" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="330.0" y="118.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">interpreter</text>
+<text x="330.0" y="134.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">parse, don&#x27;t embed</text>
+<line x1="390" y1="108" x2="440" y2="78" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="440" y1="78" x2="444.2259749877557" y2="70.05386034587467" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="440" y1="78" x2="448.9999938067015" y2="78.01055837745099" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="390" y1="132" x2="440" y2="168" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="440" y1="168" x2="448.9694408410763" y2="168.7410337363665" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="440" y1="168" x2="443.54766286184804" y2="176.27128092973902" stroke="#4b5563" stroke-width="1.6"/>
+<rect x="442" y="56" width="200" height="44" rx="8" fill="#fb718522" stroke="#fb7185" stroke-width="1.5" opacity="1"/>
+<text x="542.0" y="76.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">filters: price&lt;100, size=42</text>
+<text x="542.0" y="92.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">HARD — never violated</text>
+<rect x="442" y="146" width="200" height="44" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="542.0" y="166.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">text: &quot;red running shoes&quot;</text>
+<text x="542.0" y="182.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">SOFT — similarity ranks</text>
+<text x="360" y="232" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">embedding &#x27;under $100&#x27; does not enforce it — a $180 shoe can be semantically &#x27;close&#x27;;</text>
+<text x="360" y="250" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">constraints belong in the WHERE clause, not the vector</text>
+</svg>

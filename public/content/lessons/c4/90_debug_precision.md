@@ -5,6 +5,9 @@ Your laziest retriever — the one that returns a single document — is scoring
 
 ## The domain
 
+![Precision-at-k denominator](content/images/c4/debug_precision.svg)
+
+
 Precision@k answers: *of the k results I budgeted for, how many were worth
 showing?* The denominator is the budget `k`, not the number of results the
 system happened to return:

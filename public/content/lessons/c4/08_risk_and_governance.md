@@ -14,6 +14,9 @@ and untrusted content authors.
 
 ## Threat scenarios, not generic labels
 
+![Risk priority matrix](content/images/c4/risk_matrix.svg)
+
+
 Write each risk as a causal scenario:
 
 ```text

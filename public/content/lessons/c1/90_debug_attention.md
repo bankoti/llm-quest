@@ -12,6 +12,9 @@ occasionally wrong about the *concept*. Nobody catches that with a linter.
 
 ## The domain
 
+![Effect of masking with 0 vs -inf](content/images/c1/debug_mask_zero.svg)
+
+
 Causal attention makes one promise: position `t` may use positions `0..t` and
 nothing else. The mask is how that promise is kept. Before you read the code,
 answer for yourself:

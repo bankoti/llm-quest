@@ -7,6 +7,9 @@ one better?" It is "is the new one not meaningfully worse, given that it is
 
 ## Superiority vs. non-inferiority
 
+![Superiority vs non-inferiority CIs](content/images/c8/noninferiority.svg)
+
+
 A superiority test asks whether the challenger beats the incumbent. A
 non-inferiority test asks whether the challenger stays within an acceptable
 margin of the incumbent:

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="220" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Four passes from mystery checkpoint to defensible claim</text>
+<rect x="40" y="70" width="130" height="52" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="105.0" y="94.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Pass 1</text>
+<text x="105.0" y="110.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">dimensions</text>
+<text x="105" y="146" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">d_model, heads,</text>
+<text x="105" y="161" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">layers, vocab</text>
+<line x1="170" y1="96" x2="198" y2="96" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="198" y1="96" x2="205.71199878032053" y2="91.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="198" y1="96" x2="205.71199878032053" y2="100.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="200" y="70" width="130" height="52" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="265.0" y="94.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Pass 2</text>
+<text x="265.0" y="110.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">construction</text>
+<text x="265" y="146" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">trace module</text>
+<text x="265" y="161" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">tree &amp; wiring</text>
+<line x1="330" y1="96" x2="358" y2="96" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="358" y1="96" x2="365.7119987803205" y2="91.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="358" y1="96" x2="365.7119987803205" y2="100.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="360" y="70" width="130" height="52" rx="8" fill="#fbbf2422" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="425.0" y="94.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Pass 3</text>
+<text x="425.0" y="110.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">weights</text>
+<text x="425" y="146" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">shapes reconcile</text>
+<text x="425" y="161" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">with config?</text>
+<line x1="490" y1="96" x2="518" y2="96" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="518" y1="96" x2="525.7119987803205" y2="91.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="518" y1="96" x2="525.7119987803205" y2="100.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="520" y="70" width="130" height="52" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="585.0" y="94.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Pass 4</text>
+<text x="585.0" y="110.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">behavior</text>
+<text x="585" y="146" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">probe: mask?</text>
+<text x="585" y="161" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">rope? tied embed?</text>
+<text x="360" y="200" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">each pass writes evidence to the log; a claim without a probe is a guess</text>
+</svg>

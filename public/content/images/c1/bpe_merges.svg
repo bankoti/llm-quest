@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 250" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="250" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">BPE: repeatedly merge the most frequent adjacent pair</text>
+<text x="96" y="76" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">start</text>
+<rect x="112" y="56" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="130.0" y="76" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">l</text>
+<rect x="156" y="56" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="174.0" y="76" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">o</text>
+<rect x="200" y="56" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="218.0" y="76" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">w</text>
+<rect x="244" y="56" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="262.0" y="76" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">e</text>
+<rect x="288" y="56" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="306.0" y="76" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">r</text>
+<rect x="332" y="56" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="350.0" y="76" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">_</text>
+<text x="96" y="122" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">merge 1</text>
+<rect x="112" y="102" width="46" height="32" rx="6" fill="#fbbf2426" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="135.0" y="122" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">lo</text>
+<rect x="166" y="102" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="184.0" y="122" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">w</text>
+<rect x="210" y="102" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="228.0" y="122" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">e</text>
+<rect x="254" y="102" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="272.0" y="122" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">r</text>
+<rect x="298" y="102" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="316.0" y="122" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">_</text>
+<text x="96" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">merge 2</text>
+<rect x="112" y="148" width="56" height="32" rx="6" fill="#fbbf2426" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="140.0" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">low</text>
+<rect x="176" y="148" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="194.0" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">e</text>
+<rect x="220" y="148" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="238.0" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">r</text>
+<rect x="264" y="148" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="282.0" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">_</text>
+<text x="96" y="214" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">merge 3</text>
+<rect x="112" y="194" width="56" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="140.0" y="214" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">low</text>
+<rect x="176" y="194" width="46" height="32" rx="6" fill="#fbbf2426" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="199.0" y="214" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">er</text>
+<rect x="230" y="194" width="36" height="32" rx="6" fill="#0b0f19" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="248.0" y="214" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">_</text>
+<text x="360" y="238" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">vocabulary grows by one entry per merge; frequent words become single tokens</text>
+</svg>

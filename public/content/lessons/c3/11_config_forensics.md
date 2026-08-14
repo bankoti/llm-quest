@@ -7,6 +7,9 @@ that interprets the config.
 
 ## Pass 1: establish dimensions
 
+![Four-pass config forensics](content/images/c3/config_forensics.svg)
+
+
 Extract vocabulary size, width, layer count, attention heads, KV heads, head
 dimension, intermediate width, expert count and top `k`, context fields, position
 parameters, normalization epsilon, and tying. Check invariants:

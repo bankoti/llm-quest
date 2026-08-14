@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 270" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="270" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Known LLM judge biases — probe before deploying</text>
+<rect x="40" y="60" width="148" height="110" rx="10" fill="#fb718514" stroke="#fb7185" stroke-width="1.5" opacity="1"/>
+<text x="114" y="84" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#fb7185" text-anchor="middle" font-weight="600" opacity="1">position bias</text>
+<text x="114" y="110" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">prefers response A</text>
+<text x="114" y="128" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">(presented first)</text>
+<rect x="210" y="60" width="148" height="110" rx="10" fill="#fbbf2414" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="284" y="84" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="600" opacity="1">verbosity bias</text>
+<text x="284" y="110" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">longer = better,</text>
+<text x="284" y="128" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">even when redundant</text>
+<rect x="380" y="60" width="148" height="110" rx="10" fill="#a78bfa14" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="454" y="84" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#a78bfa" text-anchor="middle" font-weight="600" opacity="1">self-enhancement</text>
+<text x="454" y="110" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">prefers outputs from</text>
+<text x="454" y="128" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">its own model family</text>
+<rect x="550" y="60" width="148" height="110" rx="10" fill="#60a5fa14" stroke="#60a5fa" stroke-width="1.5" opacity="1"/>
+<text x="624" y="84" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#60a5fa" text-anchor="middle" font-weight="600" opacity="1">sycophancy</text>
+<text x="624" y="110" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">told B is better →</text>
+<text x="624" y="128" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">flips to B</text>
+<text x="360" y="222" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">probe each bias on your rubric:  swap A/B, shorten a winner, test the same judge on its own outputs</text>
+<text x="360" y="244" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">a judge that fails a probe should not be trusted for the adjacent real task</text>
+</svg>

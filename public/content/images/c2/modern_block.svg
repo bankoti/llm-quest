@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 250" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="250" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">The modern decoder block (Llama-style)</text>
+<rect x="30" y="105" width="60" height="44" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="60.0" y="131.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">x</text>
+<line x1="90" y1="127" x2="118" y2="127" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="118" y1="127" x2="125.71199878032053" y2="122.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="118" y1="127" x2="125.71199878032053" y2="131.6395123463932" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="120" y="105" width="100" height="44" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="170.0" y="131.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">RMSNorm</text>
+<line x1="220" y1="127" x2="248" y2="127" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="248" y1="127" x2="255.71199878032053" y2="122.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="248" y1="127" x2="255.71199878032053" y2="131.6395123463932" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="250" y="105" width="120" height="44" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="310.0" y="125.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">GQA + RoPE</text>
+<text x="310.0" y="141.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">attention</text>
+<line x1="370" y1="127" x2="398" y2="127" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="398" y1="127" x2="405.7119987803205" y2="122.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="398" y1="127" x2="405.7119987803205" y2="131.6395123463932" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="384.0" y="121.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">⊕</text>
+<rect x="400" y="105" width="100" height="44" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="450.0" y="131.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">RMSNorm</text>
+<line x1="500" y1="127" x2="528" y2="127" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="528" y1="127" x2="535.7119987803205" y2="122.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="528" y1="127" x2="535.7119987803205" y2="131.6395123463932" stroke="#9ca3af" stroke-width="1.6"/>
+<rect x="530" y="105" width="100" height="44" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="580.0" y="125.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">SwiGLU</text>
+<text x="580.0" y="141.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gated MLP</text>
+<line x1="630" y1="127" x2="668" y2="127" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="668" y1="127" x2="675.7119987803205" y2="122.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="668" y1="127" x2="675.7119987803205" y2="131.6395123463932" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="649.0" y="121.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">⊕</text>
+<line x1="60" y1="103" x2="60" y2="60" stroke="#67e8f9" stroke-width="1.4" opacity="1"/>
+<line x1="60" y1="60" x2="384" y2="60" stroke="#67e8f9" stroke-width="1.4" opacity="1"/>
+<line x1="384" y1="60" x2="384" y2="101" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="384" y1="101" x2="388.6395123463932" y2="108.71199878032053" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="384" y1="101" x2="379.3604876536068" y2="108.71199878032053" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="384" y1="60" x2="654" y2="60" stroke="#67e8f9" stroke-width="1.4" opacity="0.7"/>
+<line x1="654" y1="60" x2="654" y2="101" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="654" y1="101" x2="658.6395123463932" y2="108.71199878032053" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="654" y1="101" x2="649.3604876536068" y2="108.71199878032053" stroke="#67e8f9" stroke-width="1.4"/>
+<text x="360" y="50" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#67e8f9" text-anchor="middle" font-weight="400" opacity="1">residual connections (pre-norm: norm sits inside the branch)</text>
+<text x="360" y="200" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">swaps vs GPT-2: LayerNorm→RMSNorm · learned pos→RoPE · MHA→GQA · GELU MLP→SwiGLU</text>
+<text x="360" y="222" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">same residual-stream skeleton — details buy stability and serving efficiency</text>
+</svg>

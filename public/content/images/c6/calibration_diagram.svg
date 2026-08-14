@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="280" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Reliability diagram: are confidence scores honest?</text>
+<line x1="80" y1="60" x2="80" y2="220" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<line x1="80" y1="220" x2="620" y2="220" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="350.0" y="246" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">model confidence</text>
+<text x="52" y="140.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" transform="rotate(-90 52 140.0)">actual accuracy</text>
+<polyline points="80,220 620,60" fill="none" stroke="#4b5563" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="1" stroke-dasharray="6,4"/>
+<text x="510" y="80" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#4b5563" text-anchor="middle" font-weight="400" opacity="1">perfect calibration</text>
+<polyline points="80,220 188,140 350,124 512,108 620,98" fill="none" stroke="#fb7185" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<text x="500" y="152" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#fb7185" text-anchor="middle" font-weight="400" opacity="1">overconfident model</text>
+<polyline points="80,210 188,172 350,108 512,68 620,60" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<text x="140" y="140" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#a78bfa" text-anchor="middle" font-weight="400" opacity="1">underconfident</text>
+<text x="360" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">ECE = area between the model curve and the diagonal — the further apart, the less you can trust the score</text>
+</svg>

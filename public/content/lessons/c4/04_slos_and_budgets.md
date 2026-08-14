@@ -8,6 +8,9 @@ not an empty 200 response.
 
 ## Latency budget
 
+![Latency budget bar](content/images/c4/latency_budget.svg)
+
+
 Start from the user-facing p95 or p99 target and subtract client/network overhead,
 gateway, serialization, and reserve. Allocate the remaining critical path. For
 sequential stages, add budgets. For parallel branches, budget approximately the

@@ -8,6 +8,9 @@ debug an incident, reproduce an evaluation, or roll back safely.
 
 ## The manifest
 
+![Artifact manifest fields](content/images/c8/artifact_manifest.svg)
+
+
 A manifest is a complete list of every artifact in the serving path, each
 pinned by a content digest:
 

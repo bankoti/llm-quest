@@ -1,5 +1,8 @@
 # 01 - Lexical Retrieval and BM25
 
+![BM25 term-frequency saturation](content/images/c5/bm25_saturation.svg)
+
+
 Lexical retrieval remains strong for exact product names, identifiers, rare terms,
 and transparent debugging. BM25 scores a query term using document frequency,
 within-document frequency, and length normalization. One common form is:

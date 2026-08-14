@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 270" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="270" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Rubric scoring and annotator agreement (κ)</text>
+<rect x="56" y="60" width="260" height="140" rx="10" fill="#0b0f19" stroke="#1f2937" stroke-width="1.5" opacity="1"/>
+<text x="186" y="82" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">example rubric row</text>
+<text x="70" y="104" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#67e8f9" text-anchor="start" font-weight="400" opacity="1">relevance 1–5</text>
+<text x="70" y="118" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">does the answer address the question?</text>
+<text x="70" y="136" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#67e8f9" text-anchor="start" font-weight="400" opacity="1">faithfulness 0/1</text>
+<text x="70" y="150" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">every claim verifiable from sources?</text>
+<text x="70" y="168" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#67e8f9" text-anchor="start" font-weight="400" opacity="1">conciseness 1–3</text>
+<text x="70" y="182" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">any unnecessary padding?</text>
+<rect x="375" y="70" width="90" height="50" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="420.0" y="99.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">annot A</text>
+<rect x="510" y="70" width="90" height="50" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="555.0" y="99.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">annot B</text>
+<rect x="375" y="140" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="397.5" y="166.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">3</text>
+<rect x="420" y="140" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="442.5" y="166.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">3</text>
+<rect x="375" y="185" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="397.5" y="211.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">1</text>
+<rect x="420" y="185" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="442.5" y="211.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">1</text>
+<rect x="375" y="230" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="397.5" y="256.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">5</text>
+<rect x="420" y="230" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="442.5" y="256.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">4</text>
+<rect x="375" y="275" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="397.5" y="301.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">2</text>
+<rect x="420" y="275" width="45" height="45" rx="3" fill="#34d39926" stroke="#1f2937" stroke-width="1" opacity="1"/>
+<text x="442.5" y="301.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">3</text>
+<text x="367" y="166.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">ex 1</text>
+<text x="367" y="211.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">ex 2</text>
+<text x="367" y="256.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">ex 3</text>
+<text x="367" y="301.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">ex 4</text>
+<text x="552" y="152" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" fill="#34d399" text-anchor="middle" font-weight="400" opacity="1">✓</text>
+<text x="552" y="196" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" fill="#34d399" text-anchor="middle" font-weight="400" opacity="1">✓</text>
+<text x="552" y="174" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="400" opacity="1">κ ≈ 0.73</text>
+<text x="552" y="218" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="400" opacity="1">disagree</text>
+<text x="360" y="252" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">low κ means the rubric itself is ambiguous — fix the rubric before collecting more labels</text>
+</svg>

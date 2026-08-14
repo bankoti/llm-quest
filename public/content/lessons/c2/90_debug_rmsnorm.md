@@ -4,6 +4,9 @@ An AI assistant "ported RMSNorm from the Llama paper". One conceptual bug.
 
 ## The domain
 
+![LayerNorm masquerading as RMSNorm](content/images/c2/debug_rmsnorm.svg)
+
+
 LayerNorm computes `(x - mean) / std`: it centers, then scales. RMSNorm was a
 deliberate simplification — Zhang & Sennrich showed the *re-centering* is
 mostly unnecessary; only the *re-scaling* matters. So RMSNorm divides by the

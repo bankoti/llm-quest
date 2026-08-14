@@ -7,6 +7,9 @@ decoding settings, retries, parser, and cost.
 
 ## Known bias probes
 
+![LLM judge known biases](content/images/c6/llm_judge_biases.svg)
+
+
 Research has documented position bias in pairwise judging and self-preference
 when models evaluate related outputs. Other concerns include verbosity/style
 preference, sensitivity to prompt framing, contamination, and correlated errors.

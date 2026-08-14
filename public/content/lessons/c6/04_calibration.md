@@ -7,6 +7,9 @@ overconfident.
 
 ## Reliability diagram and ECE
 
+![Reliability diagram / ECE](content/images/c6/calibration_diagram.svg)
+
+
 Partition predictions into confidence bins. For bin `B_m`, compare mean
 confidence and empirical accuracy:
 

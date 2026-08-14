@@ -5,6 +5,9 @@ its formula looks like every KV-cache formula you have seen. One bug.
 
 ## The domain
 
+![Query heads vs KV heads in cache budget](content/images/c3/debug_kv_budget.svg)
+
+
 Grouped-query attention exists for one reason: the KV cache was eating the
 accelerator. GQA keeps many *query* heads for quality but shares each K/V pair
 across a group, so the cache stores only `kv_heads` heads:

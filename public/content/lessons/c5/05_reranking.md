@@ -1,5 +1,8 @@
 # 05 - Reranking and Hard Negatives
 
+![Two-stage retrieval funnel](content/images/c5/rerank_funnel.svg)
+
+
 Candidate generation optimizes recall under a broad budget. Reranking spends more
 compute on tens or hundreds of candidates to improve top positions. A feature
 ranker may combine lexical score, dense score, exact category, freshness, and

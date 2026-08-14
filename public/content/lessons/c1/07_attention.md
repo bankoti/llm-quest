@@ -16,6 +16,9 @@ v = x Wv    value: what information do I provide?
 
 ## The equation
 
+![Attention computation](content/images/c1/attention_flow.svg)
+
+
 ```text
 Attention(Q, K, V) = softmax((Q K^T) / sqrt(d_k) + mask) V
 ```
@@ -41,6 +44,9 @@ variance grows with dimension `D`. Dividing by `sqrt(D)` keeps scores in a range
 where softmax has useful gradients instead of becoming nearly one-hot too early.
 
 ## Why causal masking
+
+![Causal attention mask](content/images/c1/causal_mask.svg)
+
 
 At position `t`, a next-token model may use positions `0..t`, never `t+1..`.
 Before softmax, disallowed scores become negative infinity, which softmax maps to

@@ -2,6 +2,9 @@
 
 ## The contract
 
+![Tokenizer contract](content/images/c1/tokenizer_contract.svg)
+
+
 A tokenizer has two essential operations:
 
 ```text
@@ -41,6 +44,9 @@ UTF-8 represents text as bytes between 0 and 255. A byte tokenizer can encode an
 valid text without an unknown token, but common words require many positions.
 
 ## Level 3: byte-pair encoding
+
+![BPE merge steps](content/images/c1/bpe_merges.svg)
+
 
 BPE begins with byte tokens and repeatedly merges the most frequent adjacent pair:
 

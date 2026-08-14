@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 240" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="240" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Progressive deployment: evidence gates each stage</text>
+<rect x="52" y="80" width="108" height="52" rx="8" fill="#4b556322" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="106.0" y="104.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">shadow</text>
+<text x="106.0" y="120.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">1% traffic</text>
+<line x1="160" y1="106" x2="170" y2="106" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="170" y1="106" x2="177.71199878032053" y2="101.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="170" y1="106" x2="177.71199878032053" y2="110.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="165.0" y="100.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gate ✓</text>
+<rect x="180" y="80" width="108" height="52" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="234.0" y="104.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">canary</text>
+<text x="234.0" y="120.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">5% traffic</text>
+<line x1="288" y1="106" x2="298" y2="106" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="298" y1="106" x2="305.7119987803205" y2="101.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="298" y1="106" x2="305.7119987803205" y2="110.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="293.0" y="100.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gate ✓</text>
+<rect x="308" y="80" width="108" height="52" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="362.0" y="104.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">limited</text>
+<text x="362.0" y="120.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">20% traffic</text>
+<line x1="416" y1="106" x2="426" y2="106" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="426" y1="106" x2="433.7119987803205" y2="101.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="426" y1="106" x2="433.7119987803205" y2="110.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="421.0" y="100.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gate ✓</text>
+<rect x="436" y="80" width="108" height="52" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="490.0" y="104.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">broad</text>
+<text x="490.0" y="120.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">80% traffic</text>
+<line x1="544" y1="106" x2="554" y2="106" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="554" y1="106" x2="561.7119987803205" y2="101.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="554" y1="106" x2="561.7119987803205" y2="110.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="549.0" y="100.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gate ✓</text>
+<rect x="564" y="80" width="108" height="52" rx="8" fill="#fbbf2422" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="618.0" y="104.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">full</text>
+<text x="618.0" y="120.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">100% traffic</text>
+<text x="360" y="196" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">each gate: metric stable for T hours, p99 within SLO, error rate below threshold, rollback tested</text>
+<text x="360" y="214" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">gate failure triggers immediate rollback — NOT a manual conversation</text>
+</svg>

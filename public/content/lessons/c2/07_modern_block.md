@@ -1,5 +1,8 @@
 # 07 - Assemble the Modern Decoder
 
+![Modern decoder block](content/images/c2/modern_block.svg)
+
+
 The course reference block is pre-norm:
 
 ```text

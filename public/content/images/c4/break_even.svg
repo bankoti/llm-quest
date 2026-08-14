@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="280" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Break-even: fixed cost vs per-request savings</text>
+<line x1="80" y1="60" x2="80" y2="220" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<line x1="80" y1="220" x2="620" y2="220" stroke="#4b5563" stroke-width="1.5" opacity="1"/>
+<text x="350.0" y="246" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">requests / month</text>
+<text x="52" y="140.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" transform="rotate(-90 52 140.0)">monthly cost</text>
+<polyline points="80,212.5 620,82.0" fill="none" stroke="#fb7185" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<text x="544.4" y="73.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#fb7185" text-anchor="middle" font-weight="400" opacity="1">buy: teacher API</text>
+<polyline points="80,152.5 620,117.99999999999999" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="1"/>
+<text x="528.2" y="133.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#34d399" text-anchor="middle" font-weight="400" opacity="1">build: student + fixed</text>
+<circle cx="360.8" cy="145.0" r="5" fill="#fbbf24" stroke="none" opacity="1"/>
+<line x1="360.8" y1="145.0" x2="360.8" y2="220" stroke="#fbbf24" stroke-width="1.2" opacity="1" stroke-dasharray="4,4"/>
+<text x="360.8" y="236" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="400" opacity="1">N* = F / (c_teacher − c_student)</text>
+<text x="360" y="264" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">below N* the fixed cost never pays back; above it, every request is savings</text>
+</svg>

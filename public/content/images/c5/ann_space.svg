@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="280" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Dense retrieval: nearest neighbors in embedding space</text>
+<circle cx="200.88054490054026" cy="157.0766760473523" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="273.4753416014436" cy="166.6272061753911" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="414.1461672594297" cy="80.4846174783701" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="77.24239535518078" cy="203.9950531354336" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="212.6447078804042" cy="107.49295376747142" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="617.6046595307546" cy="145.24216120359168" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="530.0537982009139" cy="146.21651339189359" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="421.4874772992891" cy="94.09862784376384" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="419.17336205685365" cy="208.8872491429275" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="357.74966571081575" cy="188.60029699223844" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="439.2763114532759" cy="80.24503011631957" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="487.02663545774953" cy="164.57593326901082" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="235.69721273364178" cy="74.96188023516" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="546.03998033842" cy="145.63985418647468" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="465.3531582361917" cy="210.61004804087707" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="462.7712159861614" cy="217.37578681341992" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="287.22987220040915" cy="198.14540335763652" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="314.5415808279183" cy="219.69387547272336" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="553.3766631859229" cy="85.59268955694036" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="144.7828731103679" cy="104.71791059730197" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="601.0140763940116" cy="139.78589866038868" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="414.6565599767422" cy="118.16419174808087" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="348.9836411059827" cy="131.7386014151844" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="263.00076882359906" cy="163.61185718485814" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="391.3384861336094" cy="214.672283335644" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="445.09017514923164" cy="218.6312961920027" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="541.0203115182156" cy="228.55834317901042" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="439.20044818938504" cy="96.09593951537116" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="543.3506432139475" cy="224.34127156944982" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="567.5827914817302" cy="161.05720055589177" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="462.59936109580957" cy="103.77999738809572" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="527.3843616503448" cy="161.76517637620555" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="226.72660409241286" cy="80.1536923432367" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="539.6683686324741" cy="228.368962387453" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="118.68495121035059" cy="198.0952514012003" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="295.75400504024987" cy="94.12245991244953" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="231.64018575048422" cy="193.00670196437514" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="550.0218635455108" cy="77.07040978072695" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="407.99289069249477" cy="77.19043895936579" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="465.14226259668396" cy="122.95266336304121" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="554.4979189860469" cy="226.90172109493435" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="347.9812055064242" cy="229.76143126012425" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="240.31852941198647" cy="82.3153127528659" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="399.86954483813037" cy="75.02044194805083" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="178.5616710356307" cy="135.26978169871853" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="405.7569176320378" cy="94.99183856217036" r="3.2" fill="#4b5563" stroke="none" opacity="0.8"/>
+<circle cx="273.4753416014436" cy="166.6272061753911" r="4.4" fill="#34d399" stroke="none" opacity="1"/>
+<line x1="300" y1="150" x2="273.4753416014436" y2="166.6272061753911" stroke="#34d399" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="263.00076882359906" cy="163.61185718485814" r="4.4" fill="#34d399" stroke="none" opacity="1"/>
+<line x1="300" y1="150" x2="263.00076882359906" y2="163.61185718485814" stroke="#34d399" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="287.22987220040915" cy="198.14540335763652" r="4.4" fill="#34d399" stroke="none" opacity="1"/>
+<line x1="300" y1="150" x2="287.22987220040915" y2="198.14540335763652" stroke="#34d399" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="348.9836411059827" cy="131.7386014151844" r="4.4" fill="#34d399" stroke="none" opacity="1"/>
+<line x1="300" y1="150" x2="348.9836411059827" y2="131.7386014151844" stroke="#34d399" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="295.75400504024987" cy="94.12245991244953" r="4.4" fill="#fbbf24" stroke="none" opacity="1"/>
+<circle cx="300" cy="150" r="6" fill="#67e8f9" stroke="none" opacity="1"/>
+<text x="300" y="136" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#67e8f9" text-anchor="middle" font-weight="600" opacity="1">query</text>
+<rect x="80" y="253" width="14" height="10" rx="2" fill="#34d399" stroke="none" stroke-width="1.5" opacity="1"/>
+<text x="100" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">found by ANN</text>
+<rect x="188.4" y="253" width="14" height="10" rx="2" fill="#fbbf24" stroke="none" stroke-width="1.5" opacity="1"/>
+<text x="208.4" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">true neighbor missed (recall &lt; 1)</text>
+<rect x="427.0" y="253" width="14" height="10" rx="2" fill="#67e8f9" stroke="none" stroke-width="1.5" opacity="1"/>
+<text x="447.0" y="262" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">query</text>
+<text x="520" y="250" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">ANN trades a little recall</text>
+<text x="520" y="266" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">for 100–1000× less work</text>
+</svg>

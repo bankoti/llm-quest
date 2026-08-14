@@ -19,6 +19,9 @@ The minus sign moves toward lower loss. The learning rate controls step size.
 
 ## The chain rule
 
+![Backpropagation graph](content/images/c1/backprop_graph.svg)
+
+
 If `loss` depends on `prediction`, which depends on `weight`, then:
 
 ```text

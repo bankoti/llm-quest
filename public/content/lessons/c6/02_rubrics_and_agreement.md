@@ -26,6 +26,9 @@ annotator, rubric version, time, and adjudication.
 
 ## Agreement
 
+![Rubric scoring and annotator agreement](content/images/c6/rubric_agreement.svg)
+
+
 Raw percent agreement is inflated when one label dominates. Cohen’s kappa for two
 raters adjusts for chance agreement:
 

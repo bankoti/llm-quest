@@ -22,6 +22,9 @@ declared epsilon.
 
 ## Monitor leading and lagging evidence
 
+![Leading vs lagging drift indicators](content/images/c6/drift_leads_lags.svg)
+
+
 Leading indicators include locale/intent mix, embedding norms, confidence,
 abstention, fallback, candidate overlap, index age, and judge disagreement.
 Lagging indicators include audited relevance, complaints, and business outcomes.

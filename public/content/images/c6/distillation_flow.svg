@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 250" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="250" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Knowledge distillation: copy the soft distribution, not just the label</text>
+<rect x="40" y="90" width="120" height="50" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="100.0" y="113.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">teacher model
+(large)</text>
+<text x="100.0" y="129.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">frozen</text>
+<rect x="430" y="90" width="120" height="50" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="490.0" y="113.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">student model
+(small)</text>
+<text x="490.0" y="129.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">trained</text>
+<rect x="230" y="170" width="180" height="50" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="320.0" y="199.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">input batch</text>
+<line x1="290" y1="168" x2="166" y2="144" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="166" y1="144" x2="157.546906008107" y2="147.08953102658356" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="166" y1="144" x2="159.31012397130198" y2="137.97957155007623" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="290" y1="168" x2="468" y2="144" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="468" y1="144" x2="475.02289761175183" y2="138.37159799455918" stroke="#67e8f9" stroke-width="1.4"/>
+<line x1="468" y1="144" x2="476.26278256791267" y2="147.56741141941862" stroke="#67e8f9" stroke-width="1.4"/>
+<rect x="160" y="46" width="120" height="40" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="220.0" y="64.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">soft logits</text>
+<text x="220.0" y="80.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">full distribution</text>
+<rect x="430" y="46" width="120" height="40" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="490.0" y="70.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">student logits</text>
+<line x1="100" y1="90" x2="100" y2="88" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="100" y1="88" x2="95.36048765360682" y2="80.28800121967947" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="100" y1="88" x2="104.63951234639318" y2="80.28800121967947" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="490" y1="90" x2="490" y2="88" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="490" y1="88" x2="485.3604876536068" y2="80.28800121967947" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="490" y1="88" x2="494.6395123463932" y2="80.28800121967947" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="282" y1="66" x2="428" y2="66" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="428" y1="66" x2="435.7119987803205" y2="61.360487653606825" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="428" y1="66" x2="435.7119987803205" y2="70.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="355.0" y="60.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">KL(T ∥ S) → loss</text>
+<text x="360" y="220" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">hard labels say &#x27;correct class&#x27;; soft labels say &#x27;the teacher thought cat was 63% likely,</text>
+<text x="360" y="238" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">truck 4% — much richer signal for the student to imitate</text>
+</svg>

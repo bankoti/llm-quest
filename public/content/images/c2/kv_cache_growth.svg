@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 270" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="270" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">KV cache: pay for each token once</text>
+<text x="130" y="66" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">decode step 1</text>
+<rect x="60" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="75" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k0</text>
+<rect x="94" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="109" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k1</text>
+<rect x="128" y="80" width="30" height="30" rx="4" fill="#fbbf2440" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="143" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k2</text>
+<rect x="60" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="75" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v0</text>
+<rect x="94" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="109" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v1</text>
+<rect x="128" y="116" width="30" height="30" rx="4" fill="#fbbf2440" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="143" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v2</text>
+<text x="330" y="66" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">decode step 2</text>
+<rect x="260" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="275" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k0</text>
+<rect x="294" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="309" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k1</text>
+<rect x="328" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="343" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k2</text>
+<rect x="362" y="80" width="30" height="30" rx="4" fill="#fbbf2440" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="377" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k3</text>
+<rect x="260" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="275" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v0</text>
+<rect x="294" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="309" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v1</text>
+<rect x="328" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="343" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v2</text>
+<rect x="362" y="116" width="30" height="30" rx="4" fill="#fbbf2440" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="377" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v3</text>
+<text x="530" y="66" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">decode step 3</text>
+<rect x="460" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="475" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k0</text>
+<rect x="494" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="509" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k1</text>
+<rect x="528" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="543" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k2</text>
+<rect x="562" y="80" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="577" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k3</text>
+<rect x="596" y="80" width="30" height="30" rx="4" fill="#fbbf2440" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="611" y="99" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">k4</text>
+<rect x="460" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="475" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v0</text>
+<rect x="494" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="509" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v1</text>
+<rect x="528" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="543" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v2</text>
+<rect x="562" y="116" width="30" height="30" rx="4" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="577" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v3</text>
+<rect x="596" y="116" width="30" height="30" rx="4" fill="#fbbf2440" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="611" y="135" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="400" opacity="1">v4</text>
+<rect x="60" y="171" width="14" height="10" rx="2" fill="#a78bfa" stroke="none" stroke-width="1.5" opacity="1"/>
+<text x="80" y="180" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">cached from earlier steps</text>
+<rect x="249.0" y="171" width="14" height="10" rx="2" fill="#fbbf24" stroke="none" stroke-width="1.5" opacity="1"/>
+<text x="269.0" y="180" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">computed this step (one token)</text>
+<text x="360" y="216" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">attention for the new token: its q against ALL cached K/V — no recompute of the past</text>
+<text x="360" y="238" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11.5" fill="#67e8f9" text-anchor="middle" font-weight="400" opacity="1">cost: cache grows linearly — bytes = 2 · layers · T · kv_heads · head_dim · dtype</text>
+</svg>

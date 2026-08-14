@@ -6,6 +6,9 @@ bug in experimentation.
 
 ## The domain
 
+![Upper vs lower CI in gating](content/images/c8/debug_gate.svg)
+
+
 A non-inferiority gate must answer: *are we confident the new system is no
 worse than the old one, within margin?* Confidence lives at the pessimistic
 end of the interval. The check is:

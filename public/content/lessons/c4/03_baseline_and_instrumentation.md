@@ -39,6 +39,9 @@ redaction and sampling at the schema boundary.
 
 ## Use the baseline to falsify AI need
 
+![Baseline control experiment](content/images/c4/baseline_control.svg)
+
+
 Add curated synonyms, field weighting, and deterministic constraints one at a
 time. Re-evaluate on the frozen set. If a taxonomy fix resolves most high-severity
 failures, do it. Remaining errors then specify what semantic, generative, or

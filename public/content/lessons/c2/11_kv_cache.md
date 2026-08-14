@@ -2,6 +2,9 @@
 
 ## Why caching works
 
+![KV cache growth during decode](content/images/c2/kv_cache_growth.svg)
+
+
 During causal decoding, keys and values for an existing prefix do not change when
 one new token is appended. Recomputing them is redundant. A cache stores per-layer
 K and V tensors from prefill and appends one position on each decode step.

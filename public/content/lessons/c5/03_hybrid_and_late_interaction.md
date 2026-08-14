@@ -1,5 +1,8 @@
 # 03 - Hybrid, Learned Sparse, and Late-Interaction Retrieval
 
+![Hybrid retrieval fusion](content/images/c5/hybrid_fusion.svg)
+
+
 Lexical and dense systems fail differently. Hybrid retrieval runs multiple
 candidate generators and combines their evidence. Reciprocal-rank fusion (RRF)
 avoids treating incomparable raw scores as calibrated:

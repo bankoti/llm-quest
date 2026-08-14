@@ -2,6 +2,9 @@
 
 ## The apparent contradiction
 
+![IO-aware attention tiling](content/images/c2/io_aware.svg)
+
+
 The attention equation creates a score matrix with `T * T` entries per head. A
 straight implementation writes that matrix to high-bandwidth memory, reads it for
 softmax, writes probabilities, then reads them again to multiply by values. For

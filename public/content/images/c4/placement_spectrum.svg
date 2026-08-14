@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="260" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Five placements: how close does the model sit to the request?</text>
+<line x1="60" y1="200" x2="670" y2="200" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="670" y1="200" x2="677.7119987803205" y2="195.3604876536068" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="670" y1="200" x2="677.7119987803205" y2="204.6395123463932" stroke="#4b5563" stroke-width="1.5"/>
+<text x="80" y="224" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="start" font-weight="400" opacity="1">far from request path (safe, stale)</text>
+<text x="650" y="224" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="end" font-weight="400" opacity="1">in the request path (fresh, risky)</text>
+<rect x="60" y="56" width="122" height="46" rx="8" fill="#34d3991e" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="121" y="74" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">offline intelligence</text>
+<text x="121" y="88" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">model writes rules/tables,</text>
+<text x="121" y="99" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">runtime is classical</text>
+<line x1="121" y1="102" x2="121" y2="196" stroke="#34d399" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="121" cy="200" r="4" fill="#34d399" stroke="none" opacity="1"/>
+<rect x="185" y="108" width="122" height="46" rx="8" fill="#67e8f91e" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="246" y="126" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">teacher → student</text>
+<text x="246" y="140" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">small distilled model</text>
+<text x="246" y="151" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">serves online</text>
+<line x1="246" y1="154" x2="246" y2="196" stroke="#67e8f9" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="246" cy="200" r="4" fill="#67e8f9" stroke="none" opacity="1"/>
+<rect x="310" y="56" width="122" height="46" rx="8" fill="#60a5fa1e" stroke="#60a5fa" stroke-width="1.5" opacity="1"/>
+<text x="371" y="74" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">shared embeddings</text>
+<text x="371" y="88" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">precomputed vectors,</text>
+<text x="371" y="99" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">online similarity only</text>
+<line x1="371" y1="102" x2="371" y2="196" stroke="#60a5fa" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="371" cy="200" r="4" fill="#60a5fa" stroke="none" opacity="1"/>
+<rect x="435" y="108" width="122" height="46" rx="8" fill="#fbbf241e" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="496" y="126" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">head cache + tail</text>
+<text x="496" y="140" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">cached answers first,</text>
+<text x="496" y="151" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">model on misses w/ deadline</text>
+<line x1="496" y1="154" x2="496" y2="196" stroke="#fbbf24" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="496" cy="200" r="4" fill="#fbbf24" stroke="none" opacity="1"/>
+<rect x="560" y="56" width="122" height="46" rx="8" fill="#fb71851e" stroke="#fb7185" stroke-width="1.5" opacity="1"/>
+<text x="621" y="74" font-family="'Segoe UI', system-ui, sans-serif" font-size="10" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">direct generation</text>
+<text x="621" y="88" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">LLM call per request,</text>
+<text x="621" y="99" font-family="'Segoe UI', system-ui, sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">full latency + cost exposure</text>
+<line x1="621" y1="102" x2="621" y2="196" stroke="#fb7185" stroke-width="1" opacity="1" stroke-dasharray="3,3"/>
+<circle cx="621" cy="200" r="4" fill="#fb7185" stroke="none" opacity="1"/>
+</svg>

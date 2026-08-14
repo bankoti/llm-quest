@@ -29,7 +29,21 @@ export function LessonPanel({ lessonFile }: Props) {
                     prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
                     prose-a:text-violet-400 prose-strong:text-white
                     scrollbar-thin">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{md}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          // Lesson markdown references images as 'content/images/...'; prefix the
+          // deploy base so they resolve on GitHub Pages subpaths too.
+          img: ({ src, alt }) => (
+            <img
+              src={src && !/^(https?:)?\/\//.test(src) ? `${import.meta.env.BASE_URL}${src}` : src}
+              alt={alt ?? ''}
+              loading="lazy"
+              className="rounded-lg border border-gray-800 bg-gray-900/60 my-4 w-full max-w-2xl"
+            />
+          ),
+        }}
+      >{md}</ReactMarkdown>
     </div>
   )
 }

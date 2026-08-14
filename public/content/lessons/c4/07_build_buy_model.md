@@ -6,6 +6,9 @@ open checkpoints, or a custom student.
 
 ## Hard gates
 
+![Build-buy decision flow](content/images/c4/build_buy.svg)
+
+
 Reject an option before scoring if it violates any non-negotiable constraint:
 
 - data may leave allowed regions or be retained for provider training;

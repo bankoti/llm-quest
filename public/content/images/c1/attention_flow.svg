@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="300" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">One attention head, end to end</text>
+<rect x="30" y="120" width="90" height="44" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="75.0" y="140.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">x</text>
+<text x="75.0" y="156.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">(T, D)</text>
+<line x1="120" y1="142" x2="165" y2="72" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="165" y1="72" x2="165.26766396262906" y2="63.00398110255933" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="165" y1="72" x2="173.07297980668847" y2="68.02168414516895" stroke="#4b5563" stroke-width="1.6"/>
+<rect x="168" y="50" width="84" height="44" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="210.0" y="70.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Q = xWq</text>
+<text x="210.0" y="86.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">(T, D)</text>
+<line x1="120" y1="142" x2="165" y2="142" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="165" y1="142" x2="172.71199878032053" y2="137.3604876536068" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="165" y1="142" x2="172.71199878032053" y2="146.6395123463932" stroke="#4b5563" stroke-width="1.6"/>
+<rect x="168" y="120" width="84" height="44" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="210.0" y="140.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">K = xWk</text>
+<text x="210.0" y="156.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">(T, D)</text>
+<line x1="120" y1="142" x2="165" y2="212" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="165" y1="212" x2="173.07297980668847" y2="215.97831585483104" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="165" y1="212" x2="165.26766396262906" y2="220.99601889744068" stroke="#4b5563" stroke-width="1.6"/>
+<rect x="168" y="190" width="84" height="44" rx="8" fill="#a78bfa22" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="210.0" y="210.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">V = xWv</text>
+<text x="210.0" y="226.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">(T, D)</text>
+<line x1="252" y1="72" x2="306" y2="100" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="306" y1="100" x2="314.9820090315038" y2="99.43121730161377" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="306" y1="100" x2="310.7107146960125" y2="107.66871352006136" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="252" y1="142" x2="306" y2="120" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="306" y1="120" x2="311.3915495820601" y2="112.7936699281682" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="306" y1="120" x2="314.8924967159537" y2="121.38690380227061" stroke="#4b5563" stroke-width="1.6"/>
+<rect x="308" y="88" width="118" height="44" rx="8" fill="#fbbf2422" stroke="#fbbf24" stroke-width="1.5" opacity="1"/>
+<text x="367.0" y="108.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">QKᵀ/√d + mask</text>
+<text x="367.0" y="124.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">scores (T, T)</text>
+<line x1="426" y1="110" x2="470" y2="110" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="470" y1="110" x2="477.7119987803205" y2="105.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="470" y1="110" x2="477.7119987803205" y2="114.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="448.0" y="104.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">softmax</text>
+<rect x="472" y="88" width="92" height="44" rx="8" fill="#34d39922" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="518.0" y="108.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">weights</text>
+<text x="518.0" y="124.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">rows sum to 1</text>
+<line x1="252" y1="212" x2="508" y2="140" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="508" y1="140" x2="514.1678354294976" y2="133.44577951891802" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="508" y1="140" x2="516.680090323185" y2="142.37824136314003" stroke="#4b5563" stroke-width="1.6"/>
+<line x1="564" y1="110" x2="606" y2="110" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="606" y1="110" x2="613.7119987803205" y2="105.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="606" y1="110" x2="613.7119987803205" y2="114.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="585.0" y="104.0" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">@ V</text>
+<rect x="606" y="88" width="84" height="44" rx="8" fill="#67e8f922" stroke="#67e8f9" stroke-width="1.5" opacity="1"/>
+<text x="648.0" y="108.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="12.5" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">out</text>
+<text x="648.0" y="124.0" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">(T, D)</text>
+<text x="360" y="282" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">each output row is a weighted mixture of value rows — weights depend on content</text>
+</svg>

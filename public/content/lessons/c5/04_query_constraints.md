@@ -1,5 +1,8 @@
 # 04 - Query Understanding and Hard Constraints
 
+![Hard vs soft query constraints](content/images/c5/query_constraints.svg)
+
+
 Semantic similarity is not eligibility. For `vegan chicken sandwich`, a meat
 chicken sandwich may be semantically close and categorically unacceptable. Parse
 the request into a controlled contract:

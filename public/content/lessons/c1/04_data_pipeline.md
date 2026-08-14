@@ -2,6 +2,9 @@
 
 ## Inputs and targets are shifted
 
+![Input and target windows](content/images/c1/xy_windows.svg)
+
+
 Suppose the encoded corpus is:
 
 ```text

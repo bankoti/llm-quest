@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" font-family="'Segoe UI', system-ui, sans-serif">
+<rect width="720" height="260" fill="#0b0f19" rx="10"/>
+<text x="360.0" y="24" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#e5e7eb" text-anchor="middle" font-weight="600" opacity="1">Prefill vs decode: two phases, two bottlenecks</text>
+<rect x="56" y="60" width="240" height="110" rx="10" fill="#a78bfa10" stroke="#a78bfa" stroke-width="1.5" opacity="1"/>
+<text x="176" y="84" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#a78bfa" text-anchor="middle" font-weight="600" opacity="1">prefill</text>
+<text x="176" y="104" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">process all prompt tokens</text>
+<text x="176" y="120" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">in parallel</text>
+<text x="176" y="140" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#67e8f9" text-anchor="middle" font-weight="400" opacity="1">compute-bound</text>
+<text x="176" y="158" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">fills KV cache once</text>
+<rect x="370" y="60" width="270" height="110" rx="10" fill="#34d39910" stroke="#34d399" stroke-width="1.5" opacity="1"/>
+<text x="505" y="84" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" fill="#34d399" text-anchor="middle" font-weight="600" opacity="1">decode</text>
+<text x="505" y="104" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">one new token per step</text>
+<text x="505" y="120" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">reads entire KV cache every step</text>
+<text x="505" y="140" font-family="ui-monospace, 'Cascadia Code', Consolas, monospace" font-size="11" fill="#fbbf24" text-anchor="middle" font-weight="400" opacity="1">memory-bandwidth-bound</text>
+<text x="505" y="158" font-family="'Segoe UI', system-ui, sans-serif" font-size="10.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">T decode steps for T tokens</text>
+<line x1="296" y1="115" x2="366" y2="115" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="366" y1="115" x2="373.7119987803205" y2="110.36048765360682" stroke="#9ca3af" stroke-width="1.6"/>
+<line x1="366" y1="115" x2="373.7119987803205" y2="119.63951234639318" stroke="#9ca3af" stroke-width="1.6"/>
+<text x="360" y="220" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">speculative decoding attacks the decode phase: draft 4–8 tokens, verify in one prefill step</text>
+<text x="360" y="240" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#9ca3af" text-anchor="middle" font-weight="400" opacity="1">if most drafts are accepted you get ~3× throughput at identical quality</text>
+</svg>

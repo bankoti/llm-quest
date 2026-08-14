@@ -7,6 +7,9 @@ runtime.
 
 ## Scenario
 
+![Architecture decision process](content/images/c3/decision_defense.svg)
+
+
 Choose one workload:
 
 - multilingual query understanding under 80 ms;

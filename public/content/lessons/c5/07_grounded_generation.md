@@ -8,6 +8,9 @@ authorization.
 
 ## Grounding has several tests
 
+![Claim-level citations](content/images/c5/grounded_citations.svg)
+
+
 - **context relevance:** retrieved evidence addresses the query;
 - **answer correctness:** response answers the user accurately;
 - **faithfulness/entailment:** factual claims follow from supplied evidence;

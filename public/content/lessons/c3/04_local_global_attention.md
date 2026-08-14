@@ -1,5 +1,8 @@
 # 04 - Local, Global, and Layerwise Attention
 
+![Local, global attention patterns](content/images/c3/local_global_masks.svg)
+
+
 Dense causal attention lets every position attend to every earlier position. At
 training time the score matrix grows quadratically in sequence length; during
 cached decoding, retained K/V state grows linearly. Attention topology changes
