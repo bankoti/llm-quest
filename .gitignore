@@ -5,3 +5,5 @@ dist/
 
 # answer key — never commit
 solutions/
+__pycache__/
+*.pyc
