@@ -7,6 +7,7 @@ import { LessonPanel } from '@/components/Lesson/LessonPanel'
 import { Arena } from '@/components/Arena/Arena'
 import { XPBar } from '@/components/Progress/XPBar'
 import { GoDeeper } from '@/components/GoDeeper'
+import { SplitPane } from '@/components/SplitPane'
 import { isAdminMode } from '@/engine/admin'
 import { HINTS } from '@/data/hints'
 import { hintXpMultiplier } from '@/components/Arena/Arena'
@@ -119,30 +120,31 @@ export function LevelPage({ onProgressChange }: Props) {
         <span className="text-xs font-mono text-gray-500 shrink-0">~{level.estimateMinutes}min</span>
       </div>
 
-      {/* Split view: lesson left, arena right */}
-      <div className="flex flex-1 min-h-0">
-        <div className="w-2/5 border-r border-gray-800 overflow-hidden">
-          <LessonPanel lessonFile={level.lessonFile} />
-        </div>
-        <div className="flex-1 flex flex-col p-4 overflow-y-auto min-w-0">
-          {starterCode === null || testCode === null ? (
-            <div className="flex items-center justify-center h-full text-gray-600 font-mono text-sm">
-              Loading challenge…
-            </div>
-          ) : (
-            <Arena
-              key={level.id}
-              levelId={level.id}
-              starterCode={starterCode}
-              testCode={testCode}
-              xp={level.xp}
-              hints={HINTS[level.id] ?? []}
-              onPass={handlePass}
-            />
-          )}
-          <GoDeeper courseId={level.courseId} challengeFile={level.challengeFile} />
-        </div>
-      </div>
+      {/* Split view: lesson left, arena right. Divider drags; chevron collapses the lesson. */}
+      <SplitPane
+        storageKey="llmquest_split_v1"
+        left={<LessonPanel lessonFile={level.lessonFile} />}
+        right={
+          <div className="h-full flex flex-col p-4 overflow-y-auto">
+            {starterCode === null || testCode === null ? (
+              <div className="flex items-center justify-center h-full text-gray-600 font-mono text-sm">
+                Loading challenge…
+              </div>
+            ) : (
+              <Arena
+                key={level.id}
+                levelId={level.id}
+                starterCode={starterCode}
+                testCode={testCode}
+                xp={level.xp}
+                hints={HINTS[level.id] ?? []}
+                onPass={handlePass}
+              />
+            )}
+            <GoDeeper courseId={level.courseId} challengeFile={level.challengeFile} />
+          </div>
+        }
+      />
 
       {/* Pass overlay */}
       {passed && (

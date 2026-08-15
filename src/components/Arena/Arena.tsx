@@ -112,6 +112,7 @@ export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Pro
           onChange={v => setCode(v ?? '')}
           theme="vs-dark"
           options={{
+            automaticLayout: true,
             fontSize: 13,
             fontFamily: 'JetBrains Mono, Fira Code, monospace',
             minimap: { enabled: false },
