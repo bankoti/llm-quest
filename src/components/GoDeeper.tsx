@@ -30,7 +30,8 @@ export function GoDeeper({ courseId, challengeFile }: Props) {
         <p className="text-xs text-gray-500 leading-relaxed mb-2">
           The browser version grades numpy. This same exercise also exists as a
           PyTorch notebook: open it in Google Colab (free, torch preinstalled,
-          GPU optional) and solve it with real tensors.
+          GPU optional) and solve it with real tensors. Solved it there? Come
+          back and pass the browser check to bank the XP; same logic in numpy.
         </p>
         <div className="flex gap-2 flex-wrap">
           <a
