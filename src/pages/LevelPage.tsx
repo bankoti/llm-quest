@@ -103,6 +103,16 @@ export function LevelPage({ onProgressChange }: Props) {
           {level.type === 'boss' && <span title="Boss fight" className="shrink-0">👑</span>}
           {level.type === 'debug' && <span title="Debug level — find the bug" className="shrink-0">🐛</span>}
         </div>
+        {/* Opens in a new tab so in-progress code in the Arena stays put. */}
+        <a
+          href={`${import.meta.env.BASE_URL}reference`}
+          target="_blank"
+          rel="noopener"
+          className="text-xs font-mono text-gray-500 hover:text-white transition-colors shrink-0"
+          title="Tensor syntax reference (new tab)"
+        >
+          📖 Syntax
+        </a>
         <div className="w-40 shrink-0">
           <XPBar xp={progress.totalXp} animated={false} />
         </div>

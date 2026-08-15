@@ -42,6 +42,12 @@ for current, following in zip(tokens, tokens[1:]):
 probabilities = counts / counts.sum(dim=1, keepdim=True)
 ```
 
+The last line hides two idioms worth unpacking. `sum(dim=1)` totals each row:
+all the following-token counts for one current token. `keepdim=True` keeps the
+result shaped `(V, 1)` instead of `(V,)`, so the division broadcasts each row's
+total across that row. Afterward every row of `probabilities` sums to 1: a
+proper distribution over next tokens.
+
 The neural version learns logits by minimizing cross entropy. The count version
 directly estimates probabilities from frequency. Their predictions should become
 similar with enough data and optimization.

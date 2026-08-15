@@ -16,3 +16,7 @@
 /* Monaco editor dark background matches our theme */
 .monaco-editor, .monaco-editor-background,
 .monaco-editor .margin { background-color: #0a0a0f !important; }
+
+/* Typography plugin wraps inline code in literal backticks; our violet pills make them redundant. */
+.prose :where(code)::before,
+.prose :where(code)::after { content: none; }

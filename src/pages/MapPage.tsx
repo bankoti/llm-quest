@@ -43,6 +43,14 @@ export function MapPage({ progress, onProgressChange }: Props) {
 
         <div className="flex items-center gap-3 ml-auto">
           <button
+            onClick={() => navigate('/reference')}
+            className="text-xs font-mono px-3 py-1.5 rounded-lg border border-gray-700
+                       text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
+            title="Tensor syntax reference: PyTorch and numpy operations in plain English"
+          >
+            📖 Syntax
+          </button>
+          <button
             onClick={() => navigate('/review')}
             className="relative text-xs font-mono px-3 py-1.5 rounded-lg border border-gray-700
                        text-gray-300 hover:border-gray-500 hover:text-white transition-colors"

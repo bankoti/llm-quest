@@ -6,6 +6,7 @@ import { MapPage } from '@/pages/MapPage'
 import { LevelPage } from '@/pages/LevelPage'
 import { ReviewPage } from '@/pages/ReviewPage'
 import { CertPage } from '@/pages/CertPage'
+import { ReferencePage } from '@/pages/ReferencePage'
 
 export default function App() {
   const [progress, setProgress] = useState<ProgressState>(loadProgress)
@@ -20,6 +21,7 @@ export default function App() {
         } />
         <Route path="/review" element={<ReviewPage onProgressChange={setProgress} />} />
         <Route path="/cert"   element={<CertPage />} />
+        <Route path="/reference" element={<ReferencePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

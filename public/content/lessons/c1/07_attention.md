@@ -80,6 +80,15 @@ scores = scores.masked_fill(mask == 0, float("-inf"))
 weights = torch.softmax(scores, dim=-1)
 ```
 
+Line by line:
+
+- `torch.tril` keeps the lower triangle of a matrix of ones: `mask[i, j]` is 1
+  exactly where `j <= i`, meaning "position i may look at position j."
+- `masked_fill(mask == 0, -inf)` overwrites every score above the diagonal,
+  which is every future position, with negative infinity.
+- `softmax(..., dim=-1)` turns each row into probabilities. Since
+  `e^-inf = 0`, forbidden positions get exactly zero weight.
+
 Mask before softmax, not after. Masking afterward leaves rows summing to less than
 one unless they are renormalized.
 

@@ -4,6 +4,10 @@ Every bug you will hit in this course, from a silent broadcasting mistake to a
 leaky attention mask, shows up first as a wrong shape. Learn to predict shapes
 before running code and you get a free debugger for everything that follows.
 
+One ground rule: the concepts matter here, not PyTorch trivia. Any time a
+function call reads as noise, open **📖 Syntax** in the top bar. It translates
+every operation in this course into plain English.
+
 ## Why tensors
 
 ![Tensors and shapes](content/images/c1/tensors_shapes.svg)
@@ -52,14 +56,16 @@ to know why yet; the point here is the reshape itself:
 
 ```python
 B, T, C, H = 2, 5, 12, 3
-x = torch.randn(B, T, C)
-heads = x.view(B, T, H, C // H).transpose(1, 2)
+x = torch.randn(B, T, C)          # (2, 5, 12)
+split = x.view(B, T, H, C // H)   # (2, 5, 3, 4): slice 12 channels into 3 groups of 4
+heads = split.transpose(1, 2)     # (2, 3, 5, 4): swap axes 1 and 2
 assert heads.shape == (B, H, T, C // H)
 ```
 
-`view` reorganizes axes without changing values. `transpose` swaps axes. After a
-transpose, call `.contiguous()` before a later `view` because the logical order
-may differ from memory order.
+`view` lays the same numbers into a new shape without changing any value.
+`transpose(1, 2)` swaps exactly those two axes, moving heads in front of
+positions. One gotcha: after a transpose, call `.contiguous()` before a later
+`view`, because the logical order may no longer match memory order.
 
 ## Broadcasting
 
@@ -82,11 +88,26 @@ The variable names below come from attention, where every position scores every
 other position; for now they are just tensors with shapes.
 
 ```python
-queries = torch.randn(2, 4, 8, 16)  # (B, H, T, head_size)
-keys = torch.randn(2, 4, 8, 16)
-scores = queries @ keys.transpose(-2, -1)
+queries = torch.randn(2, 4, 8, 16)   # (B, H, T, head_size)
+keys = torch.randn(2, 4, 8, 16)      # same shape
+keys_t = keys.transpose(-2, -1)      # swap the last two axes: (2, 4, 8, 16) -> (2, 4, 16, 8)
+scores = queries @ keys_t            # (..., 8, 16) @ (..., 16, 8) -> (..., 8, 8)
 assert scores.shape == (2, 4, 8, 8)
 ```
+
+Read it in plain English before tracing any shapes:
+
+- `transpose(-2, -1)` swaps the last two axes and touches nothing else.
+  Negative numbers count axes from the end, so this works for any number of
+  batch axes in front.
+- The swap exists only to satisfy the matmul rule: `(8, 16) @ (16, 8)` has
+  matching inner axes; `(8, 16) @ (8, 16)` does not.
+- Why multiply queries by keys at all? Each row-times-column step inside a
+  matmul is a dot product, and a dot product measures how much two vectors
+  agree. So `scores[b, h, i, j]` is a single number: how strongly query
+  position `i` matches key position `j`. One `@` computes all 8 x 8 pairwise
+  matches at once. Level 6 builds the full mechanism on top of exactly this
+  line.
 
 Every query position now has one score for every key position.
 
