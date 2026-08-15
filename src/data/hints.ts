@@ -6,6 +6,32 @@
 
 export const HINTS: Record<string, [string, string, string]> = {
   // Course 1
+  'c0-l1': [
+    'All four are one-liners over the math module. ceil_div: math.ceil(a / b) or (a + b - 1) // b. close_enough: math.isclose(a, b).',
+    'solve_exponent: take logs of both sides. base**n <= threshold becomes n >= log(threshold)/log(base) because dividing by a negative log flips the inequality. Then math.ceil.',
+    'n_choose_k is exactly math.comb(n, k). No factorials, no loops.',
+  ],
+  'c0-l2': [
+    'top_k: sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]. Sort positions, not values.',
+    'argmax: loop with enumerate and a strict > so the FIRST maximum wins ties. count_labels: d[label] = d.get(label, 0) + 1.',
+    'pair_deltas: [a - b for b, a in zip(before, after)]. zip pairs the lists element by element.',
+  ],
+  'c0-l3': [
+    'clamp is max(lo, min(x, hi)). safe_ratio: check den == 0 first and return default; only then divide.',
+    'missing_keys: [k for k in required if k not in config]. Iterating required (not config) preserves the required order.',
+    'range_error: return "" when lo <= value <= hi; otherwise exactly f"{name}={value} outside [{lo}, {hi}]". Copy the format from the docstring.',
+  ],
+  'c0-l4': [
+    'The axis you name disappears: col_means is M.mean(axis=0). row_normalize divides by M.sum(axis=1, keepdims=True).',
+    'pairwise_scores is one matmul: A @ B.T. Shapes: (n,d) @ (d,m) -> (n,m).',
+    'mask_scores: np.where(mask, S, -np.inf). Keep where True, replace where False.',
+  ],
+  'c0-l5': [
+    'gpus_needed is ceil_div from level 1: (model_bytes + gpu_bytes - 1) // gpu_bytes.',
+    'cheapest_config: min(sorted(costs), key=lambda k: costs[k]). Sorting names first makes ties resolve alphabetically because min is stable. accuracy_by_model: sum(answers)/len(answers) with an if-else guard for empty.',
+    'route_queries: np.argmax(Q @ K.T, axis=1).tolist(). axis=1 picks the best expert per row (per query); .tolist() converts to plain ints.',
+  ],
+
   'c1-l1': [
     'Every task here is about shapes. Before writing code, write down the input shapes and the required output shape.',
     'Matmul contracts the inner dimension: (a,b) @ (b,c) -> (a,c). Broadcasting aligns trailing dimensions and stretches size-1 dims.',

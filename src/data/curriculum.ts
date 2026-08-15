@@ -1,4 +1,4 @@
-// Curriculum: 8 courses, 49 challenge levels + lessons
+// Curriculum: course 0 (open reference) + 9 gated courses
 // XP calibrated: harder = more. Boss fights = 3x normal.
 // challengeFile: path to the numpy/pure-python challenge (C1-3)
 //   or the mini_llm workbook (C4-8)
@@ -33,6 +33,28 @@ export interface Course {
 }
 
 export const COURSES: Course[] = [
+  {
+    id: 0,
+    slug: 'python-toolkit',
+    title: 'The Python Toolkit',
+    shortTitle: 'Toolkit',
+    color: 'slate',
+    accent: '#64748b',
+    prerequisite: null,
+    description: 'An open reference course: the small set of Python and NumPy tools every other course leans on. Nothing here is gated and nothing gates on it. Work through it once, or come back mid-challenge when a tool looks unfamiliar.',
+    outcomes: [
+      'Use ceiling division, log solving, comb, and isclose where float math bites',
+      'Write comprehensions, key-sorts, and dict counters without reaching for loops',
+      'Reduce, normalize, and multiply NumPy arrays along the right axis',
+    ],
+    levels: [
+      { id:'c0-l1', courseId:0, index:1, title:'Math Toolbox',              description:'Ceiling division, solving for exponents, comb, and float comparison.', xp:100, type:'challenge', lessonFile:'c0/01_math_toolbox.md',  challengeFile:'c0/01_math_toolbox.py',  estimateMinutes:15 },
+      { id:'c0-l2', courseId:0, index:2, title:'Collections & Comprehensions', description:'top-k, argmax, counting, and pairing: the list and dict idioms the courses use.', xp:100, type:'challenge', lessonFile:'c0/02_collections.md',   challengeFile:'c0/02_collections.py',   estimateMinutes:15 },
+      { id:'c0-l3', courseId:0, index:3, title:'Functions & Contracts',     description:'Read a challenge contract: signatures, defaults, edge cases, and assert-based tests.', xp:100, type:'challenge', lessonFile:'c0/03_contracts.md',     challengeFile:'c0/03_contracts.py',     estimateMinutes:15 },
+      { id:'c0-l4', courseId:0, index:4, title:'Axes & Matmul: NumPy & Torch', description:'Axis reductions, keepdims, broadcasting, @, and -inf masking, in both dialects.', xp:100, type:'challenge', lessonFile:'c0/04_numpy_axes.md',    challengeFile:'c0/04_numpy_axes.py',    estimateMinutes:20 },
+      { id:'c0-l5', courseId:0, index:5, title:'Toolkit Gauntlet',          description:'One mixed drill: napkin math, dict wrangling, and a matrix routing table.', xp:250, type:'boss',      lessonFile:'c0/05_gauntlet.md',      challengeFile:'c0/05_gauntlet.py',      estimateMinutes:30 },
+    ],
+  },
   {
     id: 1,
     slug: 'build-an-llm',

@@ -19,15 +19,22 @@ export interface ProgressState {
 
 const KEY = 'llmquest_progress_v1'
 
+// Course 0 is an open reference course: every level is always unlocked and
+// completing it is never required to progress. The linear unlock chain runs
+// over the gated (non-course-0) levels only.
+const isFree = (l: { courseId: number }) => l.courseId === 0
+const GATED_LEVELS = ALL_LEVELS.filter(l => !isFree(l))
+
 function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
 function defaultState(): ProgressState {
   const levels: Record<string, LevelState> = {}
-  ALL_LEVELS.forEach((level, i) => {
+  ALL_LEVELS.forEach(level => {
+    const first = GATED_LEVELS[0]?.id === level.id
     levels[level.id] = {
-      status: i === 0 ? 'unlocked' : 'locked',
+      status: isFree(level) || first ? 'unlocked' : 'locked',
       xpEarned: 0,
       attempts: 0,
     }
@@ -39,10 +46,16 @@ function defaultState(): ProgressState {
 // (e.g. debug levels). A new level is unlocked if the level before it in
 // ALL_LEVELS order is already complete, otherwise locked.
 function migrate(state: ProgressState): ProgressState {
-  ALL_LEVELS.forEach((level, i) => {
+  ALL_LEVELS.forEach(level => {
     if (state.levels[level.id]) return
-    const prev = i > 0 ? state.levels[ALL_LEVELS[i - 1].id] : undefined
-    const unlocked = i === 0 || prev?.status === 'complete'
+    let unlocked: boolean
+    if (isFree(level)) {
+      unlocked = true
+    } else {
+      const gi = GATED_LEVELS.findIndex(l => l.id === level.id)
+      const prev = gi > 0 ? state.levels[GATED_LEVELS[gi - 1].id] : undefined
+      unlocked = gi === 0 || prev?.status === 'complete'
+    }
     state.levels[level.id] = {
       status: unlocked ? 'unlocked' : 'locked',
       xpEarned: 0,
@@ -99,11 +112,11 @@ export function completeLevel(levelId: string, xpMultiplier = 1): ProgressState 
   }
   state.totalXp += earned
 
-  // Unlock next level
-  const idx = ALL_LEVELS.findIndex(l => l.id === levelId)
-  if (idx >= 0 && idx + 1 < ALL_LEVELS.length) {
-    const nextId = ALL_LEVELS[idx + 1].id
-    if (state.levels[nextId].status === 'locked') {
+  // Unlock next level in the gated chain (course 0 gates nothing)
+  const idx = GATED_LEVELS.findIndex(l => l.id === levelId)
+  if (idx >= 0 && idx + 1 < GATED_LEVELS.length) {
+    const nextId = GATED_LEVELS[idx + 1].id
+    if (state.levels[nextId]?.status === 'locked') {
       state.levels[nextId].status = 'unlocked'
     }
   }
