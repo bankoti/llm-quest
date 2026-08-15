@@ -8,6 +8,32 @@ Lessons show PyTorch; challenges grade plain numpy. The ideas are identical and
 only some argument names differ: PyTorch says `dim=` and `keepdim=`, numpy says
 `axis=` and `keepdims=`. Each entry notes both where they differ.
 
+## Torch to numpy cheatsheet
+
+The whole dialect gap, in one table. Lesson code on the left, what you type in
+the challenge editor on the right.
+
+| PyTorch (lessons) | NumPy (challenges) |
+| --- | --- |
+| `x.view(B, T, H, D)` or `x.reshape(...)` | `x.reshape(B, T, H, D)` |
+| `x.transpose(-2, -1)` | `x.swapaxes(-2, -1)` (plain 2D: `x.T`) |
+| `q @ k.transpose(-2, -1)` | `q @ k.swapaxes(-2, -1)` |
+| `x.sum(dim=-1, keepdim=True)` | `x.sum(axis=-1, keepdims=True)` |
+| `x.mean(dim=1)` | `x.mean(axis=1)` |
+| `torch.softmax(x, dim=-1)` | write it out; see the Softmax section below |
+| `torch.tril(torch.ones(T, T))` | `np.tril(np.ones((T, T)))` |
+| `x.masked_fill(m == 0, -inf)` | `np.where(m == 0, -np.inf, x)` |
+| `torch.zeros(4, 4)` / `torch.randn(2, 3)` | `np.zeros((4, 4))` / `np.random.randn(2, 3)` |
+| `torch.arange(T)` | `np.arange(T)` |
+| `torch.cat([a, b], dim=-1)` | `np.concatenate([a, b], axis=-1)` |
+
+Slicing, `@`, broadcasting, `x.shape`, and all elementwise math (`+ - * /`,
+`** 2`, `np.exp`, `np.sqrt`) are spelled identically in both.
+
+> **Gotcha:** numpy creation functions take the shape as one tuple:
+> `np.zeros((4, 4))`, not `np.zeros(4, 4)`. `np.random.randn` is the odd one
+> out that takes bare ints. Torch accepts bare ints everywhere.
+
 ## Axes and negative indexing
 
 A shape like `(B, T, C)` has axes numbered 0, 1, 2. Negative numbers count from

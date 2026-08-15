@@ -4,6 +4,10 @@ The first architecture fork: give up generation, gain full bidirectional
 context. BERT-style encoders still carry a large share of production ranking
 and extraction traffic, so read this family as a working tool.
 
+> **Note:** reminder from Course 1: lessons show PyTorch, challenges grade in
+> numpy. The **📖 Syntax** button in the top bar opens with a torch-to-numpy
+> cheatsheet.
+
 ![Encoder vs decoder attention](content/images/c3/bert_vs_gpt_mask.svg)
 
 

@@ -6,7 +6,10 @@ before running code and you get a free debugger for everything that follows.
 
 > **Tip:** the concepts matter here, not PyTorch trivia. Any time a function
 > call reads as noise, open **📖 Syntax** in the top bar. It translates every
-> operation in this course into plain English.
+> operation in this course into plain English. One heads-up: lessons show
+> PyTorch (what real model code uses), but challenges grade in your browser
+> with numpy, since PyTorch has no browser build. Only spellings differ, and
+> the Syntax page opens with a torch-to-numpy cheatsheet.
 
 ## Why tensors
 

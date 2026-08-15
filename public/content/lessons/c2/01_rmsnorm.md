@@ -5,6 +5,10 @@ keeps activations in a healthy numeric range using a single statistic; RoPE
 encodes position by rotating queries and keys. Both are small enough to verify
 on paper.
 
+> **Note:** reminder from Course 1: lessons show PyTorch, challenges grade in
+> numpy. The **📖 Syntax** button in the top bar opens with a torch-to-numpy
+> cheatsheet.
+
 ## LayerNorm first
 
 ![LayerNorm vs RMSNorm](content/images/c2/rmsnorm_vs_layernorm.svg)
