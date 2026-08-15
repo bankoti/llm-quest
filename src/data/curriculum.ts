@@ -200,8 +200,9 @@ export const COURSES: Course[] = [
       { id:'c7-l4', courseId:7, index:4, title:'Circuit Breaker',        description:'Open a circuit when downstream latency crosses a threshold.', xp:200, type:'challenge', lessonFile:'c7/05_observability.md',         challengeFile:'c7/04_circuit_breaker.py', estimateMinutes:35 },
       { id:'c7-l5', courseId:7, index:5, title:'Overload Admission',     description:'Shed load gracefully; never queue work you cannot serve.',   xp:150, type:'challenge', lessonFile:'c7/04_routing_and_backpressure.md', challengeFile:'c7/05_admission.py',  estimateMinutes:25 },
       { id:'c7-l7', courseId:7, index:7, title:'Memory-Budget Serving', description:'Calculate what fits: weights, KV cache, and max batch size for any device.', xp:200, type:'challenge', lessonFile:'c7/08_memory_budget.md', challengeFile:'c7/07_memory_budget.py', estimateMinutes:35 },
-      { id:'c7-d1', courseId:7, index:7, title:'Debug: Retry Storm', description:'The retry logic looks polite. Under an outage it becomes a mob.', xp:150, type:'debug', lessonFile:'c7/90_debug_retry.md', challengeFile:'c7/90_debug_retry.py', estimateMinutes:25 },
-      { id:'c7-l6', courseId:7, index:8, title:'Canary Gate',            description:'Block a rollout automatically when error rate spikes.',       xp:500, type:'boss',      lessonFile:'c7/07_deployments.md',        challengeFile:'c7/06_canary_gate.py',     estimateMinutes:55 },
+      { id:'c7-l8', courseId:7, index:8, title:'Speculative Decoding', description:'Draft cheap, verify exact: the acceptance math behind 2-3x serving speedups.', xp:200, type:'challenge', lessonFile:'c7/09_speculative_decoding.md', challengeFile:'c7/08_spec_decode.py', estimateMinutes:35 },
+      { id:'c7-d1', courseId:7, index:8, title:'Debug: Retry Storm', description:'The retry logic looks polite. Under an outage it becomes a mob.', xp:150, type:'debug', lessonFile:'c7/90_debug_retry.md', challengeFile:'c7/90_debug_retry.py', estimateMinutes:25 },
+      { id:'c7-l6', courseId:7, index:9, title:'Canary Gate',            description:'Block a rollout automatically when error rate spikes.',       xp:500, type:'boss',      lessonFile:'c7/07_deployments.md',        challengeFile:'c7/06_canary_gate.py',     estimateMinutes:55 },
     ],
   },
   {
@@ -248,8 +249,9 @@ export const COURSES: Course[] = [
       { id:'c9-l3', courseId:9, index:3, title:'DPO Loss',                description:'Implement the Direct Preference Optimization loss from the paper.',        xp:200, type:'challenge', lessonFile:'c9/03_alignment.md',       challengeFile:'c9/03_dpo_loss.py',        estimateMinutes:35 },
       { id:'c9-l4', courseId:9, index:4, title:'GRPO Advantages',         description:'Compute group-relative advantages used in DeepSeek-R1 reasoning RL.',     xp:200, type:'challenge', lessonFile:'c9/04_reasoning_rl.md',    challengeFile:'c9/04_grpo.py',            estimateMinutes:35 },
       { id:'c9-l5', courseId:9, index:5, title:'Frontier Config Audit',   description:'Derive parameter counts and KV cache from Llama 3 / DeepSeek configs.',   xp:200, type:'challenge', lessonFile:'c9/05_frontier_configs.md', challengeFile:'c9/05_frontier_audit.py', estimateMinutes:35 },
-      { id:'c9-d1', courseId:9, index:6, title:'Debug: Budget That Forgot Inference', description:'The Chinchilla formula is correct. The objective is wrong.', xp:150, type:'debug', lessonFile:'c9/90_debug_scaling.md', challengeFile:'c9/90_debug_scaling.py', estimateMinutes:25 },
-      { id:'c9-l6', courseId:9, index:6, title:'Training Recipe Defense', description:'Design a full training recipe that satisfies compute, memory, and alignment constraints.', xp:1000, type:'boss', lessonFile:'c9/06_training_recipe.md', challengeFile:'c9/06_training_recipe.py', estimateMinutes:75 },
+      { id:'c9-l7', courseId:9, index:6, title:'Test-Time Compute', description:'Buy accuracy with inference FLOPs: pass@n, majority voting, and the small-vs-large trade.', xp:200, type:'challenge', lessonFile:'c9/07_test_time_compute.md', challengeFile:'c9/07_test_time.py', estimateMinutes:35 },
+      { id:'c9-d1', courseId:9, index:7, title:'Debug: Budget That Forgot Inference', description:'The Chinchilla formula is correct. The objective is wrong.', xp:150, type:'debug', lessonFile:'c9/90_debug_scaling.md', challengeFile:'c9/90_debug_scaling.py', estimateMinutes:25 },
+      { id:'c9-l6', courseId:9, index:7, title:'Training Recipe Defense', description:'Design a full training recipe that satisfies compute, memory, and alignment constraints.', xp:1000, type:'boss', lessonFile:'c9/06_training_recipe.md', challengeFile:'c9/06_training_recipe.py', estimateMinutes:75 },
     ],
   },
 ]

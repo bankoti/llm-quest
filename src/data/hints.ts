@@ -270,6 +270,12 @@ export const HINTS: Record<string, [string, string, string]> = {
     'max_batch_size: subtract model_bytes from budget, divide remainder by kv_cache_bytes(batch=1). Return floor, minimum 0.',
   ],
 
+  'c7-l8': [
+    'acceptance_prob = min(1.0, p_target / q_draft). simulate_verify walks the draft: accept token i while us[i] < min(1, ratios[i]); stop at the first rejection; return accepted + 1.',
+    'expected_tokens = (1 - alpha**(gamma+1)) / (1 - alpha), with alpha >= 1 returning float(gamma + 1). speedup divides that by (c * gamma + 1).',
+    'best_gamma: loop g from 1 to max_gamma, track the g with the highest speedup; a plain loop with > (strictly greater) keeps the smallest on ties.',
+  ],
+
   'c7-d1': [
     'Under an outage this retry code multiplies traffic. Look for what is missing between attempts.',
     'Three missing pieces to check: exponential backoff (delay grows per attempt), jitter (randomized delay), and a hard retry cap.',
@@ -343,6 +349,12 @@ export const HINTS: Record<string, [string, string, string]> = {
     'attn = hidden*(q_heads*head_dim) + hidden*(kv_heads*head_dim)*2 + (q_heads*head_dim)*hidden. Three projection matrices for Q, K, V plus O projection.',
     'ffn SwiGLU uses THREE matrices: gate (h*i), up (h*i), down (i*h). Not two. kv_cache = 2*kv_heads*head_dim*bpp*seq*layers.',
   ],
+  'c9-l7': [
+    'best_of_n = 1 - (1 - p)**n. majority_vote sums math.comb(n, k) * p**k * (1-p)**(n-k) for k from n//2 + 1 to n.',
+    'samples_needed: if best_of_n(p, 1) >= target return 1; else n = math.ceil(math.log(1 - target) / math.log(1 - p)).',
+    'cheaper_strategy: small cost = samples_needed(p_small, target) * 2 * params_small; large cost = 2 * params_large. Return small only if strictly cheaper.',
+  ],
+
   'c9-d1': [
     'Run TrainingBudget(2e23).recommend() and compute model_gb = params * 2 / 1e9. Does it fit in 40GB?',
     'fixed_recommend must cap params at gpu_memory_gb * 1e9 / bytes_per_param. Then set tokens = compute_flops / (6 * params).',

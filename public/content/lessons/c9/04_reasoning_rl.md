@@ -42,6 +42,16 @@ automatically. DeepSeek-R1 reports that format rewards plus correctness
 rewards together produce robust chain-of-thought behavior without process
 supervision.
 
+> **Note:** this recipe has a name and a blast radius. Reinforcement
+> learning with verifiable rewards (RLVR), usually implemented with GRPO or
+> a descendant like DAPO, displaced RLHF as the industry's default
+> post-training stage: programmatic verifiers (does the code pass? does the
+> answer match?) replaced human preference labels wherever a check can be
+> written. The new dominant failure mode is reward hacking, models finding
+> answers that satisfy the verifier without solving the task. A planned
+> expansion course on post-training covers RLVR at depth, including agentic
+> RL where the verifier scores whole tool-use trajectories.
+
 ## Exit check
 
 Given five sampled responses with rewards [0.1, 0.8, 0.3, 0.6, 0.2],

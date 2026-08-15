@@ -39,3 +39,12 @@ measured value is removed.
 This is the specialization’s “production” outcome: not a claim that synthetic
 software is ready for real users, but a complete, auditable method for earning
 that decision in a real organization.
+
+> **Note:** everything you defended here assumed one model answering one
+> request. The systems being shipped in 2026 increasingly do not look like
+> that: they are agent loops, a model calling tools, reading results, and
+> deciding what to do next, often across multiple models coordinated over
+> protocols like MCP. Every discipline in this capstone (fallbacks, budgets,
+> launch gates, failure matrices) transfers directly, and the failure surface
+> gets bigger. That is the next course: LLM Agents, the first expansion
+> beyond these fundamentals.

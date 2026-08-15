@@ -71,3 +71,13 @@ versioned, and invalidated correctly in a serving system just like a KV cache.
 **Checkpoint:** Recommend attention, an SSM, or a hybrid for a workload with long
 streaming inputs and occasional exact references to early identifiers. Explain
 which experiment could overturn your recommendation.
+
+> **Note:** hybrids won. By 2026 the pattern this lesson teaches is the
+> production default at the frontier: Nemotron 3 alternates Mamba-2 and
+> attention layers, Qwen3.6 uses Gated DeltaNet (a linear-attention cousin)
+> for its non-attention layers, and Mamba-3 and Gated DeltaNet-2 are already
+> published. There are also whole paradigms this course deliberately leaves
+> out: diffusion language models and multimodal architectures each deserve
+> their own course, and a planned Architecture Frontiers expansion covers
+> the linear-attention family in depth. What you learned here is the vocabulary
+> all of them are written in.
