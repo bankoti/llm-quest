@@ -79,7 +79,8 @@ export const COURSES: Course[] = [
       { id:'c2-l4', courseId:2, index:4, title:'The Modern Block',       description:'Assemble the full Llama/Mistral-style decoder block.',         xp:400, type:'boss',      lessonFile:'c2/07_modern_block.md',     challengeFile:'c2/04_modern_decoder.py',  estimateMinutes:50 },
       { id:'c2-l5', courseId:2, index:5, title:'IO-Aware Attention',     description:'Derive why FlashAttention rewrites are memory-bandwidth wins.', xp:200, type:'challenge', lessonFile:'c2/09_io_aware_attention.md',challengeFile:'c2/05_flash_io.py',        estimateMinutes:35 },
       { id:'c2-l6', courseId:2, index:6, title:'KV Cache Arithmetic',    description:'Calculate cache size, eviction, and speculative budgets.',     xp:200, type:'challenge', lessonFile:'c2/11_kv_cache.md',         challengeFile:'c2/06_kv_cache.py',        estimateMinutes:35 },
-      { id:'c2-d1', courseId:2, index:7, title:'Debug: The Norm That Centers', description:'This RMSNorm passes a quick glance. The paper disagrees.', xp:150, type:'debug', lessonFile:'c2/90_debug_rmsnorm.md', challengeFile:'c2/90_debug_rmsnorm.py', estimateMinutes:25 },
+      { id:'c2-l7', courseId:2, index:7, title:'Multi-head Latent Attention', description:'Compress K and V into a shared latent; reduce KV cache by 93%.', xp:200, type:'challenge', lessonFile:'c2/12_mla.md', challengeFile:'c2/07_mla.py', estimateMinutes:35 },
+      { id:'c2-d1', courseId:2, index:8, title:'Debug: The Norm That Centers', description:'This RMSNorm passes a quick glance. The paper disagrees.', xp:150, type:'debug', lessonFile:'c2/90_debug_rmsnorm.md', challengeFile:'c2/90_debug_rmsnorm.py', estimateMinutes:25 },
     ],
   },
   {
@@ -198,8 +199,9 @@ export const COURSES: Course[] = [
       { id:'c7-l3', courseId:7, index:3, title:'Token & Deadline Budget', description:'Propagate deadlines; cut work before exceeding the budget.',  xp:200, type:'challenge', lessonFile:'c7/03_latency_budgets.md', challengeFile:'c7/03_token_deadline.py',  estimateMinutes:35 },
       { id:'c7-l4', courseId:7, index:4, title:'Circuit Breaker',        description:'Open a circuit when downstream latency crosses a threshold.', xp:200, type:'challenge', lessonFile:'c7/05_observability.md',         challengeFile:'c7/04_circuit_breaker.py', estimateMinutes:35 },
       { id:'c7-l5', courseId:7, index:5, title:'Overload Admission',     description:'Shed load gracefully; never queue work you cannot serve.',   xp:150, type:'challenge', lessonFile:'c7/04_routing_and_backpressure.md', challengeFile:'c7/05_admission.py',  estimateMinutes:25 },
-      { id:'c7-d1', courseId:7, index:6, title:'Debug: Retry Storm', description:'The retry logic looks polite. Under an outage it becomes a mob.', xp:150, type:'debug', lessonFile:'c7/90_debug_retry.md', challengeFile:'c7/90_debug_retry.py', estimateMinutes:25 },
-      { id:'c7-l6', courseId:7, index:6, title:'Canary Gate',            description:'Block a rollout automatically when error rate spikes.',       xp:500, type:'boss',      lessonFile:'c7/07_deployments.md',        challengeFile:'c7/06_canary_gate.py',     estimateMinutes:55 },
+      { id:'c7-l7', courseId:7, index:7, title:'Memory-Budget Serving', description:'Calculate what fits: weights, KV cache, and max batch size for any device.', xp:200, type:'challenge', lessonFile:'c7/08_memory_budget.md', challengeFile:'c7/07_memory_budget.py', estimateMinutes:35 },
+      { id:'c7-d1', courseId:7, index:7, title:'Debug: Retry Storm', description:'The retry logic looks polite. Under an outage it becomes a mob.', xp:150, type:'debug', lessonFile:'c7/90_debug_retry.md', challengeFile:'c7/90_debug_retry.py', estimateMinutes:25 },
+      { id:'c7-l6', courseId:7, index:8, title:'Canary Gate',            description:'Block a rollout automatically when error rate spikes.',       xp:500, type:'boss',      lessonFile:'c7/07_deployments.md',        challengeFile:'c7/06_canary_gate.py',     estimateMinutes:55 },
     ],
   },
   {

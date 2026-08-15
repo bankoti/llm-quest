@@ -84,6 +84,12 @@ export const HINTS: Record<string, [string, string, string]> = {
     'Delete the centering step: divide x by sqrt(mean(x*x) + eps), multiply by the gain. The mean of the OUTPUT should generally be nonzero.',
   ],
 
+  'c2-l7': [
+    'MLA caches only c_KV (the compressed latent), not the expanded K and V. The cache size formula is: n_layers * batch * seq_len * d_c * bytes.',
+    'compress_kv is a single matmul: x @ W_DKV. expand_kv is two matmuls: c_kv @ W_UK and c_kv @ W_UV.',
+    'cache_reduction_factor = (2 * n_kv_heads * head_dim) / d_c. The 2 is because standard caches both K and V. Element size cancels out.',
+  ],
+
   // Course 3
   'c3-l1': [
     'Classify by attention direction: encoder = bidirectional, decoder = causal, cross-attention = decoder queries reading encoder keys/values.',
@@ -258,6 +264,12 @@ export const HINTS: Record<string, [string, string, string]> = {
     'Estimated wait = queue_length x service_time. Admit only if wait + service fits the deadline; otherwise reject immediately.',
     'Reject early and cheaply — do not enqueue and time out later. The tests measure both what you accept and how fast you refuse.',
   ],
+  'c7-l7': [
+    'model_bytes = ceil(params * bytes_per_param). bytes_per_param: BF16=2.0, INT8=1.0, INT4=0.5.',
+    'kv_cache_bytes = ceil(2 * layers * kv_heads * head_dim * seq_len * batch_size * bytes_per_kv). The 2 is for K and V.',
+    'max_batch_size: subtract model_bytes from budget, divide remainder by kv_cache_bytes(batch=1). Return floor, minimum 0.',
+  ],
+
   'c7-d1': [
     'Under an outage this retry code multiplies traffic. Look for what is missing between attempts.',
     'Three missing pieces to check: exponential backoff (delay grows per attempt), jitter (randomized delay), and a hard retry cap.',
