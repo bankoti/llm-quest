@@ -28,6 +28,10 @@ export function LevelPage({ onProgressChange }: Props) {
 
   useEffect(() => {
     if (!level) return
+    setPassed(false)
+    setEarnedXp(0)
+    setStarterCode(null)
+    setTestCode(null)
     // challenge file e.g. "c1/06_attention.py" → test: "c1/06_attention_test.py"
     const [courseDir, fileName] = level.challengeFile.split('/')
     const testFile = fileName.replace('.py', '_test.py')
@@ -50,6 +54,14 @@ export function LevelPage({ onProgressChange }: Props) {
     setEarnedXp(wasComplete ? 0 : newProgress.levels[level.id]?.xpEarned ?? level.xp)
     setPassed(true)
   }
+
+  // Escape dismisses the pass overlay and stays on the level.
+  useEffect(() => {
+    if (!passed) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPassed(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [passed])
 
   function goNext() {
     if (!level) return
@@ -118,6 +130,16 @@ export function LevelPage({ onProgressChange }: Props) {
           <XPBar xp={progress.totalXp} animated={false} />
         </div>
         <span className="text-xs font-mono text-gray-500 shrink-0">~{level.estimateMinutes}min</span>
+        {levelState?.status === 'complete' && (
+          <button
+            onClick={goNext}
+            className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg text-white shrink-0 transition-opacity hover:opacity-90"
+            style={{ background: course.accent }}
+            title="Continue to the next level"
+          >
+            Next →
+          </button>
+        )}
       </div>
 
       {/* Split view: lesson left, arena right. Divider drags; chevron collapses the lesson. */}
@@ -152,7 +174,7 @@ export function LevelPage({ onProgressChange }: Props) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="absolute inset-0 bg-black/80 flex items-center justify-center z-50"
-          onClick={() => {}}
+          onClick={() => setPassed(false)}
         >
           <motion.div
             initial={{ scale: 0.7, opacity: 0 }}
@@ -160,6 +182,7 @@ export function LevelPage({ onProgressChange }: Props) {
             transition={{ type: 'spring', stiffness: 240, damping: 20 }}
             className="bg-gray-900 border border-gray-700 rounded-2xl p-10 text-center max-w-sm mx-4"
             style={{ borderTopColor: course.accent, borderTopWidth: 3 }}
+            onClick={e => e.stopPropagation()}
           >
             <div className="text-5xl mb-3">{level.type === 'boss' ? '🏆' : '⭐'}</div>
             <h2 className="text-2xl font-bold text-white mb-1">{level.title}</h2>
@@ -175,6 +198,12 @@ export function LevelPage({ onProgressChange }: Props) {
               style={{ background: course.accent }}
             >
               Next Level →
+            </button>
+            <button
+              onClick={() => setPassed(false)}
+              className="mt-3 w-full py-2 rounded-xl font-mono text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Stay on this level (Esc)
             </button>
           </motion.div>
         </motion.div>
