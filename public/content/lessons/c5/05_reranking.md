@@ -20,9 +20,9 @@ Random negatives are often too easy. Mine hard negatives from:
 - same title with incompatible attributes or locale;
 - exposed but skipped candidates, after accounting for click bias.
 
-Do not label every unclicked result irrelevant. It may not have been seen, and
-position/popularity affect behavior. Use explicit judgments or debiasing methods
-where the decision matters.
+> **Gotcha:** do not label every unclicked result irrelevant. It may not have
+> been seen, and position/popularity affect behavior. Use explicit judgments or
+> debiasing methods where the decision matters.
 
 ## Score and calibrate
 

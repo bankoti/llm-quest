@@ -10,8 +10,8 @@ interpreting lift. The challenge below demonstrates assignment and absolute
 lift; production analysis needs uncertainty, interference, novelty, and multiple-
 testing handling.
 
-The synthetic experiment can validate event joins and decision mechanics only.
-Label results “simulation”; do not infer business conversion.
+> **Note:** the synthetic experiment can validate event joins and decision
+> mechanics only. Label results "simulation"; do not infer business conversion.
 
 ## Launch review
 

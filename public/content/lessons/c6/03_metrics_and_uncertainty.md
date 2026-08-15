@@ -41,9 +41,9 @@ power is low.
 
 ## Composite score warning
 
-Do not average quality, latency, safety, and cost into one number that permits
-tradeoff through a critical gate. Use a dashboard: hard guardrails first, then
-optimize the primary metric among survivors.
+> **Warning:** do not average quality, latency, safety, and cost into one
+> number that permits tradeoff through a critical gate. Use a dashboard: hard
+> guardrails first, then optimize the primary metric among survivors.
 
 **Checkpoint:** Write the decision rule before viewing final results, including
 how inconclusive confidence intervals are handled.

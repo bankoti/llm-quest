@@ -25,8 +25,10 @@ behavior, then replace the adapter in a real experiment.
 Brute-force search compares the query with every item and is an exact control.
 Approximate nearest-neighbor (ANN) indexes trade recall for latency and memory.
 Graph indexes expose construction and search breadth; inverted or product-
-quantized methods partition/compress vectors. Names do not determine quality:
-benchmark index type and parameters on the actual vector distribution.
+quantized methods partition/compress vectors.
+
+> **Tip:** names do not determine quality. Benchmark the index type and
+> parameters on your actual vector distribution.
 
 Measure ANN recall against exact top-K, p50/p95 latency, build time, resident
 memory, update/delete behavior, filter selectivity, and recovery. Metadata filters

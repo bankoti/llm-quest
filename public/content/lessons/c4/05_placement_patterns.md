@@ -45,8 +45,9 @@ search architecture.
 
 First apply hard gates: privacy, license, hardware, p95, availability, and policy.
 Then compare surviving options on quality potential, implementation effort,
-freshness, operability, unit cost, and reversibility. Do not let a weighted score
-compensate for a hard violation.
+freshness, operability, unit cost, and reversibility.
+
+> **Gotcha:** do not let a weighted score compensate for a hard violation.
 
 **Checkpoint:** For each pattern, name its source of truth, online failure mode,
 version boundary, and fallback.

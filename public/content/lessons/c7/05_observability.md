@@ -15,8 +15,9 @@ reranking, policy, model prefill/decode where available, tools, and response.
 Propagate trace context across queues. Record duration, status, route, artifact
 versions, token counts, candidate counts, and fallback reason.
 
-Do not attach raw prompts, source documents, secrets, or generated personal data
-by default. Use approved redaction, sampling, access control, and retention.
+> **Warning:** do not attach raw prompts, source documents, secrets, or
+> generated personal data by default. Use approved redaction, sampling, access
+> control, and retention.
 
 ## Metrics explain populations
 

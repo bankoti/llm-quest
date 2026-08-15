@@ -38,8 +38,10 @@ RMSNorm(x) = [3/3.536, 4/3.536] = [0.849, 1.131]
 ```
 
 Now scale the input by 10: `x = [30, 40]` gives rms = 35.36 and exactly the
-same output. That is the scale invariance the exercise asks you to test. Note
-the output mean is 0.99, nowhere near zero; RMSNorm never promised that.
+same output. That is the scale invariance the exercise asks you to test.
+
+> **Note:** the output mean is 0.99, nowhere near zero. RMSNorm never promised
+> centering; only LayerNorm subtracts the mean.
 
 ## An implementation detail that matters
 
@@ -118,10 +120,10 @@ Check it against the pair formula: the first output element is
 `x0*cos + (-x1)*sin` and the second is `x1*cos + x0*sin`, exactly the rotation
 above. Two elementwise multiplies and one add replace the loop.
 
-One convention warning before you read real code: some implementations,
-including Llama's, lay pairs out as the first half and second half of the
-vector rather than as adjacent elements. The math is identical; the element
-order is not. This course uses adjacent pairs.
+> **Gotcha:** before you read real code, know that some implementations,
+> including Llama's, lay pairs out as the first half and second half of the
+> vector rather than as adjacent elements. The math is identical; the element
+> order is not. This course uses adjacent pairs.
 
 ## Exercise
 

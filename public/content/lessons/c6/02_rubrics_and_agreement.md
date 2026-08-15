@@ -48,7 +48,10 @@ original annotations.
 ## Label quality gate
 
 Define minimum agreement, maximum unresolved rate, audit sample size, and
-escalation. Re-label after rubric changes rather than silently mixing versions.
+escalation.
+
+> **Tip:** re-label after rubric changes rather than silently mixing label
+> versions.
 
 **Checkpoint:** Write five boundary examples between grades 1/2 and 2/3. If two
 qualified annotators cannot apply the rubric consistently, model evaluation will

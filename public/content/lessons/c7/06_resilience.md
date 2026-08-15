@@ -14,8 +14,10 @@ provider internals to the client.
 
 Retry only transient, idempotent operations when enough deadline remains. Use
 bounded attempts, exponential backoff with jitter, and a retry budget limiting
-extra load. Do not retry invalid schema, authorization, policy rejection, or
-deterministic context-limit errors. Retry storms amplify outages.
+extra load.
+
+> **Gotcha:** do not retry invalid schema, authorization, policy rejection, or
+> deterministic context-limit errors. Retry storms amplify outages.
 
 ## Circuit breaker
 

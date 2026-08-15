@@ -24,8 +24,9 @@ num_heads % num_kv_heads == 0        # for ordinary GQA grouping
 top_k <= num_experts
 ```
 
-Do not assume `head_dim = hidden_size / num_heads`; some configurations set an
-explicit head dimension. Do not assume all layers share one attention topology.
+> **Gotcha:** do not assume `head_dim = hidden_size / num_heads`; some
+> configurations set an explicit head dimension. And do not assume all layers
+> share one attention topology.
 
 Practice the derivation on Llama 3 8B's values: hidden 4096, 32 query heads,
 8 KV heads, head_dim 128:

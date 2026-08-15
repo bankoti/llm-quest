@@ -40,8 +40,8 @@ coverage = answered / eligible
 risk     = errors / answered
 ```
 
-Do not call abstained cases correct. Track their outcome separately and ensure the
-fallback remains useful.
+> **Gotcha:** do not call abstained cases correct. Track their outcome
+> separately and ensure the fallback remains useful.
 
 ## Distribution dependence
 

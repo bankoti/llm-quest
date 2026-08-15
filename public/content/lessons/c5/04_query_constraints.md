@@ -32,8 +32,10 @@ similarity enforces it.
 
 Apply immutable legal, safety, tenancy, and availability filters regardless of
 route. Business boosts may alter ranking but must not override hard eligibility.
-Where possible, filter before expensive reranking; verify that ANN filtering does
-not silently reduce candidate recall.
+Where possible, filter before expensive reranking.
+
+> **Gotcha:** verify that ANN filtering does not silently reduce candidate
+> recall.
 
 ## Ambiguity and clarification
 

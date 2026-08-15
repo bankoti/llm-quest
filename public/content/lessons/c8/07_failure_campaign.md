@@ -18,8 +18,10 @@ operator action, recovery, and evidence link.
 - teacher-label or confidence-distribution drift.
 
 Test combinations where reasonable: dependency slowdown during peak, cache cold
-after rollback, and model failure while telemetry is degraded. Do not create an
-unbounded combinatorial campaign; prioritize blast radius and control interaction.
+after rollback, and model failure while telemetry is degraded.
+
+> **Tip:** do not create an unbounded combinatorial campaign; prioritize blast
+> radius and control interaction.
 
 Verify deadline propagation, cancellation, retry budget, circuit breaker,
 idempotency, fallback quality, policy/auth, alerts, and automatic recovery.

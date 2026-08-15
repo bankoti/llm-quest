@@ -12,9 +12,11 @@ Post-training transforms it through two stages:
 
 ## Supervised fine-tuning
 
-SFT data is expensive to produce and small relative to pretraining. Quality
-matters far more than quantity: a few hundred carefully written demonstrations
-in a new domain often outperform thousands of automatically generated ones.
+SFT data is expensive to produce and small relative to pretraining.
+
+> **Note:** quality matters far more than quantity. A few hundred carefully
+> written demonstrations in a new domain often outperform thousands of
+> automatically generated ones.
 
 Loss is computed only on response tokens:
 

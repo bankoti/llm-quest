@@ -36,8 +36,8 @@ presence of boilerplate. Classifier-based filters train a binary model on
 high-quality text versus raw crawl. FineWeb reports roughly 15% token
 retention from CommonCrawl after deduplication and filtering.
 
-Over-filtering is a real risk: heuristics that penalize short lines can
-silently remove math and code, which are scarce by nature.
+> **Gotcha:** over-filtering is a real risk. Heuristics that penalize short
+> lines can silently remove math and code, which are scarce by nature.
 
 ## Domain mix
 
