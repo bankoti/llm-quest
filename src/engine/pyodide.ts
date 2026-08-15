@@ -26,7 +26,10 @@ function injectScript(src: string): Promise<void> {
     const s = document.createElement('script')
     s.src = src
     s.onload = () => resolve()
-    s.onerror = () => reject(new Error(`Failed to load ${src}`))
+    s.onerror = () => {
+      s.remove() // leave no dead tag behind, so a retry re-injects
+      reject(new Error(`Failed to load ${src}`))
+    }
     document.head.appendChild(s)
   })
 }
@@ -41,7 +44,11 @@ export async function getPyodide(): Promise<PyodideInterface> {
     await py.loadPackage(['numpy'])
     pyodideInstance = py
     return py
-  })()
+  })().catch(e => {
+    // Do not cache a failed load: reset so the next Run retries the CDN.
+    loadingPromise = null
+    throw e
+  })
 
   return loadingPromise
 }

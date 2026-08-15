@@ -41,6 +41,7 @@ export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Pro
   const [runState, setRunState] = useState<RunState>('idle')
   const [result, setResult] = useState<RunResult | null>(null)
   const [pyodideReady, setPyodideReady] = useState(false)
+  const [pyLoadFailed, setPyLoadFailed] = useState(false)
   const [failCount, setFailCount] = useState(0)
   const [revealed, setRevealed] = useState(0)
 
@@ -49,7 +50,7 @@ export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Pro
     setRunState('loading-pyodide')
     getPyodide()
       .then(() => { setPyodideReady(true); setRunState('idle') })
-      .catch(() => setRunState('idle'))
+      .catch(() => { setPyLoadFailed(true); setRunState('idle') })
   }, [])
 
   // Debounced autosave of the draft
@@ -73,7 +74,14 @@ export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Pro
     setRunState('running')
     setResult(null)
 
-    const r = await runChallenge(code, testCode)
+    let r: RunResult
+    try {
+      r = await runChallenge(code, testCode)
+    } catch (e) {
+      // Pyodide itself failed to load (offline / CDN blocked). Show it.
+      r = { ok: false, output: '', durationMs: 0,
+        error: `Python runtime failed to load (${String(e)}). Check network access to cdn.jsdelivr.net, then press Run to retry.` }
+    }
     setResult(r)
     setRunState(r.ok ? 'pass' : 'fail')
 
@@ -158,7 +166,11 @@ export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Pro
         </button>
 
         {!pyodideReady && runState === 'idle' && (
-          <span className="text-xs text-gray-600 font-mono">Warming up Python runtime…</span>
+          <span className={`text-xs font-mono ${pyLoadFailed ? 'text-red-400' : 'text-gray-600'}`}>
+            {pyLoadFailed
+              ? 'Python runtime failed to load. Check your network (cdn.jsdelivr.net), then press Run to retry.'
+              : 'Warming up Python runtime…'}
+          </span>
         )}
 
         <span className="ml-auto text-xs text-gray-600 font-mono hidden md:block"
