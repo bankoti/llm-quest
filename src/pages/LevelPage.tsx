@@ -123,7 +123,7 @@ export function LevelPage({ onProgressChange }: Props) {
       {/* Split view: lesson left, arena right. Divider drags; chevron collapses the lesson. */}
       <SplitPane
         storageKey="llmquest_split_v1"
-        left={<LessonPanel lessonFile={level.lessonFile} />}
+        left={<LessonPanel lessonFile={level.lessonFile} accent={course.accent} />}
         right={
           <div className="h-full flex flex-col p-4 overflow-y-auto">
             {starterCode === null || testCode === null ? (

@@ -43,9 +43,9 @@ z = x.reshape(10, 12)              # merge B and T into one axis
 Both lay the same numbers into a new shape; no value changes. The element count
 must match: `2*5*12 = 10*12 = 120`. In numpy the same operation is `reshape`.
 
-Gotcha: after a `transpose`, PyTorch's `view` can fail because the logical order
-no longer matches memory order. Call `.contiguous()` first, or use `reshape`,
-which handles it for you.
+> **Gotcha:** after a `transpose`, PyTorch's `view` can fail because the
+> logical order no longer matches memory order. Call `.contiguous()` first, or
+> use `reshape`, which handles it for you.
 
 ## transpose: swapping axes
 

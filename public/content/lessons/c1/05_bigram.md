@@ -28,8 +28,11 @@ projects those features to `V` logits at the end.
 
 Train this model for a few hundred steps on any small corpus and the loss falls
 quickly, but generated text has locally plausible character pairs and poor
-long-range structure. That is expected evidence of the model's context
-limitation, not a bug.
+long-range structure.
+
+> **Note:** that output quality is expected evidence of the model's context
+> limitation, not a bug. The bigram sees exactly one token back; it cannot do
+> better.
 
 ## A count-based version
 
@@ -87,8 +90,10 @@ the more complex architecture or its optimization.
 ## Experiment
 
 If you train this model yourself, do it at 10, 50, 200, and 1,000 steps. Record
-train loss, validation loss, and a fixed-prompt sample. Do not judge quality
-from loss alone and do not judge it from one lucky sample.
+train loss, validation loss, and a fixed-prompt sample.
+
+> **Tip:** do not judge quality from loss alone and do not judge it from one
+> lucky sample. Loss curves and samples fail in different ways; you need both.
 
 Then complete the challenge below; get the forward-pass shapes right before
 worrying about anything else.

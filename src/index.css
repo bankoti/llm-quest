@@ -20,3 +20,46 @@
 /* Typography plugin wraps inline code in literal backticks; our violet pills make them redundant. */
 .prose :where(code)::before,
 .prose :where(code)::after { content: none; }
+
+/* ---- Lesson typography: character and hierarchy for markdown prose ---- */
+/* Driven by --accent so each course tints its own lessons. */
+.lesson-prose { --accent: #7c3aed; }
+
+.lesson-prose h1 { color: #fff; }
+.lesson-prose h2 {
+  color: var(--accent);
+  filter: brightness(1.35) saturate(0.85);
+  border-bottom: 1px solid rgb(31 41 55);
+  padding-bottom: 0.3rem;
+}
+.lesson-prose h3 { color: #e5e7eb; }
+
+.lesson-prose strong { color: #fcd34d; font-weight: 600; }
+.lesson-prose em { color: #c4b5fd; }
+.lesson-prose li::marker { color: var(--accent); filter: brightness(1.35); }
+.lesson-prose a { color: #a78bfa; }
+
+.lesson-prose hr {
+  border: 0;
+  height: 1px;
+  margin: 2rem 0;
+  background: linear-gradient(to right, transparent, #4b5563, transparent);
+}
+
+/* Callouts: blockquotes with a bold kind label (Note / Tip / Gotcha). */
+.lesson-prose blockquote.callout {
+  font-style: normal;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.65rem 1rem;
+  margin: 1.25rem 0;
+}
+.lesson-prose blockquote.callout p:first-of-type::before,
+.lesson-prose blockquote.callout p:last-of-type::after { content: none; }
+
+.lesson-prose .callout-note    { border-color: #60a5fa; background: rgba(96, 165, 250, 0.08); }
+.lesson-prose .callout-note strong    { color: #93c5fd; }
+.lesson-prose .callout-tip     { border-color: #34d399; background: rgba(52, 211, 153, 0.08); }
+.lesson-prose .callout-tip strong     { color: #6ee7b7; }
+.lesson-prose .callout-warning { border-color: #f59e0b; background: rgba(245, 158, 11, 0.09); }
+.lesson-prose .callout-warning strong { color: #fcd34d; }

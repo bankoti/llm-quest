@@ -4,9 +4,9 @@ Every bug you will hit in this course, from a silent broadcasting mistake to a
 leaky attention mask, shows up first as a wrong shape. Learn to predict shapes
 before running code and you get a free debugger for everything that follows.
 
-One ground rule: the concepts matter here, not PyTorch trivia. Any time a
-function call reads as noise, open **📖 Syntax** in the top bar. It translates
-every operation in this course into plain English.
+> **Tip:** the concepts matter here, not PyTorch trivia. Any time a function
+> call reads as noise, open **📖 Syntax** in the top bar. It translates every
+> operation in this course into plain English.
 
 ## Why tensors
 
@@ -64,8 +64,10 @@ assert heads.shape == (B, H, T, C // H)
 
 `view` lays the same numbers into a new shape without changing any value.
 `transpose(1, 2)` swaps exactly those two axes, moving heads in front of
-positions. One gotcha: after a transpose, call `.contiguous()` before a later
-`view`, because the logical order may no longer match memory order.
+positions.
+
+> **Gotcha:** after a transpose, call `.contiguous()` before a later `view`,
+> because the logical order may no longer match memory order.
 
 ## Broadcasting
 

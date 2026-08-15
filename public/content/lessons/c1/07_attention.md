@@ -89,8 +89,8 @@ Line by line:
 - `softmax(..., dim=-1)` turns each row into probabilities. Since
   `e^-inf = 0`, forbidden positions get exactly zero weight.
 
-Mask before softmax, not after. Masking afterward leaves rows summing to less than
-one unless they are renormalized.
+> **Gotcha:** mask before softmax, not after. Masking afterward leaves rows
+> summing to less than one unless they are renormalized.
 
 ## Multiple heads
 

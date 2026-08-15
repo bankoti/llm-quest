@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { PROSE_CLASSES, markdownComponents } from './markdown'
 
-interface Props { lessonFile: string }
+interface Props {
+  lessonFile: string
+  /** Course accent color; tints headings, list markers, and default callouts. */
+  accent?: string
+}
 
-export function LessonPanel({ lessonFile }: Props) {
+export function LessonPanel({ lessonFile, accent }: Props) {
   const [md, setMd] = useState<string | null>(null)
 
   useEffect(() => {
@@ -23,27 +28,13 @@ export function LessonPanel({ lessonFile }: Props) {
   }
 
   return (
-    <div className="prose prose-invert prose-sm max-w-none h-full overflow-y-auto px-6 py-5
-                    prose-headings:font-semibold prose-headings:text-white
-                    prose-code:text-violet-300 prose-code:bg-violet-950/40 prose-code:px-1 prose-code:rounded
-                    prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
-                    prose-a:text-violet-400 prose-strong:text-white
-                    scrollbar-thin">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          // Lesson markdown references images as 'content/images/...'; prefix the
-          // deploy base so they resolve on GitHub Pages subpaths too.
-          img: ({ src, alt }) => (
-            <img
-              src={src && !/^(https?:)?\/\//.test(src) ? `${import.meta.env.BASE_URL}${src}` : src}
-              alt={alt ?? ''}
-              loading="lazy"
-              className="rounded-lg border border-gray-800 bg-gray-900/60 my-4 w-full max-w-2xl"
-            />
-          ),
-        }}
-      >{md}</ReactMarkdown>
+    <div
+      className={`${PROSE_CLASSES} h-full overflow-y-auto px-6 py-5 scrollbar-thin`}
+      style={accent ? ({ '--accent': accent } as CSSProperties) : undefined}
+    >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+        {md}
+      </ReactMarkdown>
     </div>
   )
 }

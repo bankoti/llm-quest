@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { PROSE_CLASSES, markdownComponents } from '@/components/Lesson/markdown'
 
 // Non-graded syntax reference. Learners keep it open in a second tab so
 // PyTorch/numpy notation never blocks a concept mid-lesson.
@@ -32,13 +33,8 @@ export function ReferencePage() {
         {md === null ? (
           <div className="text-gray-600 font-mono text-sm">Loading…</div>
         ) : (
-          <div className="prose prose-invert prose-sm max-w-none
-                          prose-headings:font-semibold prose-headings:text-white
-                          prose-code:text-violet-300 prose-code:bg-violet-950/40 prose-code:px-1 prose-code:rounded
-                          prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800
-                          prose-a:text-violet-400 prose-strong:text-white
-                          prose-table:text-gray-300 prose-th:text-white">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{md}</ReactMarkdown>
+          <div className={PROSE_CLASSES}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{md}</ReactMarkdown>
           </div>
         )}
       </div>
