@@ -407,3 +407,344 @@ export function RewardHackPlay({ onDone }: WidgetProps) {
     </div>
   )
 }
+
+// ── L5: autoregressive generation stepper ────────────────────────────────────
+// The killer widget: tap "generate", watch the distribution, watch the context
+// grow, watch the KV-cache fill. Scripted toy model, deterministic picks.
+
+interface GenRound { dist: { tok: string; p: number }[]; pick: string }
+const GEN_PROMPT = ['The', 'cat', 'sat', 'on', 'the']
+const GEN_ROUNDS: GenRound[] = [
+  { dist: [ { tok: 'mat', p: 0.62 }, { tok: 'floor', p: 0.18 }, { tok: 'sofa', p: 0.09 }, { tok: 'roof', p: 0.06 }, { tok: 'moon', p: 0.05 } ], pick: 'mat' },
+  { dist: [ { tok: '.', p: 0.55 }, { tok: 'and', p: 0.20 }, { tok: ',', p: 0.15 }, { tok: 'again', p: 0.10 } ], pick: '.' },
+  { dist: [ { tok: 'It', p: 0.40 }, { tok: 'The', p: 0.25 }, { tok: 'Then', p: 0.20 }, { tok: 'A', p: 0.15 } ], pick: 'It' },
+  { dist: [ { tok: 'purred', p: 0.50 }, { tok: 'slept', p: 0.30 }, { tok: 'left', p: 0.20 } ], pick: 'purred' },
+]
+const LAYERS = 12
+
+export function GenerationPlay({ onDone }: WidgetProps) {
+  const [round, setRound] = useState(0)          // rounds completed
+  const generated = GEN_ROUNDS.slice(0, round).map(r => r.pick)
+  const cur = round < GEN_ROUNDS.length ? GEN_ROUNDS[round] : null
+  const nTokens = GEN_PROMPT.length + generated.length
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Generation is a loop: predict a distribution, pick a token, feed it back in.</p>
+      <p className="text-sm text-gray-400 mb-4">Tap generate and watch all three things move: context, distribution, KV-cache.</p>
+
+      {/* context row */}
+      <p className="text-[10px] font-mono text-gray-500 mb-1">context ({nTokens} tokens)</p>
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {GEN_PROMPT.map((t, i) => <Cell key={'p' + i} v={t} wide />)}
+        {generated.map((t, i) => (
+          <motion.div key={'g' + i} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+            <Cell v={t} wide hot />
+          </motion.div>
+        ))}
+        {cur && <div className="w-9 h-9 flex items-center justify-center rounded-md border border-dashed border-gray-700 text-gray-600 font-mono text-xs">?</div>}
+      </div>
+
+      {/* current distribution */}
+      <p className="text-[10px] font-mono text-gray-500 mb-1">{cur ? 'next-token distribution' : 'done: 4 tokens generated'}</p>
+      <div className="grid gap-1.5 min-h-28 mb-3">
+        {(cur?.dist ?? []).map(d => (
+          <div key={d.tok} className="flex items-center gap-2">
+            <span className="w-14 font-mono text-xs text-gray-300 text-right">{d.tok}</span>
+            <div className="flex-1 h-4 bg-gray-900 rounded overflow-hidden">
+              <motion.div key={round + d.tok} initial={{ width: 0 }} animate={{ width: `${Math.round(d.p * 100)}%` }} transition={{ duration: 0.5 }}
+                className={`h-full ${d.tok === cur?.pick ? 'bg-emerald-500' : 'bg-gray-700'}`} />
+            </div>
+            <span className="w-8 font-mono text-[10px] text-gray-500">{d.p.toFixed(2)}</span>
+          </div>
+        ))}
+        {!cur && (
+          <p className="text-sm text-gray-300">"The cat sat on the <span className="text-violet-300">mat. It purred</span>" — each picked token became input for the next step. That loop is all an LLM does at inference.</p>
+        )}
+      </div>
+
+      {/* kv cache meter */}
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-[10px] font-mono text-gray-500 shrink-0">KV-cache</span>
+        <div className="flex-1 h-3 bg-gray-900 rounded overflow-hidden">
+          <motion.div animate={{ width: `${(nTokens / 9) * 100}%` }} className="h-full bg-sky-600" />
+        </div>
+        <span className="text-[10px] font-mono text-gray-500 shrink-0">{nTokens} tokens x {LAYERS} layers x 2 = {nTokens * LAYERS * 2} tensors</span>
+      </div>
+
+      {cur ? (
+        <button onClick={() => setRound(r => r + 1)}
+          className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-mono text-sm font-semibold">
+          ▶ generate token {round + 1} of 4
+        </button>
+      ) : (
+        <ContinueBtn onClick={onDone} label="Got it, continue" />
+      )}
+      <p className="mt-3 text-xs text-gray-500">Green bar = sampled token. Only its K and V get appended; nothing is recomputed.</p>
+    </div>
+  )
+}
+
+// ── L9: embedding space explorer ──────────────────────────────────────────────
+
+interface Word { w: string; x: number; y: number }
+const WORDS: Word[] = [
+  { w: 'king', x: 72, y: 18 }, { w: 'queen', x: 80, y: 26 }, { w: 'man', x: 60, y: 10 }, { w: 'woman', x: 68, y: 19 },
+  { w: 'apple', x: 14, y: 68 }, { w: 'banana', x: 22, y: 76 }, { w: 'cherry', x: 10, y: 78 },
+  { w: 'paris', x: 84, y: 72 }, { w: 'tokyo', x: 92, y: 80 }, { w: 'london', x: 78, y: 82 },
+]
+function nearest2(w: Word): string[] {
+  return WORDS.filter(o => o.w !== w.w)
+    .map(o => ({ w: o.w, d: (o.x - w.x) ** 2 + (o.y - w.y) ** 2 }))
+    .sort((a, b) => a.d - b.d).slice(0, 2).map(o => o.w)
+}
+
+export function EmbeddingPlay({ onDone }: WidgetProps) {
+  const [sel, setSel] = useState<string | null>(null)
+  const [tried, setTried] = useState<Set<string>>(new Set())
+  const near = sel ? nearest2(WORDS.find(w => w.w === sel)!) : []
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">An embedding maps each token to a point in space. Meaning becomes distance.</p>
+      <p className="text-sm text-gray-400 mb-4">This is a 2D shadow of a 768-dim space. Tap a word; its 2 nearest neighbors light up.</p>
+      <div className="relative w-full h-64 bg-gray-900 border border-gray-800 rounded-xl mb-3 overflow-hidden">
+        {WORDS.map(w => {
+          const isSel = sel === w.w
+          const isNear = near.includes(w.w)
+          return (
+            <button key={w.w} onClick={() => { setSel(w.w); setTried(t => new Set(t).add(w.w)) }}
+              style={{ left: `${w.x}%`, top: `${w.y}%` }}
+              className={`absolute -translate-x-1/2 -translate-y-1/2 px-2 py-1 rounded-md font-mono text-xs border transition-all
+                ${isSel ? 'bg-violet-600 border-violet-400 text-white scale-110 z-10'
+                : isNear ? 'bg-emerald-600/30 border-emerald-500 text-emerald-200 z-10'
+                : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}>
+              {w.w}
+            </button>
+          )
+        })}
+      </div>
+      <p className="text-sm text-gray-300 min-h-10">
+        {sel
+          ? <>Nearest to <span className="text-violet-300 font-mono">{sel}</span>: <span className="text-emerald-300 font-mono">{near.join(', ')}</span>. Words that appear in similar contexts end up close; that is the whole trick.</>
+          : 'Notice the three clusters before you tap: royalty/people, fruit, cities.'}
+      </p>
+      {tried.size >= 3
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-4 text-xs text-gray-500">Tap at least 3 words ({tried.size}/3).</p>}
+    </div>
+  )
+}
+
+// ── L10: MoE router ───────────────────────────────────────────────────────────
+
+const EXPERTS = ['E1 syntax', 'E2 nature', 'E3 math', 'E4 code']
+const ROUTES: { tok: string; w: number[] }[] = [
+  { tok: 'the', w: [0.71, 0.16, 0.08, 0.05] },
+  { tok: 'cat', w: [0.12, 0.79, 0.05, 0.04] },
+  { tok: '∑',   w: [0.03, 0.02, 0.88, 0.07] },
+  { tok: 'def', w: [0.05, 0.03, 0.09, 0.83] },
+]
+
+export function MoePlay({ onDone }: WidgetProps) {
+  const [sel, setSel] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  const route = sel === null ? null : ROUTES[sel]
+  const top2 = route ? [...route.w.keys()].sort((a, b) => route.w[b] - route.w[a]).slice(0, 2) : []
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">A Mixture-of-Experts layer holds several FFNs. A router picks the top 2 per token.</p>
+      <p className="text-sm text-gray-400 mb-4">Tap each token and watch where the router sends it.</p>
+      <div className="flex gap-2 mb-5">
+        {ROUTES.map((r, i) => (
+          <button key={r.tok} onClick={() => { setSel(i); setTried(t => new Set(t).add(i)) }}
+            className={`px-4 py-2 rounded-lg font-mono text-sm border ${sel === i ? 'bg-violet-600 border-violet-400 text-white' : 'bg-gray-800 border-gray-700 text-gray-200 hover:border-violet-500'}`}>
+            {r.tok}
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        {EXPERTS.map((e, i) => {
+          const active = top2.includes(i)
+          const w = route ? route.w[i] : 0
+          return (
+            <div key={e} className={`p-3 rounded-xl border transition-all duration-300 ${active ? 'bg-violet-600/20 border-violet-500' : 'bg-gray-900 border-gray-800'}`}>
+              <p className={`font-mono text-xs mb-1 ${active ? 'text-violet-200' : 'text-gray-500'}`}>{e}</p>
+              <div className="h-3 bg-gray-950 rounded overflow-hidden">
+                <motion.div animate={{ width: `${Math.round(w * 100)}%` }} transition={{ duration: 0.4 }}
+                  className={`h-full ${active ? 'bg-violet-500' : 'bg-gray-800'}`} />
+              </div>
+              <p className="font-mono text-[10px] text-gray-500 mt-1">{route ? w.toFixed(2) : '—'} {active && '← active'}</p>
+            </div>
+          )
+        })}
+      </div>
+      <p className="text-sm text-gray-300 min-h-10">
+        {route
+          ? `Only 2 of 4 experts run for "${route.tok}": half the expert parameters stay cold. Same quality lever as a big dense FFN, a fraction of the compute.`
+          : ''}
+      </p>
+      {tried.size >= 4
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-4 text-xs text-gray-500">Route all 4 tokens ({tried.size}/4).</p>}
+    </div>
+  )
+}
+
+// ── L11: retrieval top-k ──────────────────────────────────────────────────────
+
+const DOCS: { title: string; score: number; trap?: boolean }[] = [
+  { title: 'Apollo 11 landed on the Moon on July 20, 1969', score: 0.92 },
+  { title: 'Overview of the Apollo program (1961-1972)', score: 0.71 },
+  { title: 'Lunar phases and orbital mechanics guide', score: 0.44 },
+  { title: 'The Apollo Theater: a Harlem landmark', score: 0.38, trap: true },
+  { title: 'SpaceX Starship test flights, 2024-2026', score: 0.29 },
+]
+
+export function RagPlay({ onDone }: WidgetProps) {
+  const [k, setK] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Query: <span className="text-sky-300">"When did Apollo 11 land on the Moon?"</span></p>
+      <p className="text-sm text-gray-400 mb-4">The retriever scored 5 documents. Choose how many enter the context.</p>
+      <div className="flex gap-2 mb-5">
+        {[1, 3, 5].map(n => (
+          <button key={n} onClick={() => { setK(n); setTried(t => new Set(t).add(n)) }}
+            className={`px-4 py-2 rounded-lg font-mono text-sm border ${k === n ? 'bg-violet-600 border-violet-400 text-white' : 'bg-gray-800 border-gray-700 text-gray-200 hover:border-violet-500'}`}>
+            top-{n}
+          </button>
+        ))}
+      </div>
+      <div className="grid gap-2 mb-3">
+        {DOCS.map((d, i) => {
+          const inCtx = k !== null && i < k
+          return (
+            <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all duration-300
+              ${inCtx ? 'bg-emerald-600/10 border-emerald-700' : 'bg-gray-900 border-gray-800 opacity-60'}`}>
+              <span className={`font-mono text-xs w-10 shrink-0 ${inCtx ? 'text-emerald-400' : 'text-gray-600'}`}>{d.score.toFixed(2)}</span>
+              <span className={`text-sm ${inCtx ? 'text-gray-200' : 'text-gray-500'}`}>{d.title}</span>
+              {inCtx && d.trap && <span className="ml-auto text-xs text-amber-400 shrink-0">wrong Apollo!</span>}
+            </div>
+          )
+        })}
+      </div>
+      <p className="text-sm text-gray-300 min-h-14">
+        {k === 1 && 'One perfect document: precise, cheap, but fragile — if the retriever misses, the model has nothing.'}
+        {k === 3 && 'The sweet spot here: the answer plus supporting context, junk still excluded.'}
+        {k === 5 && 'Now the Apollo Theater is in the context. High k trades precision for recall — and lexical overlap ("Apollo") is exactly how junk sneaks in.'}
+      </p>
+      {tried.size >= 2
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-4 text-xs text-gray-500">Try at least 2 values of k ({tried.size}/2).</p>}
+    </div>
+  )
+}
+
+// ── L12: LoRA rank picker ─────────────────────────────────────────────────────
+// 7B base, 32 layers, d=4096, adapting q & v projections: each adapter is two
+// matrices A (d x r) and B (r x d) -> params = 2 proj x 2 mats x d x r x layers.
+
+const RANKS = [1, 4, 16, 64]
+const loraParams = (r: number) => 2 * 2 * 4096 * r * 32
+const BASE_PARAMS = 7e9
+
+export function LoraPlay({ onDone }: WidgetProps) {
+  const [r, setR] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  const p = r === null ? 0 : loraParams(r)
+  const pct = (p / BASE_PARAMS) * 100
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">LoRA freezes all 7B weights and trains two thin matrices per layer instead.</p>
+      <p className="text-sm text-gray-400 mb-4">Pick a rank r. Trainable parameters = 2 proj x (A: d x r + B: r x d) x 32 layers.</p>
+      <div className="flex gap-2 mb-5">
+        {RANKS.map(rank => (
+          <button key={rank} onClick={() => { setR(rank); setTried(t => new Set(t).add(rank)) }}
+            className={`px-4 py-2 rounded-lg font-mono text-sm border ${r === rank ? 'bg-violet-600 border-violet-400 text-white' : 'bg-gray-800 border-gray-700 text-gray-200 hover:border-violet-500'}`}>
+            r = {rank}
+          </button>
+        ))}
+      </div>
+      <div className="mb-1 flex justify-between font-mono text-[10px] text-gray-500">
+        <span>trainable</span><span>frozen base: 7,000M</span>
+      </div>
+      <div className="h-8 bg-gray-900 rounded-lg overflow-hidden relative mb-2">
+        <motion.div animate={{ width: `${Math.max(pct * 30, r === null ? 0 : 1.5)}%` }} transition={{ duration: 0.4 }}
+          className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400" />
+        {r !== null && (
+          <span className="absolute inset-0 flex items-center justify-center font-mono text-xs text-white">
+            {(p / 1e6).toFixed(1)}M params = {pct.toFixed(2)}% of the model
+          </span>
+        )}
+      </div>
+      <p className="text-sm text-gray-300 min-h-14">
+        {r === 1 && 'One rank: 1M parameters. Enough for narrow style shifts, too thin for new capabilities.'}
+        {r === 4 && '4M parameters, 0.06% of the model. This trains on one consumer GPU and covers most instruction-tuning tasks.'}
+        {r === 16 && 'The common default: quality close to full fine-tuning on most benchmarks at 0.24% of the parameters.'}
+        {r === 64 && '67M parameters. Diminishing returns: weight updates during fine-tuning are intrinsically low-rank, so extra rank mostly buys noise.'}
+      </p>
+      {tried.size >= 4
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-4 text-xs text-gray-500">Try all four ranks ({tried.size}/4).</p>}
+    </div>
+  )
+}
+
+// ── L13: speculative decoding rounds ─────────────────────────────────────────
+
+interface SpecRound { proposed: string[]; accepted: number; fix?: string }
+const SPEC_ROUNDS: SpecRound[] = [
+  { proposed: ['the', 'cat', 'sat', 'on'], accepted: 3, fix: 'quietly' },
+  { proposed: ['on', 'the', 'warm', 'mat'], accepted: 4 },
+]
+
+export function SpecDecodePlay({ onDone }: WidgetProps) {
+  const [round, setRound] = useState(0)   // 0 = not started, 1..2 = rounds shown
+  const shown = SPEC_ROUNDS.slice(0, round)
+  const total = shown.reduce((n, r) => n + r.accepted + (r.fix ? 1 : 0), 0)
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">A small draft model guesses 4 tokens; the big model verifies them all in one pass.</p>
+      <p className="text-sm text-gray-400 mb-4">Accepted guesses are free speed. A rejection costs nothing: the big model supplies the fix.</p>
+      <div className="grid gap-3 mb-4 min-h-28">
+        {shown.map((r, ri) => (
+          <div key={ri}>
+            <p className="text-[10px] font-mono text-gray-500 mb-1">round {ri + 1}: draft proposes, target verifies</p>
+            <div className="flex flex-wrap gap-1.5">
+              {r.proposed.map((t, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.15 }}>
+                  <div className={`px-2 h-9 min-w-9 flex items-center justify-center rounded-md font-mono text-xs border
+                    ${i < r.accepted ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300' : 'bg-red-900/30 border-red-800 text-red-300 line-through'}`}>
+                    {t}
+                  </div>
+                </motion.div>
+              ))}
+              {r.fix && (
+                <motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7 }}>
+                  <div className="px-2 h-9 min-w-9 flex items-center justify-center rounded-md font-mono text-xs border bg-violet-600/30 border-violet-500 text-violet-200">
+                    {r.fix} ←target
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {round > 0 && (
+        <p className="text-sm text-gray-300 mb-2">
+          {total} tokens produced in {round} target pass{round > 1 ? 'es' : ''} (sequential decoding would need {total}).
+        </p>
+      )}
+      {round < SPEC_ROUNDS.length ? (
+        <button onClick={() => setRound(n => n + 1)}
+          className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-mono text-sm font-semibold">
+          ▶ run round {round + 1}
+        </button>
+      ) : (
+        <>
+          <p className="text-xs text-gray-400 mb-1">The output distribution is mathematically identical to the big model decoding alone. Pure speed, zero quality change.</p>
+          <ContinueBtn onClick={onDone} label="Got it, continue" />
+        </>
+      )}
+    </div>
+  )
+}

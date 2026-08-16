@@ -11,6 +11,7 @@ import { SplitPane } from '@/components/SplitPane'
 import { isAdminMode } from '@/engine/admin'
 import { HINTS } from '@/data/hints'
 import { hintXpMultiplier } from '@/components/Arena/Arena'
+import { WARMUPS } from '@/interactive/lessons'
 
 interface Props { onProgressChange: (p: ProgressState) => void }
 
@@ -116,6 +117,17 @@ export function LevelPage({ onProgressChange }: Props) {
           {level.type === 'boss' && <span title="Boss fight" className="shrink-0">👑</span>}
           {level.type === 'debug' && <span title="Debug level — find the bug" className="shrink-0">🐛</span>}
         </div>
+        {WARMUPS[level.id] && (
+          <a
+            href={`${import.meta.env.BASE_URL}interactive/${WARMUPS[level.id]}`}
+            target="_blank"
+            rel="noopener"
+            className="text-xs font-mono text-violet-400 hover:text-violet-200 transition-colors shrink-0"
+            title="3-minute interactive warm-up for this level (new tab)"
+          >
+            ⚡ Warm-up
+          </a>
+        )}
         {/* Opens in a new tab so in-progress code in the Arena stays put. */}
         <a
           href={`${import.meta.env.BASE_URL}reference`}
