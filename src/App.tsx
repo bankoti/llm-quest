@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { DemoBrilliantPage } from '@/pages/DemoBrilliantPage'
 import { loadProgress, ProgressState } from '@/engine/progress'
 import { HomePage } from '@/pages/HomePage'
 import { MapPage } from '@/pages/MapPage'
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/review" element={<ReviewPage onProgressChange={setProgress} />} />
         <Route path="/cert"   element={<CertPage />} />
         <Route path="/reference" element={<ReferencePage />} />
+        <Route path="/demo" element={<DemoBrilliantPage />} />  {/* hidden: Brilliant-style experiment */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
