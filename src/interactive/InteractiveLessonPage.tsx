@@ -46,7 +46,7 @@ function StepConcept({ step, onDone }: { step: Extract<Step, { kind: 'concept' }
   )
 }
 
-function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>; onDone: (firstTry: boolean) => void }) {
+export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>; onDone: (firstTry: boolean) => void }) {
   const [picked, setPicked] = useState<number | null>(null)
   const [wrongOnes, setWrongOnes] = useState<number[]>([])
   const solved = picked === step.answer
@@ -131,7 +131,7 @@ function PredictQ({ q, onDone }: { q: PredictQuestion; onDone: (firstTry: boolea
   )
 }
 
-function StepPredict({ step, onDone }: { step: Extract<Step, { kind: 'predict' }>; onDone: (firstTryAll: boolean) => void }) {
+export function StepPredict({ step, onDone }: { step: Extract<Step, { kind: 'predict' }>; onDone: (firstTryAll: boolean) => void }) {
   const [doneCount, setDoneCount] = useState(0)
   const [allFirstTry, setAllFirstTry] = useState(true)
   const [key, setKey] = useState(0)
@@ -188,31 +188,34 @@ export function InteractiveLessonPage() {
   const lesson = INTERACTIVE_LESSONS.find(l => l.slug === slug)
   const [step, setStep] = useState(0)
   const [firstTries, setFirstTries] = useState(0)
+  const [missed, setMissed] = useState<number[]>([])
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
   const [done, setDone] = useState(false)
 
   const scored = lesson ? scoredCount(lesson) : 0
 
-  const next = useCallback(() => {
+  // ftDelta/missStep are passed explicitly so the final step's result is included
+  // in the saved record (state updates would not be visible to this closure yet)
+  const next = useCallback((ftDelta = 0, missStep: number | null = null) => {
     if (!lesson) return
+    const ft = firstTries + ftDelta
+    const ms = missStep === null ? missed : [...missed, missStep]
+    setFirstTries(ft)
+    setMissed(ms)
     if (step + 1 >= lesson.steps.length) {
-      saveLesson(lesson.slug, { firstTries, scored, completedAt: new Date().toISOString() })
+      saveLesson(lesson.slug, { firstTries: ft, scored, completedAt: new Date().toISOString(), missed: ms })
       setDone(true)
     } else {
       setStep(s => s + 1)
     }
-  }, [step, lesson, firstTries, scored])
+  }, [step, lesson, firstTries, missed, scored])
 
   const scored_step = useCallback((ft: boolean) => {
-    if (ft) {
-      setFirstTries(n => n + 1)
-      setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns })
-    } else {
-      setStreak(0)
-    }
-    next()
-  }, [next])
+    if (ft) setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns })
+    else setStreak(0)
+    next(ft ? 1 : 0, ft ? null : step)
+  }, [next, step])
 
   if (!lesson) return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -248,10 +251,10 @@ export function InteractiveLessonPage() {
             className="w-full flex justify-center">
             {(() => {
               const s = lesson.steps[step]
-              if (s.kind === 'concept') return <StepConcept step={s} onDone={next} />
+              if (s.kind === 'concept') return <StepConcept step={s} onDone={() => next()} />
               if (s.kind === 'mcq') return <StepMcq step={s} onDone={scored_step} />
               if (s.kind === 'predict') return <StepPredict step={s} onDone={scored_step} />
-              if (s.kind === 'widget') return <s.widget onDone={next} />
+              if (s.kind === 'widget') return <s.widget onDone={() => next()} />
               return null
             })()}
           </motion.div>

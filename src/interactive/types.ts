@@ -61,7 +61,7 @@ export const scoredCount = (l: InteractiveLesson) =>
 // never touches main XP, gating, or the certificate.
 const KEY = 'llmquest_interactive_v1'
 
-export interface LessonRecord { firstTries: number; scored: number; completedAt: string }
+export interface LessonRecord { firstTries: number; scored: number; completedAt: string; missed?: number[] }
 export type TrackState = Record<string, LessonRecord>
 
 export function loadTrack(): TrackState {
@@ -71,8 +71,18 @@ export function loadTrack(): TrackState {
 export function saveLesson(slug: string, rec: LessonRecord) {
   const s = loadTrack()
   const prev = s[slug]
-  // keep the best score across replays
+  // stars keep the best score across replays; missed steps always reflect the latest run
   if (!prev || rec.firstTries > prev.firstTries) s[slug] = rec
+  else s[slug] = { ...prev, missed: rec.missed, completedAt: rec.completedAt }
+  localStorage.setItem(KEY, JSON.stringify(s))
+}
+
+// remove one step from a lesson's missed list (cleared in practice)
+export function clearMiss(slug: string, stepIdx: number) {
+  const s = loadTrack()
+  const rec = s[slug]
+  if (!rec?.missed) return
+  rec.missed = rec.missed.filter(i => i !== stepIdx)
   localStorage.setItem(KEY, JSON.stringify(s))
 }
 

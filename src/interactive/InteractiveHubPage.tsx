@@ -15,6 +15,7 @@ export function InteractiveHubPage() {
 
   const completed = INTERACTIVE_LESSONS.filter(l => track[l.slug]).length
   const totalStars = INTERACTIVE_LESSONS.reduce((n, l) => n + stars(track[l.slug]), 0)
+  const weakSpots = INTERACTIVE_LESSONS.reduce((n, l) => n + (track[l.slug]?.missed?.length ?? 0), 0)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white px-6 py-10">
@@ -30,6 +31,19 @@ export function InteractiveHubPage() {
           <span>{completed}/{TOTAL} lessons done</span>
           <span>{'⭐'.repeat(Math.min(totalStars, 6))} {totalStars}/{TOTAL * 3} stars</span>
         </div>
+
+        {/* weakest-first practice */}
+        {weakSpots > 0 && (
+          <Link to="/interactive/practice"
+            className="flex items-center gap-3 p-4 mb-6 rounded-xl border bg-amber-950/30 border-amber-800/60 hover:border-amber-500 transition-colors group">
+            <span className="text-2xl">🎯</span>
+            <span className="flex-1">
+              <span className="block font-semibold text-amber-200 group-hover:text-amber-100">Practice weak spots</span>
+              <span className="block text-xs text-amber-500/80">{weakSpots} missed {weakSpots === 1 ? 'check' : 'checks'}, weakest lesson first</span>
+            </span>
+            <span className="text-amber-600 group-hover:text-amber-400 text-lg">›</span>
+          </Link>
+        )}
 
         {/* lesson cards */}
         <div className="grid gap-4">
