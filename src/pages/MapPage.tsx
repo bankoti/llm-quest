@@ -43,6 +43,13 @@ export function MapPage({ progress, onProgressChange }: Props) {
 
         <div className="flex items-center gap-3 ml-auto">
           <button
+            onClick={() => navigate('/interactive')}
+            className="text-xs font-mono px-3 py-1.5 rounded-lg border border-violet-800
+                       text-violet-300 hover:border-violet-500 hover:text-violet-100 transition-colors"
+          >
+            ✨ Interactive
+          </button>
+          <button
             onClick={() => navigate('/reference')}
             className="text-xs font-mono px-3 py-1.5 rounded-lg border border-gray-700
                        text-gray-300 hover:border-gray-500 hover:text-white transition-colors"
