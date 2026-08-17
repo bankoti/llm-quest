@@ -5,9 +5,35 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { INTERACTIVE_LESSONS } from './lessons'
-import { loadTrack, stars, scoredCount } from './types'
+import { loadTrack, stars, scoredCount, computeStreak } from './types'
 
 const TOTAL = INTERACTIVE_LESSONS.length
+
+function StreakCalendar({ activeDates }: { activeDates: Set<string> }) {
+  const days: { date: string; active: boolean }[] = []
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000)
+    const iso = d.toISOString().slice(0, 10)
+    days.push({ date: iso, active: activeDates.has(iso) })
+  }
+  const weeks: typeof days[] = []
+  for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
+  return (
+    <div className="mb-8">
+      <p className="font-mono text-[10px] text-gray-600 mb-2">last 28 days</p>
+      <div className="flex gap-1">
+        {weeks.map((week, wi) => (
+          <div key={wi} className="flex flex-col gap-1">
+            {week.map(d => (
+              <div key={d.date} title={d.date}
+                className={`w-4 h-4 rounded-sm transition-colors ${d.active ? 'bg-violet-500' : 'bg-gray-800'}`} />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export function InteractiveHubPage() {
   const [track, setTrack] = useState(loadTrack)
@@ -16,6 +42,7 @@ export function InteractiveHubPage() {
   const completed = INTERACTIVE_LESSONS.filter(l => track[l.slug]).length
   const totalStars = INTERACTIVE_LESSONS.reduce((n, l) => n + stars(track[l.slug]), 0)
   const weakSpots = INTERACTIVE_LESSONS.reduce((n, l) => n + (track[l.slug]?.missed?.length ?? 0), 0)
+  const streak = computeStreak(track)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white px-6 py-10">
@@ -27,10 +54,19 @@ export function InteractiveHubPage() {
         </div>
         <h1 className="text-3xl font-bold mb-1">Interactive Track</h1>
         <p className="text-gray-400 mb-2">Tap-first lessons. No code, no typing — just intuition.</p>
-        <div className="flex items-center gap-4 mb-8 text-sm font-mono text-gray-500">
+        <div className="flex items-center gap-4 mb-4 text-sm font-mono text-gray-500">
           <span>{completed}/{TOTAL} lessons done</span>
           <span>{'⭐'.repeat(Math.min(totalStars, 6))} {totalStars}/{TOTAL * 3} stars</span>
+          {streak.current > 0 && (
+            <span className="text-orange-400">🔥 {streak.current}-day streak</span>
+          )}
+          {streak.longest > 1 && streak.current < streak.longest && (
+            <span className="text-gray-600">best: {streak.longest}</span>
+          )}
         </div>
+
+        {/* calendar heatmap — last 28 days */}
+        {completed > 0 && <StreakCalendar activeDates={streak.activeDates} />}
 
         {/* weakest-first practice */}
         {weakSpots > 0 && (

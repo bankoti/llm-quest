@@ -2,6 +2,7 @@
 // Each lesson is a linear Step[] played by InteractiveLessonPage.
 // No Pyodide, no progress writes; purely tap-and-reveal.
 import type { InteractiveLesson } from './types'
+import { dailyPick } from './types'
 import {
   AxisPlay, SlicePlay, BpePlay, AttentionPlay,
   LrPlay, TemperaturePlay, PrecisionPlay, RewardHackPlay,
@@ -136,11 +137,17 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict',
-        prompt: 'Vocab size = 50,257. An embedding matrix maps each token ID to a 768-dimensional vector. Predict the shape.',
-        questions: [
-          { label: 'embedding.weight', options: ['(50257, 768)', '(768, 50257)', '(50257,)'], answer: 0,
-            reveal: 'Row i is the embedding for token ID i. You look up by indexing rows, so vocab is the first axis: (vocab_size, embedding_dim).' },
-        ],
+        ...dailyPick([
+          { prompt: 'Vocab size = 50,257 (GPT-2). Embedding dim = 768. Predict the weight shape.',
+            questions: [{ label: 'embedding.weight', options: ['(50257, 768)', '(768, 50257)', '(50257,)'], answer: 0,
+              reveal: 'Row i is the embedding for token ID i. Vocab is the first axis: (50257, 768).' }] },
+          { prompt: 'Vocab size = 32,000 (Llama-2). Embedding dim = 4096. Predict the weight shape.',
+            questions: [{ label: 'embedding.weight', options: ['(32000, 4096)', '(4096, 32000)', '(32000,)'], answer: 0,
+              reveal: 'Same rule: row per token, vocab first: (32000, 4096). Llama-2 uses a larger embedding dim for its larger hidden size.' }] },
+          { prompt: 'Vocab size = 128,256 (Llama-3). Embedding dim = 2048. Predict the weight shape.',
+            questions: [{ label: 'embedding.weight', options: ['(128256, 2048)', '(2048, 128256)', '(128256,)'], answer: 0,
+              reveal: 'Larger vocab, moderate dim: (128256, 2048). GPT-4-class models use 100k+ vocab sizes to improve tokenisation of code and multilingual text.' }] },
+        ] as const),
       },
     ],
   },
@@ -187,14 +194,32 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict',
-        prompt: 'B=2, H=4, T=8, D=16. Trace the shapes through one attention head.',
-        code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nscores = Q @ K.transpose(-2, -1)   # ??\nweights = softmax(scores / sqrt(D)) # ??\nV: (B, H, T, D)\nout = weights @ V                   # ??',
-        questions: [
-          { label: 'scores shape', options: ['(2, 4, 8, 8)', '(2, 4, 8, 16)', '(2, 8, 8, 4)'], answer: 0,
-            reveal: '(B, H, T, D) @ (B, H, D, T) → (B, H, T, T) = (2, 4, 8, 8). One score per query-key pair.' },
-          { label: 'out shape', options: ['(2, 4, 8, 16)', '(2, 4, 8, 8)', '(2, 8, 4, 16)'], answer: 0,
-            reveal: '(B, H, T, T) @ (B, H, T, D) → (B, H, T, D) = (2, 4, 8, 16). Each position gets a blend of value vectors.' },
-        ],
+        ...dailyPick([
+          { prompt: 'B=2, H=4, T=8, D=16. Trace the shapes through one attention head.',
+            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
+            questions: [
+              { label: 'scores shape', options: ['(2, 4, 8, 8)', '(2, 4, 8, 16)', '(2, 8, 8, 4)'], answer: 0,
+                reveal: 'Q(B,H,T,D) @ K.T(B,H,D,T) → (B,H,T,T) = (2,4,8,8). One score per query-key pair.' },
+              { label: 'out shape', options: ['(2, 4, 8, 16)', '(2, 4, 8, 8)', '(2, 8, 4, 16)'], answer: 0,
+                reveal: '(B,H,T,T) @ V(B,H,T,D) → (B,H,T,D) = (2,4,8,16). Each position is a blend of value vectors.' },
+            ] },
+          { prompt: 'B=1, H=8, T=16, D=64. Trace the shapes through one attention head.',
+            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
+            questions: [
+              { label: 'scores shape', options: ['(1, 8, 16, 16)', '(1, 8, 16, 64)', '(1, 16, 8, 8)'], answer: 0,
+                reveal: '(1,8,16,64) @ (1,8,64,16) → (1,8,16,16). T×T attention map.' },
+              { label: 'out shape', options: ['(1, 8, 16, 64)', '(1, 8, 16, 16)', '(1, 16, 8, 64)'], answer: 0,
+                reveal: '(1,8,16,16) @ (1,8,16,64) → (1,8,16,64). Same shape as Q, K, V.' },
+            ] },
+          { prompt: 'B=4, H=2, T=6, D=32. Trace the shapes through one attention head.',
+            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
+            questions: [
+              { label: 'scores shape', options: ['(4, 2, 6, 6)', '(4, 2, 6, 32)', '(4, 6, 6, 2)'], answer: 0,
+                reveal: '(4,2,6,32) @ (4,2,32,6) → (4,2,6,6). T×T regardless of D.' },
+              { label: 'out shape', options: ['(4, 2, 6, 32)', '(4, 2, 6, 6)', '(4, 6, 2, 32)'], answer: 0,
+                reveal: '(4,2,6,6) @ (4,2,6,32) → (4,2,6,32). Matches Q/K/V shape.' },
+            ] },
+        ] as const),
       },
     ],
   },
@@ -416,11 +441,17 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict',
-        prompt: 'Sequence length T = 2048, 32 layers, 32 K/V heads, head dim D = 128, fp16 (2 bytes). KV-cache size in GB?',
-        questions: [
-          { label: '2 × layers × heads × T × D × bytes', options: ['0.5 GB', '2 GB', '8 GB'], answer: 0,
-            reveal: '2 × 32 × 32 × 2048 × 128 × 2 = 536,870,912 bytes ≈ 0.5 GB. Short contexts are cheap; at T=32k this becomes 8 GB — the practical limit for consumer hardware.' },
-        ],
+        ...dailyPick([
+          { prompt: 'T = 2048, 32 layers, 32 K/V heads, head dim D = 128, fp16 (2 bytes). KV-cache in GB?',
+            questions: [{ label: '2 × layers × heads × T × D × bytes', options: ['0.5 GB', '2 GB', '8 GB'], answer: 0,
+              reveal: '2×32×32×2048×128×2 ≈ 537 MB ≈ 0.5 GB. At T=32k this becomes 8 GB — the consumer GPU limit.' }] },
+          { prompt: 'T = 8192, 32 layers, 8 K/V heads (GQA), head dim D = 128, fp16 (2 bytes). KV-cache in GB?',
+            questions: [{ label: '2 × layers × heads × T × D × bytes', options: ['0.5 GB', '2 GB', '4 GB'], answer: 0,
+              reveal: '2×32×8×8192×128×2 ≈ 537 MB ≈ 0.5 GB. GQA (8 heads vs 32) cuts cache 4× — same size as the baseline despite 4× longer context.' }] },
+          { prompt: 'T = 4096, 40 layers, 40 K/V heads, head dim D = 128, fp16 (2 bytes). KV-cache in GB?',
+            questions: [{ label: '2 × layers × heads × T × D × bytes', options: ['2.5 GB', '0.5 GB', '10 GB'], answer: 0,
+              reveal: '2×40×40×4096×128×2 ≈ 2.68 GB ≈ 2.5 GB. This is a 13B-class model at medium context — fits a 4090 alongside ~26 GB of weights.' }] },
+        ] as const),
       },
     ],
   },
@@ -825,11 +856,17 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict',
-        prompt: 'A 30B model trained on 300B tokens. According to Chinchilla (D* = 20N*), is it compute-optimal, undertrained, or overtrained?',
-        questions: [
-          { label: 'Training status', options: ['Undertrained — needs 600B tokens for compute-optimal', 'Compute-optimal', 'Overtrained — too much data for 30B params'], answer: 0,
-            reveal: '20 × 30B = 600B optimal tokens. 300B is half that — the model has spare capacity that was never filled. Quality improves further by training longer at the same parameter count.' },
-        ],
+        ...dailyPick([
+          { prompt: 'A 30B model trained on 300B tokens. Is it compute-optimal per Chinchilla (D* = 20N*)?',
+            questions: [{ label: 'Training status', options: ['Undertrained — needs 600B tokens', 'Compute-optimal', 'Overtrained'], answer: 0,
+              reveal: '20×30B = 600B optimal. 300B is only half — spare capacity never filled.' }] },
+          { prompt: 'A 7B model trained on 1T tokens. Is it compute-optimal per Chinchilla (D* = 20N*)?',
+            questions: [{ label: 'Training status', options: ['Overtrained — optimal is 140B tokens', 'Compute-optimal', 'Undertrained'], answer: 0,
+              reveal: '20×7B = 140B optimal tokens. 1T is 7× more — deliberately overtrained (Llama-style) for cheap inference.' }] },
+          { prompt: 'A 13B model trained on 260B tokens. Is it compute-optimal per Chinchilla (D* = 20N*)?',
+            questions: [{ label: 'Training status', options: ['Compute-optimal — 20×13B = 260B', 'Undertrained', 'Overtrained'], answer: 0,
+              reveal: '20×13B = 260B. Exactly compute-optimal. A "free lunch" model: best quality for this training budget.' }] },
+        ] as const),
       },
     ],
   },
@@ -867,13 +904,29 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict',
-        prompt: 'Model: hidden_dim=512, 8 heads. Each head projects Q, K, V to head_dim = 512/8 = 64. Predict the full weight matrix shapes.',
-        questions: [
-          { label: 'W_Q shape', options: ['(512, 512)', '(512, 64)', '(64, 512)'], answer: 0,
-            reveal: 'W_Q projects hidden_dim → hidden_dim = 512. It is then chunked into 8 × 64-dim slices for each head. Full shape: (512, 512).' },
-          { label: 'W_O (output projection) shape', options: ['(512, 512)', '(8, 64)', '(512, 64)'], answer: 0,
-            reveal: 'After concatenating all 8 head outputs (8 × 64 = 512), W_O projects back to hidden_dim: (512, 512).' },
-        ],
+        ...dailyPick([
+          { prompt: 'Model: hidden_dim=512, 8 heads, head_dim=64. Predict the weight shapes.',
+            questions: [
+              { label: 'W_Q shape', options: ['(512, 512)', '(512, 64)', '(64, 512)'], answer: 0,
+                reveal: 'W_Q projects hidden_dim→hidden_dim. Full shape (512,512), then chunked into 8×64 slices per head.' },
+              { label: 'W_O shape', options: ['(512, 512)', '(8, 64)', '(512, 64)'], answer: 0,
+                reveal: 'Concat 8 heads × 64 = 512; W_O projects 512→512. Shape: (512,512).' },
+            ] },
+          { prompt: 'Model: hidden_dim=768, 12 heads, head_dim=64. Predict the weight shapes.',
+            questions: [
+              { label: 'W_Q shape', options: ['(768, 768)', '(768, 64)', '(64, 768)'], answer: 0,
+                reveal: 'W_Q: (hidden_dim, hidden_dim) = (768,768). GPT-2 base uses exactly these dimensions.' },
+              { label: 'W_O shape', options: ['(768, 768)', '(12, 64)', '(768, 64)'], answer: 0,
+                reveal: 'Concat 12×64=768; W_O: (768,768).' },
+            ] },
+          { prompt: 'Model: hidden_dim=1024, 16 heads, head_dim=64. Predict the weight shapes.',
+            questions: [
+              { label: 'W_Q shape', options: ['(1024, 1024)', '(1024, 64)', '(64, 1024)'], answer: 0,
+                reveal: 'W_Q: (1024,1024). head_dim = 1024/16 = 64, full W_Q still maps hidden→hidden.' },
+              { label: 'W_O shape', options: ['(1024, 1024)', '(16, 64)', '(1024, 64)'], answer: 0,
+                reveal: 'Concat 16×64=1024; W_O: (1024,1024).' },
+            ] },
+        ] as const),
       },
     ],
   },

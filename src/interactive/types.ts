@@ -92,3 +92,58 @@ export function stars(rec: LessonRecord | undefined): number {
   const r = rec.firstTries / rec.scored
   return r >= 0.99 ? 3 : r >= 0.6 ? 2 : 1
 }
+
+// ── streak & calendar ────────────────────────────────────────────────────────
+
+// Returns ISO date string "YYYY-MM-DD" in local time
+export const toDateStr = (iso: string) => iso.slice(0, 10)
+
+export interface StreakInfo {
+  current: number     // days in a row ending today (or yesterday)
+  longest: number
+  activeDates: Set<string>  // all unique days a lesson was completed
+}
+
+export function computeStreak(track: TrackState): StreakInfo {
+  const dates = new Set<string>()
+  for (const rec of Object.values(track)) {
+    if (rec.completedAt) dates.add(toDateStr(rec.completedAt))
+  }
+  if (dates.size === 0) return { current: 0, longest: 0, activeDates: dates }
+
+  const sorted = [...dates].sort()
+  const today = toDateStr(new Date().toISOString())
+  const yesterday = toDateStr(new Date(Date.now() - 86400000).toISOString())
+
+  // Longest streak
+  let longest = 1, run = 1
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1]), cur = new Date(sorted[i])
+    const diffDays = Math.round((cur.getTime() - prev.getTime()) / 86400000)
+    run = diffDays === 1 ? run + 1 : 1
+    if (run > longest) longest = run
+  }
+
+  // Current streak: must include today or yesterday
+  let current = 0
+  if (dates.has(today) || dates.has(yesterday)) {
+    const anchor = dates.has(today) ? today : yesterday
+    current = 1
+    let check = anchor
+    for (;;) {
+      const prev = toDateStr(new Date(new Date(check).getTime() - 86400000).toISOString())
+      if (dates.has(prev)) { current++; check = prev } else break
+    }
+  }
+
+  return { current, longest, activeDates: dates }
+}
+
+// ── parameterized variants ────────────────────────────────────────────────────
+// Picks a variant based on the current day. Same call within a calendar day
+// returns the same item, so a session is stable. Different day = different variant.
+// Runs at module load time — no React state needed.
+export function dailyPick<T>(arr: T[]): T {
+  const day = Math.floor(Date.now() / 86400000)
+  return arr[day % arr.length]
+}

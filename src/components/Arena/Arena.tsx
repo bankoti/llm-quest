@@ -19,9 +19,7 @@ type RunState = 'idle' | 'loading-pyodide' | 'running' | 'pass' | 'fail'
 // The cost keeps retrieval effortful (the testing effect) while making sure
 // nobody rage-quits at the exact moment they were about to learn something.
 const FAILS_TO_UNLOCK_FIRST_HINT = 2
-export function hintXpMultiplier(hintsUsed: number): number {
-  return 1 - 0.1 * Math.max(0, hintsUsed - 1)
-}
+import { hintXpMultiplier } from './xpUtils'
 
 // Drafts survive refresh/navigation — losing 30 min of typed code is fatal UX.
 const draftKey = (levelId: string) => `llmquest_code_v1:${levelId}`

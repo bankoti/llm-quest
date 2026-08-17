@@ -51,3 +51,17 @@ freshness, operability, unit cost, and reversibility.
 
 **Checkpoint:** For each pattern, name its source of truth, online failure mode,
 version boundary, and fallback.
+## Challenge decision rules
+
+The challenge `choose_pattern` tests three of the patterns above using numeric
+thresholds. The mapping and logic:
+
+| Return value | Pattern above | When to use |
+|---|---|---|
+| `"head-cache"` | Validated head cache | `head_coverage >= 0.5` — majority of traffic is computable ahead of time |
+| `"live-model"` | Direct live generation | Coverage too low for a cache; `latency_ms >= 150` — deadline is loose enough for a real-time call |
+| `"teacher-student"` | Teacher offline, student online | Low coverage **and** tight deadline — no live call fits; distill offline |
+
+Apply the rules in order: check `head_coverage` first, then `latency_ms`. The
+`unlabeled_pairs` argument tells you how much distillation data is available but
+does not change the routing decision in this simplified version.

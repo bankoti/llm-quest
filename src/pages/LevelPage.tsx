@@ -4,13 +4,14 @@ import { motion } from 'framer-motion'
 import { getLevel, getCourse, ALL_LEVELS } from '@/data/curriculum'
 import { loadProgress, completeLevel, ProgressState } from '@/engine/progress'
 import { LessonPanel } from '@/components/Lesson/LessonPanel'
-import { Arena } from '@/components/Arena/Arena'
+import { lazy, Suspense } from 'react'
+const Arena = lazy(() => import('@/components/Arena/Arena').then(m => ({ default: m.Arena })))
 import { XPBar } from '@/components/Progress/XPBar'
 import { GoDeeper } from '@/components/GoDeeper'
 import { SplitPane } from '@/components/SplitPane'
 import { isAdminMode } from '@/engine/admin'
 import { HINTS } from '@/data/hints'
-import { hintXpMultiplier } from '@/components/Arena/Arena'
+import { hintXpMultiplier } from '@/components/Arena/xpUtils'
 import { WARMUPS } from '@/interactive/lessons'
 
 interface Props { onProgressChange: (p: ProgressState) => void }
@@ -165,6 +166,7 @@ export function LevelPage({ onProgressChange }: Props) {
                 Loading challenge…
               </div>
             ) : (
+              <Suspense fallback={<div className="flex-1 flex items-center justify-center text-gray-600 text-sm">Loading editor…</div>}>
               <Arena
                 key={level.id}
                 levelId={level.id}
@@ -174,6 +176,7 @@ export function LevelPage({ onProgressChange }: Props) {
                 hints={HINTS[level.id] ?? []}
                 onPass={handlePass}
               />
+              </Suspense>
             )}
             <GoDeeper courseId={level.courseId} challengeFile={level.challengeFile} />
           </div>
