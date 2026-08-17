@@ -1033,3 +1033,600 @@ export function CalibrationPlay({ onDone }: WidgetProps) {
     </div>
   )
 }
+
+
+// ── Tier 2: scaling laws / compute-optimal allocation ────────────────────────
+
+const SCALING_CONFIGS: { label: string; n: number; d: number }[] = [
+  { label: 'Tiny model, massive data (1B × 1T)', n: 1e9, d: 1e12 },
+  { label: 'Balanced (10B × 200B)', n: 1e10, d: 2e11 },
+  { label: 'Chinchilla-optimal (14B × 280B)', n: 1.4e10, d: 2.8e11 },
+  { label: 'Giant model, thin data (100B × 10B)', n: 1e11, d: 1e10 },
+]
+// proxy loss: lower is better; Chinchilla formula Lˣ ≈ A/N^α + B/D^β
+const scalingLoss = (n: number, d: number) =>
+  Math.round((406.4 / (n / 1e9) ** 0.34 + 410.7 / (d / 1e9) ** 0.28) * 100) / 100
+
+export function ScalingPlay({ onDone }: WidgetProps) {
+  const [sel, setSel] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  const pick = (i: number) => { setSel(i); setTried(t => new Set(t).add(i)) }
+  const losses = SCALING_CONFIGS.map(c => scalingLoss(c.n, c.d))
+  const best = losses.indexOf(Math.min(...losses))
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Fixed compute budget: 3×10²¹ FLOPs. How should you spend it?</p>
+      <p className="text-sm text-gray-400 mb-4">Tap each allocation and watch the predicted loss. One combination is compute-optimal.</p>
+      <div className="grid gap-2 mb-4">
+        {SCALING_CONFIGS.map((c, i) => (
+          <button key={i} onClick={() => pick(i)}
+            className={`px-4 py-3 rounded-xl border text-left text-sm transition-colors
+              ${sel === i ? 'bg-violet-600/20 border-violet-500 text-gray-100' : 'bg-gray-800/60 border-gray-700 text-gray-200 hover:border-violet-500'}`}>
+            {c.label}
+            {tried.has(i) && (
+              <span className={`float-right font-mono text-xs ${i === best ? 'text-emerald-400' : 'text-gray-400'}`}>
+                loss {losses[i]} {i === best ? '← best' : ''}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+      {sel !== null && (
+        <motion.div key={sel} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+          className="p-3 rounded-xl border bg-gray-900 border-gray-800 mb-3 text-sm text-gray-300">
+          {sel === 2
+            ? 'Chinchilla (DeepMind, 2022): for a given compute budget C, optimal N* ≈ 0.1C^0.5 params and D* ≈ 20N* tokens. Models like GPT-3 were ~4× undertrained — you get a better model for the same FLOP budget by shrinking params and training longer.'
+            : sel === 3
+            ? 'Over-parameterized and undertrained. The giant model memorizes quickly then stagnates. You are paying for capacity you cannot afford to fill with data.'
+            : sel === 0
+            ? 'Reversed extreme: the model is too small to absorb what the data teaches. Capacity-limited even with abundant tokens.'
+            : 'Close to optimal but slightly off-balance. A further nudge toward Chinchilla improves loss with no extra compute.'}
+        </motion.div>
+      )}
+      {tried.size >= 4
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="text-xs text-gray-500 mt-2">Try all 4 allocations ({tried.size}/4).</p>}
+    </div>
+  )
+}
+
+// ── Tier 2: multi-head attention ──────────────────────────────────────────────
+
+const MH_TOKS = ['The', 'cat', 'sat', 'on', 'it']
+const MH_HEADS: { name: string; desc: string; scores: number[][] }[] = [
+  {
+    name: 'Head A — Coreference',
+    desc: '"it" strongly attends to "cat" — the head specialises in pronoun resolution.',
+    scores: [
+      [0.9, 0.03, 0.03, 0.02, 0.02],
+      [0.05, 0.85, 0.04, 0.03, 0.03],
+      [0.03, 0.10, 0.80, 0.04, 0.03],
+      [0.02, 0.03, 0.10, 0.80, 0.05],
+      [0.02, 0.60, 0.08, 0.12, 0.18],
+    ],
+  },
+  {
+    name: 'Head B — Syntax',
+    desc: '"sat" attends heavily to "cat" (its subject) — syntactic subject-verb dependency.',
+    scores: [
+      [0.80, 0.08, 0.05, 0.04, 0.03],
+      [0.08, 0.75, 0.08, 0.05, 0.04],
+      [0.05, 0.70, 0.15, 0.06, 0.04],
+      [0.03, 0.05, 0.12, 0.72, 0.08],
+      [0.03, 0.08, 0.06, 0.10, 0.73],
+    ],
+  },
+  {
+    name: 'Head C — Previous-token',
+    desc: 'Every token attends mostly to its immediate predecessor — a positional induction pattern.',
+    scores: [
+      [0.85, 0.05, 0.04, 0.03, 0.03],
+      [0.70, 0.20, 0.04, 0.03, 0.03],
+      [0.02, 0.80, 0.12, 0.03, 0.03],
+      [0.02, 0.03, 0.78, 0.12, 0.05],
+      [0.02, 0.03, 0.04, 0.82, 0.09],
+    ],
+  },
+  {
+    name: 'Head D — Broad / global',
+    desc: 'Attention is nearly uniform — this head aggregates context rather than focusing on structure.',
+    scores: [
+      [0.30, 0.20, 0.18, 0.17, 0.15],
+      [0.18, 0.30, 0.20, 0.17, 0.15],
+      [0.16, 0.20, 0.28, 0.20, 0.16],
+      [0.14, 0.18, 0.22, 0.28, 0.18],
+      [0.14, 0.18, 0.20, 0.22, 0.26],
+    ],
+  },
+]
+
+export function MultiHeadPlay({ onDone }: WidgetProps) {
+  const [head, setHead] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  const pick = (i: number) => { setHead(i); setTried(t => new Set(t).add(i)) }
+  const h = head !== null ? MH_HEADS[head] : null
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">One transformer layer runs 4 attention heads in parallel. Each learns a different pattern.</p>
+      <p className="text-sm text-gray-400 mb-4">Tap a head — inspect its attention heatmap for "The cat sat on it".</p>
+      <div className="flex gap-2 mb-4">
+        {MH_HEADS.map((hd, i) => (
+          <button key={i} onClick={() => pick(i)} className={chipCls(head === i)}>
+            {['A','B','C','D'][i]}
+            {tried.has(i) && <span className="ml-1 text-emerald-400 text-[9px]">✓</span>}
+          </button>
+        ))}
+      </div>
+      {h && (
+        <motion.div key={head!} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+          <p className="font-mono text-xs text-violet-300 mb-2">{h.name}</p>
+          <div className="grid gap-0.5 mb-2">
+            <div className="flex gap-0.5 ml-14">
+              {MH_TOKS.map(t => <div key={t} className="w-10 text-center font-mono text-[9px] text-gray-500">{t}</div>)}
+            </div>
+            {h.scores.map((row, r) => (
+              <div key={r} className="flex gap-0.5 items-center">
+                <div className="w-12 text-right pr-1 font-mono text-[9px] text-gray-500">{MH_TOKS[r]}</div>
+                {row.map((v, c) => (
+                  <div key={c} className="w-10 h-7 flex items-center justify-center rounded font-mono text-[9px] transition-all duration-300"
+                    style={{ background: `rgba(139,92,246,${v.toFixed(2)})`, color: v > 0.5 ? 'white' : '#9ca3af', border: '1px solid rgba(139,92,246,0.2)' }}>
+                    {v >= 0.1 ? v.toFixed(2) : ''}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <p className="text-sm text-gray-300">{h.desc}</p>
+        </motion.div>
+      )}
+      {tried.size >= 4
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-4 text-xs text-gray-500">Explore all 4 heads ({tried.size}/4).</p>}
+    </div>
+  )
+}
+
+// ── Tier 2: beam search vs sampling ──────────────────────────────────────────
+
+interface BeamNode { token: string; logp: number; children?: BeamNode[] }
+const BEAM_TREE: BeamNode[] = [
+  { token: 'on', logp: -0.51, children: [
+    { token: 'the', logp: -0.36 },
+    { token: 'a', logp: -1.20 },
+  ]},
+  { token: 'by', logp: -1.20, children: [
+    { token: 'fire', logp: -0.69 },
+    { token: 'the', logp: -0.69 },
+  ]},
+  { token: 'in', logp: -2.30, children: [] },
+]
+
+export function BeamPlay({ onDone }: WidgetProps) {
+  const [step, setStep] = useState<0|1|2>(0)
+  const beams0 = BEAM_TREE.slice(0,2) // top-2 first tokens
+  const beams1 = beams0.flatMap(b => (b.children ?? []).slice(0,1).map(c => ({
+    tokens: [b.token, c.token],
+    logp: b.logp + c.logp,
+  }))).sort((a,b) => b.logp - a.logp)
+
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Prompt: "The cat sat ___". Beam width = 2.</p>
+      <p className="text-sm text-gray-400 mb-4">Beam search keeps the top-k sequences at each step. Sampling would draw from the distribution — you might get "by fire".</p>
+
+      {/* step 0: initial token candidates */}
+      <div className="mb-4">
+        <p className="font-mono text-[10px] text-gray-500 mb-1">Step 1 candidates (log-prob)</p>
+        <div className="flex gap-2">
+          {BEAM_TREE.map((n, i) => (
+            <div key={n.token} className={`px-3 py-2 rounded-lg border font-mono text-sm transition-all
+              ${i < 2 ? 'bg-violet-600/20 border-violet-500 text-violet-200' : 'bg-gray-900 border-gray-800 text-gray-600 line-through'}`}>
+              {n.token} <span className="text-[10px]">{n.logp}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-gray-600 mt-1">pruned: "in" — only top-2 kept</p>
+      </div>
+
+      {step >= 1 && (
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+          <p className="font-mono text-[10px] text-gray-500 mb-1">Step 2 expand each beam</p>
+          {beams0.map(b => (
+            <div key={b.token} className="flex gap-2 mb-1">
+              <div className="px-2 py-1 rounded bg-violet-700/20 border border-violet-600 font-mono text-xs text-violet-300">{b.token}</div>
+              <span className="text-gray-600 self-center text-xs">→</span>
+              {(b.children ?? []).map((c, ci) => (
+                <div key={c.token} className={`px-2 py-1 rounded border font-mono text-xs
+                  ${ci === 0 ? 'bg-violet-600/20 border-violet-500 text-violet-200' : 'bg-gray-900 border-gray-800 text-gray-400'}`}>
+                  {c.token} <span className="text-[9px]">{c.logp}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </motion.div>
+      )}
+
+      {step >= 2 && (
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+          <p className="font-mono text-[10px] text-gray-500 mb-1">Re-rank by cumulative log-prob</p>
+          {beams1.map((b, i) => (
+            <div key={b.tokens.join('-')} className={`flex items-center gap-3 px-3 py-2 mb-1 rounded-lg border font-mono text-sm
+              ${i === 0 ? 'bg-emerald-600/20 border-emerald-600 text-emerald-200' : 'bg-gray-900 border-gray-800 text-gray-400'}`}>
+              <span>"The cat sat {b.tokens.join(' ')}"</span>
+              <span className="ml-auto text-[10px]">{b.logp.toFixed(2)}</span>
+              {i === 0 && <span className="text-[10px] text-emerald-400">← winner</span>}
+            </div>
+          ))}
+          <p className="text-xs text-gray-400 mt-2">Safe, grammatical, boring. Sampling could have picked "by fire" — a phrase that scores lower on average but is vivid. Neither is always right: use beam for factual tasks, sampling for creative ones.</p>
+        </motion.div>
+      )}
+
+      {step < 2 && (
+        <button onClick={() => setStep(s => (s + 1) as 0|1|2)}
+          className="mt-4 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold">
+          {step === 0 ? 'Expand beams (step 2)' : 'Re-rank and pick winner'}
+        </button>
+      )}
+      {step >= 2 && <ContinueBtn onClick={onDone} label="Got it, continue" />}
+    </div>
+  )
+}
+
+// ── Tier 2: overfitting / early stopping ─────────────────────────────────────
+
+// pre-computed loss pairs [train, val] for 12 training steps
+const ES_CURVE: [number, number][] = [
+  [2.30, 2.35], [1.80, 1.88], [1.40, 1.52], [1.10, 1.28],
+  [0.88, 1.08], [0.72, 0.92], [0.61, 0.85], [0.54, 0.81],
+  [0.48, 0.84], [0.43, 0.89], [0.39, 0.96], [0.36, 1.04],
+]
+const ES_OPT = 7 // 0-indexed, val minimum
+
+export function EarlyStopPlay({ onDone }: WidgetProps) {
+  const [pos, setPos] = useState(0)
+  const [stopped, setStopped] = useState<number | null>(null)
+
+  const cur = ES_CURVE[pos] ?? ES_CURVE[ES_CURVE.length - 1]
+  const done = stopped !== null
+
+  const doStop = () => { setStopped(pos); }
+  const doNext = () => { if (pos < ES_CURVE.length - 1) setPos(p => p + 1) }
+
+  const diff = stopped !== null ? stopped - ES_OPT : null
+  const quality = diff !== null ? (Math.abs(diff) <= 1 ? 'perfect' : Math.abs(diff) <= 2 ? 'close' : 'off') : null
+
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Training loss always falls. Validation loss tells you when to stop.</p>
+      <p className="text-sm text-gray-400 mb-4">Step through training and hit "Stop here!" when you think val loss is at its minimum.</p>
+
+      {/* mini loss chart */}
+      <div className="relative h-32 border border-gray-800 rounded-xl bg-gray-950 mb-4 overflow-hidden px-3 py-2">
+        <div className="absolute top-2 right-3 flex gap-3 text-[9px] font-mono">
+          <span className="text-sky-400">— train</span>
+          <span className="text-orange-400">— val</span>
+        </div>
+        <svg className="w-full h-full" viewBox="0 0 260 100" preserveAspectRatio="none">
+          {/* train loss line */}
+          <polyline fill="none" stroke="#38bdf8" strokeWidth="1.5"
+            points={ES_CURVE.slice(0, pos + 1).map((p, i) => `${(i / 11) * 240 + 10},${p[0] * 35}`).join(' ')} />
+          {/* val loss line */}
+          <polyline fill="none" stroke="#fb923c" strokeWidth="1.5"
+            points={ES_CURVE.slice(0, pos + 1).map((p, i) => `${(i / 11) * 240 + 10},${p[1] * 35}`).join(' ')} />
+          {/* optimal marker */}
+          {stopped !== null && (
+            <line x1={((ES_OPT / 11) * 240 + 10).toString()} y1="0" x2={((ES_OPT / 11) * 240 + 10).toString()} y2="100"
+              stroke="#4ade80" strokeWidth="1" strokeDasharray="3,2" />
+          )}
+          {/* stopped marker */}
+          {stopped !== null && (
+            <line x1={((stopped / 11) * 240 + 10).toString()} y1="0" x2={((stopped / 11) * 240 + 10).toString()} y2="100"
+              stroke="#a855f7" strokeWidth="1.5" strokeDasharray="3,2" />
+          )}
+        </svg>
+        <p className="absolute bottom-1 left-3 font-mono text-[9px] text-gray-600">step {pos + 1}/12</p>
+      </div>
+
+      <div className="flex gap-4 mb-3 font-mono text-sm">
+        <span className="text-sky-300">train: {cur[0].toFixed(2)}</span>
+        <span className="text-orange-300">val: {cur[1].toFixed(2)}</span>
+      </div>
+
+      {!done && (
+        <div className="flex gap-3">
+          {pos < ES_CURVE.length - 1 && (
+            <button onClick={doNext}
+              className="px-5 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-semibold">
+              Train one more step →
+            </button>
+          )}
+          <button onClick={doStop}
+            className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold">
+            Stop here!
+          </button>
+        </div>
+      )}
+
+      {done && (
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+          <p className={`text-sm font-semibold mb-1 ${quality === 'perfect' ? 'text-emerald-400' : quality === 'close' ? 'text-amber-300' : 'text-red-300'}`}>
+            {quality === 'perfect' && `Perfect — step ${stopped! + 1} is right at the val minimum.`}
+            {quality === 'close' && `Good — you stopped ${Math.abs(diff!)} step${Math.abs(diff!) > 1 ? 's' : ''} ${(diff! > 0 ? 'after' : 'before')} the optimum.`}
+            {quality === 'off' && `Stepped too ${diff! > 0 ? 'far — model overfit' : 'early — left performance on the table'}.`}
+          </p>
+          <p className="text-sm text-gray-300">Optimal is step {ES_OPT + 1}. After that, train loss keeps falling but val loss creeps back up — the model is memorising the training set. In practice: use a held-out val set, checkpoint every epoch, and restore the best checkpoint.</p>
+          <ContinueBtn onClick={onDone} label="Got it, continue" />
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+// ── Tier 2: RLHF pipeline ordering ────────────────────────────────────────────
+
+const RLHF_STAGES = ['SFT', 'Reward Model', 'PPO']
+const RLHF_WRONG: Record<string, string> = {
+  'PPO,SFT,Reward Model': 'RL before supervised training: the policy starts random. The reward model has nothing sensible to score.',
+  'Reward Model,SFT,PPO': 'You trained a reward model before the policy even knows how to follow instructions — it scores incoherent outputs.',
+  'SFT,PPO,Reward Model': 'PPO needs a reward model to exist first. Without scores, the RL update has no signal.',
+  'PPO,Reward Model,SFT': 'Everything is backwards: RL on a random policy, reward model trained before SFT, SFT last.',
+  'Reward Model,PPO,SFT': 'Same problem: no SFT baseline, no well-defined outputs for the RM to score.',
+}
+
+export function RlhfPipelinePlay({ onDone }: WidgetProps) {
+  const [order, setOrder] = useState<string[]>([])
+  const done = order.length === 3
+  const correct = done && JSON.stringify(order) === JSON.stringify(RLHF_STAGES)
+  const wrongMsg = done && !correct ? RLHF_WRONG[order.join(',')] ?? 'Incorrect order — think about what each stage needs as input.' : ''
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">RLHF has three stages that must happen in a strict order.</p>
+      <p className="text-sm text-gray-400 mb-4">Tap the stages in the order they should run, earliest first.</p>
+      {/* available */}
+      <div className="flex gap-3 mb-5">
+        {RLHF_STAGES.filter(s => !order.includes(s)).map(s => (
+          <button key={s} onClick={() => setOrder(o => [...o, s])}
+            className="px-4 py-2.5 rounded-xl border bg-gray-800 border-gray-700 text-gray-200 hover:border-violet-500 font-mono text-sm transition-colors">
+            {s}
+          </button>
+        ))}
+      </div>
+      {/* sequence slots */}
+      <div className="flex gap-3 mb-4">
+        {[0,1,2].map(i => (
+          <div key={i} className={`flex-1 h-12 flex items-center justify-center rounded-xl border font-mono text-sm
+            ${order[i] ? (correct ? 'bg-emerald-600/20 border-emerald-500 text-emerald-200' : done && !correct ? 'bg-red-900/20 border-red-700 text-red-300' : 'bg-violet-600/20 border-violet-500 text-violet-200') : 'bg-gray-900 border-gray-800 text-gray-700'}`}>
+            {order[i] ?? (i + 1)}
+          </div>
+        ))}
+      </div>
+      {done && !correct && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <p className="text-sm text-red-300 mb-3">{wrongMsg}</p>
+          <button onClick={() => setOrder([])} className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-semibold">
+            Try again
+          </button>
+        </motion.div>
+      )}
+      {correct && (
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+          <p className="text-sm text-emerald-300 mb-1">Correct. The output of each stage feeds the next.</p>
+          <p className="text-sm text-gray-300 mb-4">SFT gives the model instruction-following ability. The reward model learns human preferences by comparing SFT outputs. PPO then fine-tunes the SFT model to maximise RM score — with a KL penalty to stay close to the SFT baseline.</p>
+          <ContinueBtn onClick={onDone} label="Got it, continue" />
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+// ── Tier 3: embedding arithmetic ─────────────────────────────────────────────
+
+interface EAWord { w: string; x: number; y: number; cluster: 'royal'|'animal'|'place' }
+const EA_WORDS: EAWord[] = [
+  { w: 'king',   x: 82, y: 18, cluster: 'royal' },
+  { w: 'queen',  x: 20, y: 18, cluster: 'royal' },
+  { w: 'man',    x: 78, y: 72, cluster: 'royal' },
+  { w: 'woman',  x: 22, y: 72, cluster: 'royal' },
+  { w: 'prince', x: 70, y: 30, cluster: 'royal' },
+  { w: 'cat',    x: 20, y: 45, cluster: 'animal' },
+  { w: 'dog',    x: 30, y: 55, cluster: 'animal' },
+  { w: 'Paris',  x: 50, y: 20, cluster: 'place' },
+  { w: 'London', x: 60, y: 28, cluster: 'place' },
+  { w: 'Rome',   x: 55, y: 12, cluster: 'place' },
+]
+const CLUSTER_COLOR: Record<string, string> = {
+  royal: '#a78bfa', animal: '#34d399', place: '#f59e0b',
+}
+
+export function EmbeddingArithPlay({ onDone }: WidgetProps) {
+  const [showArrow, setShowArrow] = useState(false)
+  const [tried, setTried] = useState(false)
+  const king = EA_WORDS.find(w => w.w === 'king')!
+  const man  = EA_WORDS.find(w => w.w === 'man')!
+  const woman= EA_WORDS.find(w => w.w === 'woman')!
+  const queen= EA_WORDS.find(w => w.w === 'queen')!
+  // result point: king.x - man.x + woman.x
+  const rx = king.x - man.x + woman.x
+  const ry = king.y - man.y + woman.y
+  const doArrow = () => { setShowArrow(true); setTried(true) }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Embeddings encode relationships as directions in space.</p>
+      <p className="text-sm text-gray-400 mb-4">The gender axis runs from "man" to "woman". Add that offset to "king" and you land near "queen".</p>
+      <div className="relative w-full h-56 border border-gray-800 rounded-xl bg-gray-950 mb-4 overflow-hidden">
+        {EA_WORDS.map(w => (
+          <div key={w.w} className="absolute text-[11px] font-mono transition-all duration-500"
+            style={{ left: `${w.x}%`, top: `${w.y}%`, transform: 'translate(-50%,-50%)', color: CLUSTER_COLOR[w.cluster] }}>
+            {w.w}
+          </div>
+        ))}
+        {showArrow && (
+          <motion.svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            {/* gender offset arrow on king */}
+            <defs><marker id="ah" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto"><path d="M0,0 L4,2 L0,4 z" fill="#a78bfa"/></marker></defs>
+            <line x1={king.x.toString()} y1={king.y.toString()} x2={rx.toFixed(1)} y2={ry.toFixed(1)}
+              stroke="#a78bfa" strokeWidth="0.5" strokeDasharray="2,1" markerEnd="url(#ah)" />
+            <circle cx={rx.toFixed(1)} cy={ry.toFixed(1)} r="2" fill="#f9a8d4" />
+            <text x={(rx + 2).toFixed(1)} y={(ry - 2).toFixed(1)} fontSize="3.5" fill="#f9a8d4" fontFamily="monospace">result ≈ queen</text>
+          </motion.svg>
+        )}
+      </div>
+      <p className="text-xs text-gray-600 mb-3">Colors: <span className="text-violet-400">royalty</span> · <span className="text-emerald-400">animals</span> · <span className="text-amber-400">places</span></p>
+      {!showArrow && (
+        <button onClick={doArrow}
+          className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold">
+          Compute king − man + woman →
+        </button>
+      )}
+      {showArrow && (
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+          <p className="text-sm text-gray-300 mb-3">The arrow lands near "queen" because the model learned that king−man and queen−woman point in roughly the same direction. That direction is the "royalty + male" axis.</p>
+          <ContinueBtn onClick={onDone} label="Got it, continue" />
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+// ── Tier 3: distillation (teacher soft labels) ────────────────────────────────
+
+const DISTILL_TOKS = ['Paris', 'Lyon', 'Berlin', 'Rome']
+const DISTILL_HARD = [1, 0, 0, 0]
+const DISTILL_SOFT = [0.85, 0.08, 0.04, 0.03]
+
+export function DistillPlay({ onDone }: WidgetProps) {
+  const [mode, setMode] = useState<'hard'|'soft'>('hard')
+  const [tried, setTried] = useState<Set<string>>(new Set(['hard']))
+  const set = (m: 'hard'|'soft') => { setMode(m); setTried(t => new Set(t).add(m)) }
+  const vals = mode === 'hard' ? DISTILL_HARD : DISTILL_SOFT
+  const grads = mode === 'hard' ? [0, 0, 0, 0] : DISTILL_SOFT.map((v,i) => i===0 ? 0 : -v)
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Training target: "The capital of France is ___"</p>
+      <p className="text-sm text-gray-400 mb-4">Hard labels say only Paris=1. A teacher's soft distribution also encodes what it almost said. Toggle and watch the gradient signal.</p>
+      <div className="flex gap-3 mb-5">
+        <button onClick={() => set('hard')} className={chipCls(mode === 'hard')}>hard label (one-hot)</button>
+        <button onClick={() => set('soft')} className={chipCls(mode === 'soft')}>soft labels (teacher)</button>
+      </div>
+      <div className="grid gap-2 mb-3">
+        {DISTILL_TOKS.map((t, i) => (
+          <div key={t} className="flex items-center gap-3">
+            <div className="w-14 font-mono text-xs text-gray-300">{t}</div>
+            <div className="flex-1 h-7 bg-gray-950 rounded overflow-hidden border border-gray-800">
+              <motion.div animate={{ width: `${vals[i] * 100}%` }} transition={{ duration: 0.4 }}
+                className={`h-full ${i === 0 ? 'bg-emerald-500' : 'bg-violet-500/60'}`} />
+            </div>
+            <div className="w-10 text-right font-mono text-xs text-gray-400">{vals[i].toFixed(2)}</div>
+            {mode === 'soft' && i > 0 && (
+              <div className="w-16 font-mono text-[10px] text-orange-300">grad {grads[i].toFixed(2)}</div>
+            )}
+            {mode === 'hard' && i > 0 && (
+              <div className="w-16 font-mono text-[10px] text-gray-700">grad 0</div>
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="text-sm text-gray-300 min-h-14">
+        {mode === 'hard'
+          ? 'Hard labels: the model learns Paris is right, nothing about Lyon or Berlin. Zero gradient on wrong answers means zero knowledge transfer about geographic relationships.'
+          : 'Soft labels: Lyon and Berlin get tiny positive probability. The student sees that the teacher "almost said" Lyon — learning that Lyon is also a French city, just not the capital. That relational knowledge transfers even though it never appears as a correct answer.'}
+      </p>
+      {tried.size >= 2
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-3 text-xs text-gray-500">Try both modes.</p>}
+    </div>
+  )
+}
+
+// ── Tier 3: agents and tool use ────────────────────────────────────────────────
+
+interface AgentRound { question: string; options: { label: string; ok: boolean; result?: string; why: string }[] }
+const AGENT_ROUNDS: AgentRound[] = [
+  {
+    question: 'Q: "What is 15% of 847?" — what should the model do?',
+    options: [
+      { label: 'Answer directly ("about 127")', ok: false, why: 'LLMs are unreliable at arithmetic. The model will guess — and 124 ≠ 127.05. Use a tool for deterministic computation.' },
+      { label: 'Call calculator: 847 × 0.15', ok: true, result: 'calculator → 127.05', why: 'Correct. Arithmetic is deterministic, tool call is free, and the result is exact. Tools are not optional for this class of query.' },
+    ],
+  },
+  {
+    question: 'Tool returned 127.05. What next?',
+    options: [
+      { label: 'Return the answer: "15% of 847 is 127.05"', ok: true, why: 'The tool gave a verified result. Return it. No need to second-guess a calculator.' },
+      { label: 'Run the calculation again to double-check', ok: false, why: 'Deterministic tools give the same result every time. Calling again wastes a turn. Reserve re-checking for tools that can return stale or probabilistic results (e.g. a web search).' },
+    ],
+  },
+]
+
+export function AgentPlay({ onDone }: WidgetProps) {
+  const [round, setRound] = useState(0)
+  const [picked, setPicked] = useState<number|null>(null)
+  const [history, setHistory] = useState<{q:string; choice:string; ok:boolean; result?:string}[]>([])
+  const cur = AGENT_ROUNDS[round]
+  const done = round >= AGENT_ROUNDS.length
+
+  const choose = (i: number) => {
+    if (picked !== null) return
+    const opt = cur.options[i]
+    setPicked(i)
+    if (opt.ok) {
+      const entry = { q: cur.question, choice: opt.label, ok: true, result: opt.result }
+      setTimeout(() => {
+        setHistory(h => [...h, entry])
+        setPicked(null)
+        setRound(r => r + 1)
+      }, 1200)
+    }
+  }
+
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">An agent loops: think → act → observe → think.</p>
+      <p className="text-sm text-gray-400 mb-4">Guide the model through a two-step tool-use scenario. Pick the right action each turn.</p>
+
+      {/* history */}
+      {history.map((h, i) => (
+        <div key={i} className="mb-3 p-3 rounded-xl border bg-gray-900 border-gray-800 text-xs font-mono">
+          <p className="text-gray-500 mb-1">{h.q}</p>
+          <p className="text-violet-300">▶ {h.choice}</p>
+          {h.result && <p className="text-emerald-300 mt-1">⟵ {h.result}</p>}
+        </div>
+      ))}
+
+      {!done && (
+        <div>
+          <p className="text-sm text-gray-200 mb-3">{cur.question}</p>
+          <div className="grid gap-3">
+            {cur.options.map((opt, i) => {
+              const isWrong = picked === i && !opt.ok
+              const isRight = picked === i && opt.ok
+              return (
+                <motion.button key={i} onClick={() => choose(i)}
+                  animate={isWrong ? { x: [0,-8,8,-5,5,0] } : {}} transition={{ duration: 0.35 }}
+                  className={`px-4 py-3 rounded-xl border text-left text-sm transition-colors
+                    ${isRight ? 'bg-emerald-600/20 border-emerald-500 text-emerald-200'
+                    : isWrong ? 'bg-red-900/20 border-red-700 text-red-300'
+                    : 'bg-gray-800/60 border-gray-700 text-gray-200 hover:border-violet-500'}`}>
+                  {opt.label}
+                </motion.button>
+              )
+            })}
+          </div>
+          {picked !== null && !cur.options[picked].ok && (
+            <p className="mt-3 text-sm text-amber-300">{cur.options[picked].why}</p>
+          )}
+        </div>
+      )}
+
+      {done && (
+        <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="p-3 rounded-xl border bg-emerald-950/30 border-emerald-800 text-xs font-mono mb-3">
+            <p className="text-emerald-300">✓ Final answer: "15% of 847 is 127.05"</p>
+          </div>
+          <p className="text-sm text-gray-300 mb-1">Two decisions, both correct. In production, agents do this in a loop — often 5–30 turns — using a scratchpad of tool calls, observations, and partial reasoning until they have enough context to commit.</p>
+          <ContinueBtn onClick={onDone} label="Got it, continue" />
+        </motion.div>
+      )}
+    </div>
+  )
+}

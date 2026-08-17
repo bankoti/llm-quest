@@ -7,6 +7,8 @@ import {
   LrPlay, TemperaturePlay, PrecisionPlay, RewardHackPlay,
   GenerationPlay, EmbeddingPlay, MoePlay, RagPlay, LoraPlay, SpecDecodePlay,
   PositionPlay, CausalMaskPlay, BackpropPlay, TokenFailPlay, CalibrationPlay,
+  ScalingPlay, MultiHeadPlay, BeamPlay, EarlyStopPlay, RlhfPipelinePlay,
+  EmbeddingArithPlay, DistillPlay, AgentPlay,
 } from './widgets'
 
 export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
@@ -161,6 +163,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         cta: 'Show me the weights',
       },
       { kind: 'widget', widget: AttentionPlay },
+      { kind: 'widget', widget: MultiHeadPlay },
       {
         kind: 'mcq',
         prompt: 'Q has shape (B, H, T, D). K has the same shape. What is the shape of Q @ K.transpose(-2, -1)?',
@@ -497,7 +500,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     title: 'Embeddings & Meaning',
     emoji: '🗺️',
     blurb: 'How words become points in space, and why distance means similarity.',
-    minutes: 4,
+    minutes: 5,
     steps: [
       {
         kind: 'concept',
@@ -509,6 +512,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         cta: 'Explore the space',
       },
       { kind: 'widget', widget: EmbeddingPlay },
+      { kind: 'widget', widget: EmbeddingArithPlay },
       {
         kind: 'mcq',
         prompt: 'Two embedding vectors are normalized to length 1. Their dot product is 0.02. The words are most likely:',
@@ -660,7 +664,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     title: 'Fine-Tuning & LoRA',
     emoji: '🔧',
     blurb: 'Adapt a 7B model on one GPU by training 0.1% of it.',
-    minutes: 4,
+    minutes: 6,
     steps: [
       {
         kind: 'concept',
@@ -697,6 +701,20 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         answer: 0,
         explain: 'Gradient updates that help the new task overwrite weights the old tasks needed. Replaying general data keeps those weights exercised. LoRA sidesteps it structurally: the base never changes, and you can even unplug the adapter to get the original model back.',
         nudge: 'The model forgot old skills while learning new ones. What is that called?',
+      },
+      { kind: 'widget', widget: DistillPlay },
+      {
+        kind: 'mcq',
+        prompt: 'You want a 1B student to match a 70B teacher. Why are soft labels strictly better than hard labels for this?',
+        options: [
+          'Soft labels encode what the teacher almost said, giving non-zero gradient on wrong tokens and transferring relational knowledge',
+          'Soft labels are one-hot just like hard labels but re-normalised over the top-10 tokens',
+          'The student needs fewer epochs with soft labels because the teacher already picked the answer',
+          'Hard labels cause the reward model to overfit to a specific output format',
+        ],
+        answer: 0,
+        explain: 'A hard one-hot says "Paris = 1, everything = 0." A soft distribution says "Paris = 0.85, Lyon = 0.08" — the 0.08 for Lyon produces a non-zero gradient that teaches geographic proximity. Hinton called this dark knowledge: information the teacher encoded that never shows up as a correct answer.',
+        nudge: 'Which tokens get a non-zero gradient under each target type?',
       },
       {
         kind: 'predict',
@@ -761,6 +779,252 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         questions: [
           { label: 'Expected accepted tokens per target pass (plus the free fix token)', options: ['~3.6 — near the full 5 but discounted by rejections', 'Exactly 5 every round', '~1.2 — barely better than sequential'], answer: 0,
             reveal: 'E = 0.8 + 0.64 + 0.512 + 0.41 ≈ 2.36 accepted, +1 token the target supplies on rejection or completion ≈ 3.4-3.6 tokens per big-model pass, versus 1 for sequential decoding. Acceptance rate is the whole game: a well-matched draft model is what makes it pay.' },
+        ],
+      },
+    ],
+  },
+
+  // ── L15: Scaling Laws ────────────────────────────────────────────────────
+  {
+    slug: 'scaling',
+    title: 'Scaling Laws',
+    emoji: '🔭',
+    blurb: 'Why bigger is not always better — compute-optimal training and the Chinchilla insight.',
+    minutes: 5,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'The compute-optimal frontier',
+        lines: [
+          'Three things determine model quality: parameters (N), training tokens (D), and compute (C ≈ 6ND FLOPs). For a fixed budget C you can trade N for D — more parameters with less data, or a smaller model trained longer.',
+          'The Chinchilla paper (DeepMind, 2022) showed that most large models were over-parameterised and undertrained. GPT-3 (175B params, 300B tokens) needed roughly 3.5 trillion tokens to be compute-optimal. Llama models deliberately train small models very long to maximise quality at inference time.',
+        ],
+        cta: 'Explore the tradeoff',
+      },
+      { kind: 'widget', widget: ScalingPlay },
+      {
+        kind: 'mcq',
+        prompt: 'Chinchilla says optimal tokens D* ≈ 20N*. You have compute for a 70B parameter model at the Chinchilla ratio. How many training tokens?',
+        options: ['~1.4T tokens', '~300B tokens', '~70B tokens', '~10T tokens'],
+        answer: 0,
+        explain: '20 × 70B = 1.4T. Most "70B" models released before Chinchilla trained on 1–2T tokens anyway, but the ratio clarifies the principle: doubling parameters should be matched by doubling tokens, not just adding compute.',
+        nudge: '20 × 70 billion = ?',
+      },
+      {
+        kind: 'mcq',
+        prompt: 'Inference-focused deployments (like Llama) deliberately over-train small models beyond the Chinchilla compute-optimal point. Why?',
+        options: [
+          'A smaller model trained longer is cheaper to serve at scale even if training cost was higher',
+          'Over-training prevents weight drift during quantisation',
+          'Small models have lower perplexity by definition',
+          'Token count is cheaper than parameter count on most hardware',
+        ],
+        answer: 0,
+        explain: 'Training is a one-time cost; inference runs millions of times. A 7B model trained on 2T tokens can match a 13B model trained compute-optimally — and it fits in half the VRAM, batches twice as large, and costs half as much per token. Chinchilla optimises for training; Llama optimises for deployment.',
+        nudge: 'The model runs once during training. How many times does it run after deployment?',
+      },
+      {
+        kind: 'predict',
+        prompt: 'A 30B model trained on 300B tokens. According to Chinchilla (D* = 20N*), is it compute-optimal, undertrained, or overtrained?',
+        questions: [
+          { label: 'Training status', options: ['Undertrained — needs 600B tokens for compute-optimal', 'Compute-optimal', 'Overtrained — too much data for 30B params'], answer: 0,
+            reveal: '20 × 30B = 600B optimal tokens. 300B is half that — the model has spare capacity that was never filled. Quality improves further by training longer at the same parameter count.' },
+        ],
+      },
+    ],
+  },
+
+  // ── L16: Attention Heads ──────────────────────────────────────────────────
+  {
+    slug: 'multihead',
+    title: 'What Attention Heads Learn',
+    emoji: '🧠',
+    blurb: 'Each head specialises — coreference, syntax, position, global context.',
+    minutes: 4,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'One mechanism, many roles',
+        lines: [
+          'Multi-head attention runs several attention computations in parallel, each with its own Q, K, V weight matrices. The outputs are concatenated and projected back to the residual stream.',
+          'Different heads spontaneously specialise. Interpretability research finds heads that track syntactic roles, resolve pronouns, copy from earlier positions, or aggregate global context. No two heads learn the same job.',
+        ],
+        cta: 'Inspect the heads',
+      },
+      { kind: 'widget', widget: MultiHeadPlay },
+      {
+        kind: 'mcq',
+        prompt: 'Why does having multiple heads help over one big attention head with the same total compute?',
+        options: [
+          'Each head attends to a different aspect independently; a single head must average across all of them',
+          'Multiple heads apply more softmax operations, making gradients stronger',
+          'Heads prevent vanishing gradients by splitting the residual stream',
+          'The concatenation operation introduces non-linearity that a single head lacks',
+        ],
+        answer: 0,
+        explain: 'A single attention head computes one weighted combination of values. Multiple heads compute several, each sensitive to a different pattern. The concatenated output lets the FFN mix signals from all specialisations. One head trying to do everything produces a blurred average.',
+        nudge: 'You saw it: each head had a sharp, distinct pattern. What would blending them produce?',
+      },
+      {
+        kind: 'predict',
+        prompt: 'Model: hidden_dim=512, 8 heads. Each head projects Q, K, V to head_dim = 512/8 = 64. Predict the full weight matrix shapes.',
+        questions: [
+          { label: 'W_Q shape', options: ['(512, 512)', '(512, 64)', '(64, 512)'], answer: 0,
+            reveal: 'W_Q projects hidden_dim → hidden_dim = 512. It is then chunked into 8 × 64-dim slices for each head. Full shape: (512, 512).' },
+          { label: 'W_O (output projection) shape', options: ['(512, 512)', '(8, 64)', '(512, 64)'], answer: 0,
+            reveal: 'After concatenating all 8 head outputs (8 × 64 = 512), W_O projects back to hidden_dim: (512, 512).' },
+        ],
+      },
+    ],
+  },
+
+  // ── L17: Decoding Strategies ──────────────────────────────────────────────
+  {
+    slug: 'decoding',
+    title: 'Decoding Strategies',
+    emoji: '🌲',
+    blurb: 'Beam search, sampling, top-p, top-k — and when each one wins.',
+    minutes: 4,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'After the logits: the choice',
+        lines: [
+          'The model outputs logits. You decide how to turn them into a token. This decision has a large effect on output character — and the right choice depends on the task.',
+          'Greedy decoding picks the argmax every time: fast, reproducible, but tends toward bland high-probability phrases. Beam search expands multiple hypotheses in parallel. Sampling draws from the distribution, optionally filtered by top-k or top-p to prevent incoherent low-probability tokens.',
+        ],
+        cta: 'Walk through beam search',
+      },
+      { kind: 'widget', widget: BeamPlay },
+      {
+        kind: 'mcq',
+        prompt: 'You are building a coding assistant that must return identical completions given the same prefix. Which decoding strategy?',
+        options: [
+          'Greedy (T=0): deterministic, always the argmax',
+          'Top-p sampling with p=0.9',
+          'Beam search width 5',
+          'Temperature 0.7 with top-k=50',
+        ],
+        answer: 0,
+        explain: 'Determinism is the requirement. Greedy (T=0) produces the same output for the same input every time. Beam search is also deterministic but slower. Sampling adds variance — bad for a predictable tool.',
+        nudge: 'The requirement is "identical given the same prefix". Which strategy has no randomness?',
+      },
+      {
+        kind: 'mcq',
+        prompt: 'Why does beam search tend to produce repetitive or generic text in open-ended generation?',
+        options: [
+          'It finds the sequence with the highest cumulative probability, which is usually common, generic text',
+          'Beam search uses a lower temperature than greedy by default',
+          'The beam width limits vocabulary breadth to k tokens per step',
+          'It only samples from the top-k tokens, cutting off creative choices',
+        ],
+        answer: 0,
+        explain: 'High-probability text is statistically common text. Beam search is very good at finding it. Creative, specific, or unusual text scores lower — exactly what you want for stories or brainstorming, exactly what beam search avoids.',
+        nudge: 'You saw it: beam found "on the", not "by fire". What kind of language maximises average log-probability?',
+      },
+      {
+        kind: 'predict',
+        prompt: 'Top-p (nucleus) sampling with p=0.9. Predict what happens to the nucleus size as temperature T increases.',
+        questions: [
+          { label: 'Nucleus size as T increases', options: ['Grows toward the full vocabulary', 'Shrinks to a single token', 'Stays the same size'], answer: 0,
+            reveal: 'Higher T flattens the distribution. To accumulate 90% probability you need more tokens, so the nucleus grows. At T→∞ it becomes uniform sampling across the full vocabulary.' },
+        ],
+      },
+    ],
+  },
+
+  // ── L18: Generalisation ───────────────────────────────────────────────────
+  {
+    slug: 'generalisation',
+    title: 'Overfitting & Generalisation',
+    emoji: '📉',
+    blurb: 'Why training loss is not the metric you care about — and how to stop at the right moment.',
+    minutes: 4,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'Two losses, one truth',
+        lines: [
+          'Training loss measures how well the model fits the data it has seen. It always improves with more training — given enough capacity, a model can memorise every training example.',
+          'Validation loss measures performance on data the model has never seen. When validation loss starts rising while training loss keeps falling, the model has stopped learning general patterns and started memorising specifics. This is overfitting.',
+        ],
+        cta: 'Find the optimal stopping point',
+      },
+      { kind: 'widget', widget: EarlyStopPlay },
+      {
+        kind: 'mcq',
+        prompt: 'Train loss: 0.3, val loss: 1.8, gap widening each epoch. The model has:',
+        options: [
+          'Severely overfit — memorised training data, poor generalisation',
+          'Underfit — needs more capacity or training',
+          'Reached optimal performance; the gap is expected for large models',
+          'Converged normally; a 1.5 gap is within variance',
+        ],
+        answer: 0,
+        explain: 'A large and widening train/val gap is the definition of overfitting. The model has learned to reproduce training examples rather than underlying patterns. Fixes: early stopping, dropout, weight decay, more data, or a smaller model.',
+        nudge: 'Train loss fell further but val loss rose. What is the model doing to training examples?',
+      },
+      {
+        kind: 'predict',
+        prompt: 'You have 100k examples and want to tune early stopping. Design the split.',
+        questions: [
+          { label: 'Correct strategy', options: ['Train/val/test: use val for stopping, keep test unseen until final eval', 'Train/test only: stop when test loss plateaus', 'Use held-out training batches as val'], answer: 0,
+            reveal: 'Three-way split: train on train, stop using val, report test once. Using test for early stopping contaminates it — the final number will look better than true out-of-sample performance. Test must remain unseen throughout development.' },
+        ],
+      },
+    ],
+  },
+
+  // ── L19: Agents & Tool Use ────────────────────────────────────────────────
+  {
+    slug: 'agents',
+    title: 'Agents & Tool Use',
+    emoji: '🤖',
+    blurb: 'How an LLM becomes an agent: loops, tool calls, and when to stop.',
+    minutes: 4,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'From model to agent',
+        lines: [
+          'A language model is stateless: one input, one output. An agent wraps the model in a loop: the model reasons about what to do, calls a tool, observes the result, and repeats until it has enough to answer.',
+          'Tools are deterministic black boxes — a calculator, a search engine, a code interpreter, a database query. The agent decides when to delegate to a tool versus when to answer from its own knowledge.',
+        ],
+        cta: 'Try two tool-call decisions',
+      },
+      { kind: 'widget', widget: AgentPlay },
+      {
+        kind: 'mcq',
+        prompt: 'An agent calls a web search tool 12 times on a single query, each time refining the search. The final answer is good but took 45 seconds. The design problem is:',
+        options: [
+          'No stopping condition — the agent did not know when it had enough information to answer',
+          'The search tool was too slow; a faster tool would have fixed it',
+          'The system prompt did not limit the number of searches',
+          'Agents always require many tool calls; this is expected behaviour',
+        ],
+        answer: 0,
+        explain: 'Without a clear criterion for "I have enough information," agents spin. Good agent design includes: a maximum turn budget, an explicit "I can answer now" decision step, and prompting that rewards sufficiency. Faster tools would not help — the agent would call them 12 times faster.',
+        nudge: 'The tool was called 12 times. What decision was missing from the loop?',
+      },
+      {
+        kind: 'mcq',
+        prompt: 'ReAct interleaves thought steps with tool calls in the context window. The key advantage over pure chain-of-thought is:',
+        options: [
+          'Intermediate tool results are incorporated into subsequent reasoning, grounding each step in real observations',
+          'Reasoning tokens are cheaper than tool calls',
+          'ReAct prevents hallucination by replacing model reasoning with tool outputs entirely',
+          'Tool calls do not consume context tokens in the ReAct format',
+        ],
+        answer: 0,
+        explain: 'Chain-of-thought reasons from memory alone — hallucination compounds with each step. ReAct calls a tool, pastes the result into context, and reasons from that observation. Each step is anchored by real data rather than model extrapolation.',
+        nudge: 'What does each tool result add to the context that pure reasoning cannot provide?',
+      },
+      {
+        kind: 'predict',
+        prompt: 'An agent loop: up to 10 turns. Each turn: thought (~100 tokens) + tool call (~20 tokens) + observation (~200 tokens). Starting context = 500 tokens.',
+        questions: [
+          { label: 'Worst-case context at turn 10', options: ['~3700 tokens', '~10000 tokens', '~500 tokens'], answer: 0,
+            reveal: '500 + 10 × (100 + 20 + 200) = 500 + 3200 = 3700 tokens. Manageable today — but at 50 turns with long observations you hit context limits fast, requiring summarisation or external memory.' },
         ],
       },
     ],
@@ -859,13 +1123,14 @@ export const WARMUPS: Record<string, string> = {
   'c1-l3': 'training',
   'c1-l4': 'sampling',
   'c1-l5': 'internals',
-  'c1-l6': 'attention',
+  'c1-l6': 'multihead',
   'c1-d1': 'internals',
   'c1-l7': 'internals',
   'c2-l1': 'internals',
-  'c2-l2': 'efficiency',
+  'c2-l2': 'multihead',
   'c2-l3': 'moe',
   'c2-l6': 'efficiency',
+  'c2-l7': 'multihead',
   'c3-l3': 'moe',
   'c5-l1': 'rag',
   'c5-l2': 'embeddings',
@@ -873,9 +1138,12 @@ export const WARMUPS: Record<string, string> = {
   'c5-l5': 'rag',
   'c5-l6': 'rag',
   'c6-l2': 'finetuning',
+  'c7-l3': 'decoding',
+  'c7-l4': 'agents',
   'c7-l7': 'efficiency',
   'c7-l8': 'frontier',
-  'c9-l1': 'frontier',
+  'c9-l1': 'scaling',
+  'c9-d1': 'scaling',
   'c9-l3': 'alignment',
   'c9-l4': 'alignment',
   'c9-l7': 'frontier',
