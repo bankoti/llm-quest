@@ -748,3 +748,288 @@ export function SpecDecodePlay({ onDone }: WidgetProps) {
     </div>
   )
 }
+
+
+// ── internals: word order / positional encoding ──────────────────────────────
+
+const PP_VEC_BAG = '[0.31, 0.74, 0.22]'
+const PP_VEC_A = '[0.58, 0.12, 0.91]'
+const PP_VEC_B = '[0.07, 0.66, 0.43]'
+
+export function PositionPlay({ onDone }: WidgetProps) {
+  const [positions, setPositions] = useState(false)
+  const [tried, setTried] = useState<Set<string>>(new Set(['off']))
+  const set = (on: boolean) => { setPositions(on); setTried(t => new Set(t).add(on ? 'on' : 'off')) }
+  const rows: { words: string[]; vec: string }[] = [
+    { words: ['dog', 'bites', 'man'], vec: positions ? PP_VEC_A : PP_VEC_BAG },
+    { words: ['man', 'bites', 'dog'], vec: positions ? PP_VEC_B : PP_VEC_BAG },
+  ]
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Attention is a weighted sum — and sums do not care about order.</p>
+      <p className="text-sm text-gray-400 mb-4">Two opposite sentences. Toggle positional encoding and watch what the model computes.</p>
+      <div className="flex gap-3 mb-5">
+        <button onClick={() => set(false)} className={chipCls(!positions)}>positions OFF</button>
+        <button onClick={() => set(true)} className={chipCls(positions)}>positions ON</button>
+      </div>
+      <div className="grid gap-3 mb-4">
+        {rows.map((r, i) => (
+          <div key={i} className="flex items-center gap-3 p-3 rounded-xl border bg-gray-900 border-gray-800">
+            <div className="flex gap-1.5">
+              {r.words.map((w, j) => (
+                <span key={j} className="px-2 py-1 rounded-md bg-gray-800 border border-gray-700 font-mono text-xs text-gray-200">
+                  {w}{positions && <span className="text-violet-400">+p{j}</span>}
+                </span>
+              ))}
+            </div>
+            <span className="ml-auto font-mono text-[10px] text-gray-500">→</span>
+            <motion.span key={r.vec + i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className={`font-mono text-[11px] ${positions ? 'text-emerald-300' : 'text-red-300'}`}>{r.vec}</motion.span>
+          </div>
+        ))}
+      </div>
+      <p className={`text-sm min-h-12 ${positions ? 'text-emerald-300' : 'text-red-300'}`}>
+        {positions
+          ? 'Different representations. Each token carries a position tag, so "dog at position 0" and "dog at position 2" are no longer the same input. Word order is back.'
+          : 'Identical representations. Without positions, both sentences are the same bag of words — the model literally cannot tell who bit whom.'}
+      </p>
+      {tried.size >= 2
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-4 text-xs text-gray-500">Try both settings.</p>}
+    </div>
+  )
+}
+
+// ── internals: causal mask toggle ─────────────────────────────────────────────
+
+const CM_TOKS = ['The', 'cat', 'sat', 'down']
+
+export function CausalMaskPlay({ onDone }: WidgetProps) {
+  const [masked, setMasked] = useState(true)
+  const [tried, setTried] = useState<Set<string>>(new Set(['on']))
+  const set = (m: boolean) => { setMasked(m); setTried(t => new Set(t).add(m ? 'on' : 'off')) }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Each row is a position asking: which tokens am I allowed to see?</p>
+      <p className="text-sm text-gray-400 mb-4">Toggle the causal mask and watch the upper triangle.</p>
+      <div className="flex gap-3 mb-5">
+        <button onClick={() => set(true)} className={chipCls(masked)}>mask ON (causal)</button>
+        <button onClick={() => set(false)} className={chipCls(!masked)}>mask OFF</button>
+      </div>
+      <div className="grid gap-1.5 mb-4">
+        <div className="flex gap-1.5 ml-16">
+          {CM_TOKS.map(t => <div key={t} className="w-12 text-center font-mono text-[10px] text-gray-500">{t}</div>)}
+        </div>
+        {CM_TOKS.map((row, r) => (
+          <div key={row} className="flex gap-1.5 items-center">
+            <div className="w-14 text-right pr-1 font-mono text-[10px] text-gray-500">{row}</div>
+            {CM_TOKS.map((_, c) => {
+              const blocked = masked && c > r
+              const leak = !masked && c > r
+              return (
+                <div key={c} className={`w-12 h-9 flex items-center justify-center rounded-md font-mono text-[10px] border transition-all duration-300
+                  ${blocked ? 'bg-gray-950 border-gray-800 text-gray-700'
+                  : leak ? 'bg-red-900/40 border-red-700 text-red-300'
+                  : 'bg-violet-600/30 border-violet-500 text-violet-200'}`}>
+                  {blocked ? '-∞' : leak ? 'leak' : 'ok'}
+                </div>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+      <p className="text-sm text-gray-300 min-h-16">
+        {masked
+          ? 'With the mask, "sat" sees only The / cat / sat. Its prediction is honest: the future is hidden, exactly as it will be at inference time.'
+          : 'Without the mask, "sat" attends to "down" — the very token it is trained to predict. Training loss collapses toward zero, but the skill is fake: at inference there is no future to copy from.'}
+      </p>
+      {tried.size >= 2
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-4 text-xs text-gray-500">Try both settings.</p>}
+    </div>
+  )
+}
+
+// ── internals: backprop chain / vanishing gradients ───────────────────────────
+
+const BP_LAYERS = 6
+
+export function BackpropPlay({ onDone }: WidgetProps) {
+  const [act, setAct] = useState<'sigmoid' | 'relu'>('sigmoid')
+  const [depth, setDepth] = useState(0)
+  const [finished, setFinished] = useState<Set<string>>(new Set())
+  const factor = act === 'sigmoid' ? 0.25 : 1.0
+  const pick = (a: 'sigmoid' | 'relu') => { if (a !== act) { setAct(a); setDepth(0) } }
+  const stepBack = () => {
+    const d = depth + 1
+    setDepth(d)
+    if (d >= BP_LAYERS) setFinished(f => new Set(f).add(act))
+  }
+  const fmt = (g: number) => (g >= 0.01 ? g.toFixed(2) : g.toExponential(1))
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">The loss knows how wrong the output was. That signal must travel back through every layer.</p>
+      <p className="text-sm text-gray-400 mb-4">Each layer multiplies the gradient by its local derivative. Send it back and watch.</p>
+      <div className="flex gap-3 mb-5">
+        <button onClick={() => pick('sigmoid')} className={chipCls(act === 'sigmoid')}>sigmoid (×0.25/layer)</button>
+        <button onClick={() => pick('relu')} className={chipCls(act === 'relu')}>ReLU (×1.0/layer)</button>
+      </div>
+      <div className="flex items-end gap-1.5 mb-2">
+        {Array.from({ length: BP_LAYERS }, (_, i) => {
+          const layerNo = i + 1
+          const reachedIdx = BP_LAYERS - depth
+          const reached = layerNo >= reachedIdx + 1 || depth >= BP_LAYERS - i
+          const g = factor ** (BP_LAYERS - i)
+          return (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div className={`w-full h-16 rounded-md border flex flex-col items-center justify-end overflow-hidden
+                ${reached ? 'border-violet-500 bg-gray-900' : 'border-gray-800 bg-gray-950'}`}>
+                {reached && (
+                  <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(4, g * 100)}%` }}
+                    className={`w-full ${g < 0.01 ? 'bg-red-600' : 'bg-violet-500'}`} />
+                )}
+              </div>
+              <span className="font-mono text-[9px] text-gray-500">L{layerNo}</span>
+              <span className={`font-mono text-[9px] ${reached ? (g < 0.01 ? 'text-red-400' : 'text-violet-300') : 'text-gray-700'}`}>
+                {reached ? fmt(g) : '·'}
+              </span>
+            </div>
+          )
+        })}
+        <div className="flex flex-col items-center gap-1">
+          <div className="w-12 h-16 rounded-md border border-amber-600 bg-amber-950/40 flex items-center justify-center font-mono text-[10px] text-amber-300">loss</div>
+          <span className="font-mono text-[9px] text-gray-500">grad=1</span>
+        </div>
+      </div>
+      <p className="text-sm text-gray-300 min-h-12 mb-1">
+        {depth === 0 && 'Gradient at the loss is 1.0. Tap to send it back one layer.'}
+        {depth > 0 && depth < BP_LAYERS && `After ${depth} layer${depth > 1 ? 's' : ''}: gradient = ${fmt(factor ** depth)}.`}
+        {depth >= BP_LAYERS && act === 'sigmoid' && `Layer 1 receives ${fmt(factor ** BP_LAYERS)} — effectively nothing. Early layers stop learning. This is the vanishing gradient.`}
+        {depth >= BP_LAYERS && act === 'relu' && 'Layer 1 receives the full signal. This is why ReLU-family activations (and residual connections) took over deep learning.'}
+      </p>
+      {depth < BP_LAYERS && (
+        <button onClick={stepBack}
+          className="mt-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold">
+          ← send gradient back ({depth}/{BP_LAYERS})
+        </button>
+      )}
+      {finished.size >= 2
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : depth >= BP_LAYERS && <p className="mt-4 text-xs text-gray-500">Now run the other activation.</p>}
+    </div>
+  )
+}
+
+// ── tokenization: famous failure modes ────────────────────────────────────────
+
+export function TokenFailPlay({ onDone }: WidgetProps) {
+  const [revealed, setRevealed] = useState<Set<string>>(new Set())
+  const reveal = (k: string) => setRevealed(r => new Set(r).add(k))
+  const Tok = ({ t }: { t: string }) => (
+    <span className="px-1.5 py-0.5 rounded bg-violet-600/30 border border-violet-500 font-mono text-xs text-violet-200">{t}</span>
+  )
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Two famous LLM fails. Tap each one to see the token boundaries behind it.</p>
+      <p className="text-sm text-gray-400 mb-4">The model never sees letters — only token IDs.</p>
+
+      <button onClick={() => reveal('straw')} className="w-full text-left p-4 mb-3 rounded-xl border bg-gray-900 border-gray-800 hover:border-violet-500 transition-colors">
+        <p className="text-sm text-gray-200 mb-1">Q: How many r&apos;s are in &quot;strawberry&quot;?</p>
+        <p className="text-sm text-red-300 font-mono mb-2">Model: 2 ✗ (it is 3)</p>
+        {revealed.has('straw') && (
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+            <p className="text-xs text-gray-400 mb-2">What the model actually receives:</p>
+            <p className="mb-2 flex gap-1.5 items-center">
+              <Tok t="straw" /><Tok t="berry" />
+              <span className="font-mono text-[10px] text-gray-500">→ IDs [33861, 15717]</span>
+            </p>
+            <p className="text-xs text-gray-300">The letters are fused into two opaque IDs before the model ever runs. It cannot count what it cannot see — it guesses from association, and &quot;berry&quot; words usually have 2 r&apos;s mentioned around them.</p>
+          </motion.div>
+        )}
+        {!revealed.has('straw') && <p className="text-xs text-gray-600">tap to reveal tokens</p>}
+      </button>
+
+      <button onClick={() => reveal('911')} className="w-full text-left p-4 mb-3 rounded-xl border bg-gray-900 border-gray-800 hover:border-violet-500 transition-colors">
+        <p className="text-sm text-gray-200 mb-1">Q: Which is bigger, 9.11 or 9.9?</p>
+        <p className="text-sm text-red-300 font-mono mb-2">Model: 9.11 ✗</p>
+        {revealed.has('911') && (
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+            <p className="text-xs text-gray-400 mb-2">What the model actually receives:</p>
+            <p className="mb-2 flex gap-1.5 items-center flex-wrap">
+              <Tok t="9" /><Tok t="." /><Tok t="11" />
+              <span className="font-mono text-[10px] text-gray-500">vs</span>
+              <Tok t="9" /><Tok t="." /><Tok t="9" />
+            </p>
+            <p className="text-xs text-gray-300">Not one number — three tokens. And in the training data, &quot;9.11&quot; usually follows &quot;9.9&quot;: section numbers, versions, dates. The pattern &quot;11 comes after 9&quot; wins over decimal arithmetic.</p>
+          </motion.div>
+        )}
+        {!revealed.has('911') && <p className="text-xs text-gray-600">tap to reveal tokens</p>}
+      </button>
+
+      {revealed.size >= 2
+        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
+        : <p className="mt-2 text-xs text-gray-500">Reveal both failures ({revealed.size}/2).</p>}
+    </div>
+  )
+}
+
+// ── alignment: calibration betting game ───────────────────────────────────────
+
+const CAL_ITEMS: { claim: string; conf: number; correct: boolean }[] = [
+  { claim: 'Canberra is the capital of Australia', conf: 98, correct: true },
+  { claim: 'The Eiffel Tower was completed in 1889', conf: 96, correct: true },
+  { claim: 'The word "strawberry" contains 2 r\'s', conf: 92, correct: false },
+  { claim: 'The Great Wall of China is visible from the Moon', conf: 88, correct: false },
+  { claim: 'Kigali is the capital of Rwanda', conf: 61, correct: true },
+]
+
+export function CalibrationPlay({ onDone }: WidgetProps) {
+  const [idx, setIdx] = useState(0)
+  const [bets, setBets] = useState<boolean[]>([])
+  const bet = (trust: boolean) => { setBets(b => [...b, trust]); setIdx(i => i + 1) }
+  const done = idx >= CAL_ITEMS.length
+  const good = bets.filter((b, i) => b === CAL_ITEMS[i].correct).length
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">A model states 5 facts with its confidence. Bet on each: trust it or doubt it.</p>
+      <p className="text-sm text-gray-400 mb-4">Score a point when you trust a true claim or doubt a false one.</p>
+      {!done && (
+        <div className="p-4 rounded-xl border bg-gray-900 border-gray-800 mb-4">
+          <p className="font-mono text-[10px] text-gray-500 mb-2">claim {idx + 1} of {CAL_ITEMS.length}</p>
+          <p className="text-gray-100 mb-3">&quot;{CAL_ITEMS[idx].claim}&quot;</p>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="font-mono text-[10px] text-gray-500 shrink-0">model confidence</span>
+            <div className="flex-1 h-3 bg-gray-950 rounded overflow-hidden">
+              <div className="h-full bg-sky-500" style={{ width: `${CAL_ITEMS[idx].conf}%` }} />
+            </div>
+            <span className="font-mono text-xs text-sky-300 shrink-0">{CAL_ITEMS[idx].conf}%</span>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => bet(true)} className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-semibold">Trust</button>
+            <button onClick={() => bet(false)} className="flex-1 px-4 py-2.5 rounded-xl bg-red-800 hover:bg-red-700 text-white text-sm font-semibold">Doubt</button>
+          </div>
+        </div>
+      )}
+      {done && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="grid gap-2 mb-4">
+            {CAL_ITEMS.map((it, i) => {
+              const goodCall = bets[i] === it.correct
+              return (
+                <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg border bg-gray-900 border-gray-800 text-xs">
+                  <span className={`font-mono shrink-0 ${it.correct ? 'text-emerald-400' : 'text-red-400'}`}>{it.correct ? 'TRUE' : 'FALSE'}</span>
+                  <span className="text-gray-300 flex-1">{it.claim}</span>
+                  <span className="font-mono text-gray-500 shrink-0">{it.conf}%</span>
+                  <span className="shrink-0">{goodCall ? '✓' : '✗'}</span>
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-sm text-gray-200 mb-1">You made {good} of {CAL_ITEMS.length} good calls.</p>
+          <p className="text-sm text-gray-400">Two claims near 90% confidence were false; the hesitant 61% one was true. Stated confidence is a speaking style, not a probability — and RLHF tunes that style toward whatever raters reward.</p>
+          <ContinueBtn onClick={onDone} label="Got it, continue" />
+        </motion.div>
+      )}
+    </div>
+  )
+}

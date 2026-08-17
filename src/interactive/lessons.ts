@@ -6,6 +6,7 @@ import {
   AxisPlay, SlicePlay, BpePlay, AttentionPlay,
   LrPlay, TemperaturePlay, PrecisionPlay, RewardHackPlay,
   GenerationPlay, EmbeddingPlay, MoePlay, RagPlay, LoraPlay, SpecDecodePlay,
+  PositionPlay, CausalMaskPlay, BackpropPlay, TokenFailPlay, CalibrationPlay,
 } from './widgets'
 
 export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
@@ -84,7 +85,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     title: 'Tokenization',
     emoji: '✂️',
     blurb: 'Why "cat" might be one token but "unbelievable" might be three.',
-    minutes: 4,
+    minutes: 5,
     steps: [
       {
         kind: 'concept',
@@ -116,6 +117,20 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         answer: 0,
         explain: '"token" is common so it survives as one token. "ize" is a frequent suffix. Character-level split only happens for truly novel byte sequences. One token only if the exact word appeared often in training.',
         nudge: 'Common subwords survive; rare ones get split. Which part of the word is more common?',
+      },
+      { kind: 'widget', widget: TokenFailPlay },
+      {
+        kind: 'mcq',
+        prompt: 'An LLM miscounts the r\'s in "strawberry". The root cause is:',
+        options: [
+          'The model receives token IDs — individual letters inside a token are invisible to it',
+          'Attention heads cannot perform counting operations',
+          'RLHF fine-tuning removed low-level character skills',
+          'The vocabulary is too small to contain the word',
+        ],
+        answer: 0,
+        explain: 'Counting letters requires seeing letters. The tokenizer fuses "strawberry" into one or two opaque IDs before the model runs, so the model answers from association, not inspection. Spelling it out ("s-t-r-a-w-b-e-r-r-y") fixes it: each letter becomes its own token.',
+        nudge: 'What does the model actually receive as input — characters or something else?',
       },
       {
         kind: 'predict',
@@ -176,6 +191,65 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
             reveal: '(B, H, T, D) @ (B, H, D, T) → (B, H, T, T) = (2, 4, 8, 8). One score per query-key pair.' },
           { label: 'out shape', options: ['(2, 4, 8, 16)', '(2, 4, 8, 8)', '(2, 8, 4, 16)'], answer: 0,
             reveal: '(B, H, T, T) @ (B, H, T, D) → (B, H, T, D) = (2, 4, 8, 16). Each position gets a blend of value vectors.' },
+        ],
+      },
+    ],
+  },
+
+  // ── Inside the Transformer ────────────────────────────────────────────────
+  {
+    slug: 'internals',
+    title: 'Inside the Transformer',
+    emoji: '🔬',
+    blurb: 'Word order, the causal mask, and how gradients actually reach layer 1.',
+    minutes: 5,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'Three quiet tricks',
+        lines: [
+          'Attention is a weighted sum, and sums do not care about order: shuffle the words and the math gives the same answer. Something has to tell the model where each token sits.',
+          'Two more tricks hide inside every GPT: a mask that stops training from cheating, and a design that lets the loss signal survive the trip back to layer 1. None of them are glamorous. Remove any one and the model does not train.',
+        ],
+        cta: 'Break word order',
+      },
+      { kind: 'widget', widget: PositionPlay },
+      {
+        kind: 'mcq',
+        prompt: 'A transformer with no positional encoding reads "dog bites man" and "man bites dog". What does it compute?',
+        options: [
+          'The same bag-of-words representation for both — the sentences are indistinguishable',
+          'Different outputs, because Q, K, V projections differ per position',
+          'It refuses to run: sequence order is required by the attention shape',
+          'The same output only at temperature 0',
+        ],
+        answer: 0,
+        explain: 'Attention scores depend on token content, not location. Every token attends to the same set of tokens either way, so the weighted sums match. Positional encodings break the tie by making "dog at position 0" a different input than "dog at position 2".',
+        nudge: 'You saw it in the widget: what happened to the two vectors with positions OFF?',
+      },
+      { kind: 'widget', widget: CausalMaskPlay },
+      {
+        kind: 'mcq',
+        prompt: 'At inference the future genuinely does not exist yet. So why does training need a causal mask at all?',
+        options: [
+          'Training feeds the whole sequence at once, so every position predicts in parallel and the future is physically present in the tensor',
+          'Training data arrives shuffled, so order must be enforced by the mask',
+          'The mask exists to save memory on long sequences',
+          'It is a regularizer that prevents overfitting to common phrases',
+        ],
+        answer: 0,
+        explain: 'Training is parallel: one forward pass scores all T positions simultaneously (teacher forcing). Position 3 predicts token 4 while token 4 sits right there in the same tensor. The -∞ mask is what makes each prediction honest.',
+        nudge: 'Think about what the training tensor contains when all positions are processed at once.',
+      },
+      { kind: 'widget', widget: BackpropPlay },
+      {
+        kind: 'predict',
+        prompt: 'A 10-layer network uses sigmoid activations at their steepest point (derivative 0.25). Predict what happens to the gradient by layer 1 — and the fix every transformer uses.',
+        questions: [
+          { label: 'Gradient scale at layer 1', options: ['~1e-6 (0.25¹⁰)', '~0.025 (0.25 × 10)', '~0.25 (only the last layer matters)'], answer: 0,
+            reveal: 'Multiplication compounds: 0.25^10 ≈ 9.5e-7. Layer 1 receives a millionth of the signal and effectively stops learning. Depth without a fix is a dead end.' },
+          { label: 'The standard fix', options: ['Residual connections: an unmodified path for the gradient past every layer', 'A much larger learning rate for early layers', 'Training the layers one at a time'], answer: 0,
+            reveal: 'x + f(x) means the gradient always has an identity path around the block: no multiplication, no vanishing. Residual streams are why 100-layer transformers train at all. (ReLU-family activations help for the same reason: derivative 1, not 0.25.)' },
         ],
       },
     ],
@@ -354,7 +428,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     title: 'RLHF & Alignment',
     emoji: '🎯',
     blurb: 'Reward modeling, PPO, and why reward hacking makes alignment hard.',
-    minutes: 4,
+    minutes: 5,
     steps: [
       {
         kind: 'concept',
@@ -391,6 +465,20 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         answer: 0,
         explain: 'Human labeling is the bottleneck: expensive, slow, and inconsistent at scale. RLAIF uses a capable LLM to generate and critique responses, producing preference data at much higher volume. The base insight: a strong enough LLM can approximate human judgment for many tasks.',
         nudge: 'What is the resource that human labeling consumes that RLAIF replaces?',
+      },
+      { kind: 'widget', widget: CalibrationPlay },
+      {
+        kind: 'mcq',
+        prompt: 'GPT-4\'s base model was well calibrated: 80% confidence meant right about 80% of the time. After RLHF, calibration got worse. Why?',
+        options: [
+          'Human raters prefer confident-sounding answers, so RLHF tunes tone toward confidence regardless of accuracy',
+          'RLHF deletes probability information from the weights',
+          'The reward model injects random noise into the logits',
+          'Calibration and helpfulness are mathematically incompatible',
+        ],
+        answer: 0,
+        explain: 'Hedged answers ("I am not sure, but...") score lower with raters, so the policy learns to sound sure. The knowledge is still in the weights; the stated confidence is a learned style optimized for approval, not truth. This is why "the model sounds certain" is not evidence.',
+        nudge: 'Which answer would you rate higher: a confident one or a hedged one? RLHF learned from people like you.',
       },
       {
         kind: 'predict',
@@ -768,11 +856,13 @@ export const WARMUPS: Record<string, string> = {
   'c0-l4': 'shapes',
   'c1-l1': 'shapes',
   'c1-l2': 'tokenization',
+  'c1-l3': 'training',
   'c1-l4': 'sampling',
-  'c1-l5': 'training',
+  'c1-l5': 'internals',
   'c1-l6': 'attention',
-  'c1-d1': 'attention',
-  'c1-l7': 'attention',
+  'c1-d1': 'internals',
+  'c1-l7': 'internals',
+  'c2-l1': 'internals',
   'c2-l2': 'efficiency',
   'c2-l3': 'moe',
   'c2-l6': 'efficiency',
