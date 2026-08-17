@@ -12,6 +12,11 @@ export function HomePage({ progress }: Props) {
   const { completed, total } = getProgressSummary(progress)
   const hasStarted = completed > 0
   const due = dueCount()
+  // Coarse pointer + narrow screen: the Monaco-based main track is a poor fit;
+  // steer these visitors to the tap-first interactive track instead.
+  const isTouchMobile =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(pointer: coarse) and (max-width: 767px)').matches
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
@@ -73,6 +78,22 @@ export function HomePage({ progress }: Props) {
           <p className="mt-4 text-xs text-gray-600 font-mono">
             No signup. Progress saved locally.
           </p>
+
+          {isTouchMobile && (
+            <button
+              onClick={() => navigate('/interactive')}
+              className="mt-6 w-full max-w-sm mx-auto flex items-center gap-3 p-4 rounded-xl text-left
+                         border border-violet-700/60 bg-violet-900/20 hover:bg-violet-900/40 transition-colors"
+            >
+              <span className="text-2xl">✨</span>
+              <span>
+                <span className="block text-sm font-semibold text-violet-200">On your phone?</span>
+                <span className="block text-xs text-gray-400 leading-snug">
+                  The main track needs a keyboard. Start with the tap-first Interactive Track — 22 lessons, no typing.
+                </span>
+              </span>
+            </button>
+          )}
         </motion.div>
 
         {/* Course grid */}
