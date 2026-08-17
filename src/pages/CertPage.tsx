@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SITE } from '@/config/site'
 import { COURSES, MAX_XP, getRank } from '@/data/curriculum'
 import { loadProgress, getProgressSummary } from '@/engine/progress'
 import { getDefense, loadReview } from '@/engine/review'
+import { renderShareCard } from '@/engine/shareCard'
 
 // Deterministic completion code: verifiable by recomputing on this page.
 // Honest scope: this is an integrity check, not a cryptographic credential —
@@ -45,6 +46,27 @@ export function CertPage() {
     setName(v)
     try { localStorage.setItem(NAME_KEY, v) } catch {}
   }
+
+  // Share card: rendered client-side to a PNG data URL; re-renders when
+  // the name or progress changes. Available at any progress level.
+  const [cardUrl, setCardUrl] = useState<string>('')
+  useEffect(() => {
+    let cancelled = false
+    renderShareCard({
+      name: name.trim(),
+      rankTitle: rank.title,
+      rankColor: rank.color,
+      xp: progress.totalXp,
+      completed, total, done,
+      code: done ? completionCode(name, completed, progress.totalXp) : '',
+      siteName: SITE.name,
+      tagline: SITE.tagline,
+      domain: SITE.domain,
+    }).then(url => { if (!cancelled) setCardUrl(url) })
+      .catch(() => { /* canvas unavailable: section simply stays hidden */ })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name, completed, progress.totalXp, done])
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -129,6 +151,31 @@ export function CertPage() {
                 style={{ width: percent + '%', background: '#7c3aed' }}
               />
             </div>
+          </div>
+        )}
+
+        {/* Share card */}
+        {cardUrl && (
+          <div className="mb-10 print:hidden">
+            <h2 className="text-sm font-mono uppercase tracking-widest text-gray-500 mb-4">
+              Share card
+            </h2>
+            <img
+              src={cardUrl}
+              alt="ZeroOne progress share card"
+              className="w-full max-w-xl rounded-xl border border-gray-800 mb-3"
+            />
+            <a
+              href={cardUrl}
+              download="zeroone-card.png"
+              className="inline-block px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-500
+                         text-sm font-mono text-gray-300 transition-colors"
+            >
+              ⬇ Download PNG
+            </a>
+            <span className="ml-3 text-xs font-mono text-gray-600">
+              1200×630 · sized for LinkedIn / X posts
+            </span>
           </div>
         )}
 
