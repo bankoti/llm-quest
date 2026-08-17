@@ -1,11 +1,12 @@
 // InteractiveLessonPage: the step player for the interactive track.
 // No Pyodide, no progress writes to the main system.
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { INTERACTIVE_LESSONS } from './lessons'
 import { scoredCount, saveLesson, stars as calcStars } from './types'
 import type { Step, PredictQuestion } from './types'
+import { beacon } from '@/engine/beacon'
 
 // ── atoms ─────────────────────────────────────────────────────────────────────
 
@@ -186,6 +187,10 @@ function Finale({ lessonSlug, firstTries, scored }: { lessonSlug: string; firstT
 export function InteractiveLessonPage() {
   const { slug } = useParams<{ slug: string }>()
   const lesson = INTERACTIVE_LESSONS.find(l => l.slug === slug)
+
+  useEffect(() => {
+    if (lesson) beacon('lesson_start', lesson.slug)
+  }, [lesson?.slug])
   const [step, setStep] = useState(0)
   const [firstTries, setFirstTries] = useState(0)
   const [missed, setMissed] = useState<number[]>([])
@@ -205,6 +210,7 @@ export function InteractiveLessonPage() {
     setMissed(ms)
     if (step + 1 >= lesson.steps.length) {
       saveLesson(lesson.slug, { firstTries: ft, scored, completedAt: new Date().toISOString(), missed: ms })
+      beacon('lesson_complete', lesson.slug)
       setDone(true)
     } else {
       setStep(s => s + 1)

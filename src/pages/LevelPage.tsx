@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { getLevel, getCourse, ALL_LEVELS } from '@/data/curriculum'
 import { loadProgress, completeLevel, ProgressState } from '@/engine/progress'
+import { beacon } from '@/engine/beacon'
 import { LessonPanel } from '@/components/Lesson/LessonPanel'
 import { lazy, Suspense } from 'react'
 const Arena = lazy(() => import('@/components/Arena/Arena').then(m => ({ default: m.Arena })))
@@ -30,6 +31,7 @@ export function LevelPage({ onProgressChange }: Props) {
 
   useEffect(() => {
     if (!level) return
+    beacon('level_start', level.id)
     setPassed(false)
     setEarnedXp(0)
     setStarterCode(null)

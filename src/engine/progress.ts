@@ -1,6 +1,7 @@
 // Progress state — stored in localStorage, no backend needed for v1.
 // Upgrade path: swap localStorage calls for Supabase calls in one file.
 
+import { beacon } from './beacon'
 import { ALL_LEVELS, getRank } from '@/data/curriculum'
 
 export interface LevelState {
@@ -123,6 +124,7 @@ export function completeLevel(levelId: string, xpMultiplier = 1): ProgressState 
 
   touchStreak(state)
   saveProgress(state)
+  beacon('level_complete', levelId)
   return state
 }
 

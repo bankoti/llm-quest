@@ -4,11 +4,14 @@
 
 export const SITE = {
   name: 'ZeroOne',
-  domain: 'zeroone.dev',
+  domain: 'bankoti.github.io/llm-quest',  // swap when a custom domain lands
   tagline: 'LLM Engineering from First Principles',
   description:
     'Ten courses. 64 levels. Build a GPT from scratch, then ship a production AI system — all in code.',
   repoUrl: 'https://github.com/bankoti/llm-quest',
+  // Funnel beacon endpoint (worker/beacon). Empty string = beacon disabled.
+  // After deploying: 'https://zeroone-beacon.<account>.workers.dev/e'
+  beaconUrl: '',
   // Social / meta
   twitterHandle: '',           // fill in later
   ogImage: '/og.png',          // fill in later
