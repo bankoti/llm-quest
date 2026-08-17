@@ -1165,6 +1165,172 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
       },
     ],
   },
+
+  // ── L20: Reading the Frontier ─────────────────────────────────────────────
+  {
+    slug: 'modelcards',
+    title: 'Reading the Frontier',
+    emoji: '📇',
+    blurb: 'Decode any 2026 model announcement: total vs active, context, license.',
+    minutes: 5,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'Two numbers, not one',
+        lines: [
+          'August 2026, one two-week stretch: Kimi K3 at 2.8T parameters, Qwen3.8-Max at 2.4T, Nemotron 3.5 Lightning at 30B, Qwen3.8-27B at 27.8B. The headline number tells you almost nothing until you find its partner: active parameters per token.',
+          'Total parameters are a memory bill — every weight has to live somewhere. Active parameters are the compute bill — what actually runs per token, which sets speed and energy. Dense models: the two numbers are equal. MoE models: the gap between them is the entire story. Kimi K3 stores 2.8T but runs ~50B per token.',
+        ],
+        cta: 'Decode a headline',
+      },
+      {
+        kind: 'mcq',
+        prompt: 'Kimi K3 launches as "2.8T parameters, 896 experts, ~50B active." A colleague says it must be ~56x slower per token than a 50B dense model. What is wrong with that?',
+        options: [
+          'Nothing is 56x: per-token compute tracks active parameters (~50B), so it decodes like a 50B model that happens to need 2.8T of storage',
+          'They are right — total parameters set decoding speed',
+          'MoE models do not have a meaningful speed comparison to dense models',
+          'The 896 experts run in parallel, so it is actually faster than 50B dense',
+        ],
+        answer: 0,
+        explain: 'The router picks a few experts per token; the other ~850 sit idle for that token. Compute per token tracks the ~50B active path, so decode speed resembles a 50B dense model. What total parameters cost you is memory: 2.8T of weights must be held somewhere, which is why these models live on big inference clusters, not laptops.',
+        nudge: 'MoE lesson flashback: stored parameters vs the path one token actually takes.',
+      },
+      {
+        kind: 'predict',
+        prompt: 'Same quantization, one consumer GPU. Nemotron 3.5 Lightning: 30B-parameter MoE, ~3B active. Qwen3.8-27B: 27.8B dense. Predict both.',
+        questions: [
+          { label: 'Which needs more memory to load?', options: ['Lightning, slightly — 30B stored beats 27.8B stored', 'Qwen3.8-27B — dense models always need more memory', 'Identical: active parameters set memory'], answer: 0,
+            reveal: 'Memory follows stored weights: 30B vs 27.8B, so Lightning is marginally bigger on disk and in VRAM. Active parameters are irrelevant to the loading bill.' },
+          { label: 'Which decodes faster per token?', options: ['Lightning, by a lot — ~3B active vs 27.8B active', 'Qwen3.8-27B — dense layers are better optimized', 'Same, since total sizes are close'], answer: 0,
+            reveal: 'Per-token compute follows active parameters: ~3B vs 27.8B is roughly a 9x gap in work per token. That is why NVIDIA pitches Lightning for always-on agents: near-30B storage, small-model latency. The 27B dense buys you something different — stronger quality per stored byte and no routing complexity.' },
+        ],
+      },
+      {
+        kind: 'concept',
+        title: 'The license line nobody reads',
+        lines: [
+          '"Open" is doing a lot of work in 2026 announcements. Qwen3.8-27B and Meta\u2019s Muse Glimmer ship under Apache 2.0: use them, modify them, ship products on them. MiniMax H3 published its weights too — but the license excludes US and EU commercial use entirely.',
+          'Open weights means you can download the numbers. Open source, in the traditional sense, would also mean training data, code, and a license that lets you build. Almost no frontier model clears that bar. Before a model goes anywhere near production, the license line is the first thing to read, not the last.',
+        ],
+      },
+      {
+        kind: 'mcq',
+        prompt: 'Your team wants to ship a paid product on a model whose announcement says "weights available on Hugging Face." What settles whether you can?',
+        options: [
+          'The license text — downloadable weights can still carry restrictions on commercial use, regions, or fields',
+          'Whether the weights are quantized',
+          'Whether it beats proprietary models on benchmarks',
+          'Whether the model card lists training data',
+        ],
+        answer: 0,
+        explain: 'Downloadable and usable are different claims. MiniMax H3 is on Hugging Face with US/EU commercial use excluded; other models restrict fields of use or require revenue-share above thresholds. The license text is the ground truth — benchmarks and quantization decide whether you want to, the license decides whether you may.',
+        nudge: 'Being able to download a file and being allowed to sell with it are separate questions.',
+      },
+    ],
+  },
+
+  // ── L21: Attention Goes Hybrid ────────────────────────────────────────────
+  {
+    slug: 'hybrid',
+    title: 'Attention Goes Hybrid',
+    emoji: '🌀',
+    blurb: 'Linear attention, fixed-size state, and why 2026 models mix 3:1.',
+    minutes: 5,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'The bill for exact recall',
+        lines: [
+          'Softmax attention has perfect memory with a growing invoice. Every new token compares against every stored key — so the KV-cache grows with context length, and per-token compute grows with it. At the 1M-token windows now standard on frontier models, the cache stops being a footnote and becomes the main memory cost.',
+          'Linear attention flips the deal: fold the entire history into a fixed-size state, updated once per token. Per-token cost stays constant whether the context is 1K or 1M. The catch is that the state is a lossy summary — ask it to retrieve one exact sentence from 400 pages and it struggles where softmax attention would nail it.',
+        ],
+        cta: 'So why not go all-in?',
+      },
+      {
+        kind: 'mcq',
+        prompt: 'Pure linear-attention models exist and are fast. Why has no frontier lab shipped one as its flagship?',
+        options: [
+          'Exact recall degrades — needle-in-a-haystack retrieval over long contexts is where fixed-size state loses to a real KV lookup',
+          'Linear attention cannot be trained with backpropagation',
+          'They are incompatible with MoE layers',
+          'The fixed state makes them slower at short contexts',
+        ],
+        answer: 0,
+        explain: 'A fixed-size state must compress everything, so rarely-referenced details fade. Softmax attention keeps every key and can look any of them up exactly. Long-context users notice precisely this failure — quote this clause, find that variable — which is why the answer in 2026 is a mix, not a replacement.',
+        nudge: 'What does a lossy summary lose first?',
+      },
+      {
+        kind: 'concept',
+        title: 'The 2026 recipe: 3 to 1',
+        lines: [
+          'Qwen3.8-27B, the model every local-agent setup adopted this month, interleaves Gated DeltaNet linear-attention layers with full softmax layers at a 3:1 ratio. Three cheap layers carry the bulk of the modeling; every fourth layer is real attention holding exact-recall ability for the whole stack.',
+          'The same shape shows up across the frontier: DeepSeek V4 and MiniMax M3 reach their 1M-token windows with sparse attention — full attention that only looks at a selected subset of positions. Different mechanism, same bet: pay the softmax bill on a fraction of the work, keep the recall.',
+        ],
+      },
+      {
+        kind: 'predict',
+        prompt: 'A 48-layer hybrid uses 3 linear : 1 full attention. Context is at 1M tokens and still growing. Predict both.',
+        questions: [
+          { label: 'KV-cache size vs an all-softmax 48-layer model', options: ['~1/4 — only the 12 full layers store a growing cache', 'Identical — every layer caches something', '~3/4 — the linear layers still cache keys'], answer: 0,
+            reveal: 'Only the 12 softmax layers keep per-token K and V. The 36 linear layers hold a fixed-size state each, which does not grow with context. At 1M tokens that is roughly a 4x cut in the dominant memory cost.' },
+          { label: 'When context doubles from 1M to 2M, per-token cost of the linear layers', options: ['Unchanged — fixed state means constant work per token', 'Doubles, like softmax attention', 'Quadruples'], answer: 0,
+            reveal: 'That is the whole point of the linear side: one state update per token regardless of history length. The softmax layers\u2019 cost still grows — but there are only 12 of them, and with sparse patterns even that gets trimmed. Long context stopped being priced by the token partly because of this trade.' },
+        ],
+      },
+    ],
+  },
+
+  // ── L22: Diffusion LLMs ───────────────────────────────────────────────────
+  {
+    slug: 'diffusion',
+    title: 'Diffusion LLMs',
+    emoji: '🌫️',
+    blurb: 'Generating text in parallel instead of left-to-right — and what it costs.',
+    minutes: 4,
+    steps: [
+      {
+        kind: 'concept',
+        title: 'Left-to-right is a latency floor',
+        lines: [
+          'Everything in this track so far generates autoregressively: one forward pass, one token, repeat. 256 tokens means 256 sequential passes, and no amount of hardware removes the "sequential" — each token needs the one before it. That is the latency floor speculative decoding chips away at.',
+          'Diffusion language models remove the floor a different way. Start a block of positions fully masked, then denoise all of them in parallel over a handful of steps — each step firms up the tokens the model is confident about. In practice they run blockwise semi-autoregressive: blocks are generated in order, but inside each active block, every position updates at once.',
+        ],
+        cta: 'Count the passes',
+      },
+      {
+        kind: 'mcq',
+        prompt: 'What do diffusion LLMs primarily buy over autoregressive models?',
+        options: [
+          'Latency — parallel decoding inside each block means far fewer sequential passes for the same output length',
+          'Quality — denoising finds better tokens than sampling',
+          'Memory — no KV-cache is needed',
+          'Training cost — diffusion objectives converge faster',
+        ],
+        answer: 0,
+        explain: 'The trade is sequential passes for parallel ones. Quality at matched size still favors autoregressive models, and dLLMs keep caches for committed blocks. Latency is the pitch — which is exactly why the frontier entries (NVIDIA\u2019s Nemotron diffusion line, DeepMind\u2019s DiffusionGemma) target interactive and edge use.',
+        nudge: 'Parallel decoding changes how many passes you wait for, not how good each token is.',
+      },
+      {
+        kind: 'predict',
+        prompt: 'Generate 256 tokens. Autoregressive: one pass per token. Diffusion: 64-token blocks, 8 denoising steps per block. Predict both.',
+        questions: [
+          { label: 'Sequential passes for the diffusion model', options: ['32 — four blocks times eight steps', '256 — same as autoregressive', '8 — one round of steps covers everything'], answer: 0,
+            reveal: '256/64 = 4 blocks, each denoised in 8 parallel steps: 32 sequential passes vs 256. An 8x cut in the count — though each denoising pass processes a whole block, so per-pass cost is higher and the wall-clock win is smaller than 8x.' },
+          { label: 'The catch that keeps dLLMs from taking over', options: ['Quality at matched size still trails autoregressive, and each denoise step re-attends to all previous blocks', 'They cannot generate code', 'Block size is capped at 64 by the math', 'They only work below 1B parameters'], answer: 0,
+            reveal: 'Two open problems: matched-size quality still favors left-to-right, and every denoising step attends over all committed blocks — an attention bill that current research (including retrofitting linear attention into dLLMs, August 2026) is actively trying to cut. Familiar fix, new architecture.' },
+        ],
+      },
+      {
+        kind: 'concept',
+        title: 'Where this sits, August 2026',
+        lines: [
+          'Diffusion LLMs graduated from papers to shipped weights this year: NVIDIA released a Nemotron diffusion line at 3B/8B/14B, and DeepMind published DiffusionGemma. Nobody\u2019s flagship is a dLLM — but nobody\u2019s flagship used MoE once, either.',
+          'The deeper lesson is the pattern, not the architecture: autoregression, like softmax attention, is a design choice with a price tag, and the field keeps finding places where a different trade wins. When the next announcement drops, you now read it the same way — what does it buy, what does it cost, and which number is doing the marketing.',
+        ],
+      },
+    ],
+  },
 ]
 
 // ── warm-up map: main-track level id → interactive lesson slug ────────────────
