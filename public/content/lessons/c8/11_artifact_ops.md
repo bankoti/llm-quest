@@ -6,6 +6,10 @@ safety filters: change any one and the system's outputs change. If you
 cannot say exactly which versions were live at a given moment, you cannot
 debug an incident, reproduce an evaluation, or roll back safely.
 
+Waypoint is a live example of the risk: model, index, prompts, and filters
+all changed within the same month. When the student-model swap ships, the
+manifest is how you prove which combination produced any given answer.
+
 ## The manifest
 
 ![Artifact manifest fields](content/images/c8/artifact_manifest.svg)

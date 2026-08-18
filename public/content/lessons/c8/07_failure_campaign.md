@@ -1,5 +1,10 @@
 # 07 - Resilience and Failure Campaign
 
+Before Waypoint's launch review you have to show what happens when its
+dependencies fail: the help-article index times out, the student model
+returns malformed JSON, the cache is cold right after a rollback. The matrix
+you build here is the checklist a reviewer reads first.
+
 Create a failure matrix before injecting faults. Each row includes stage,
 injection, expected response, maximum latency, security invariant, telemetry,
 operator action, recovery, and evidence link.

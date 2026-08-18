@@ -1,6 +1,6 @@
 # Debug: The Confident Gate
 
-A regression shipped last week. The launch gate said PASS. The gate an AI
+A Waypoint regression shipped last week. The launch gate said PASS. The gate an AI
 assistant wrote has one conceptual bug, and it is the most expensive class of
 bug in experimentation.
 

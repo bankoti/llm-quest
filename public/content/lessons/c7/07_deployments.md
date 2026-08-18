@@ -25,9 +25,39 @@ safe version identifiers for incident correlation.
 7. retain previous warm artifact through observation window.
 
 Shadowing tests capacity and compatibility but not user impact. Canary compares
-served behavior and must account for traffic mix. Complete the challenge
-below: a quality gain cannot compensate for an error-rate
-or latency guardrail breach.
+served behavior and must account for traffic mix.
+
+## The canary decision
+
+At every ramp stage the gate makes one of three calls, and the order of checks
+is the whole design:
+
+1. **Rollback** on any guardrail breach (error rate or p95 latency), even on
+   thin evidence. Demonstrated harm is not something you wait out, and a
+   quality gain can never buy back a breach.
+2. **Hold** when the sample count is below the evidence bar. Promoting on 120
+   requests is opinion; the gate demands data.
+3. **Promote** only when the quality delta clears the minimum with enough
+   samples behind it.
+4. **Hold** otherwise: no harm shown, but no proven win either. A canary that
+   never proves its win eventually gets abandoned by a human, not auto-promoted
+   by drift.
+
+The asymmetry is deliberate. Rollback triggers on weak evidence of harm;
+promote requires strong evidence of good. The cost of a wrong rollback is a
+delayed launch; the cost of a wrong promote is an incident at 100% traffic.
+
+## Ramping
+
+A promoted canary does not jump to 100%. It walks fixed stages
+(1% -> 5% -> 25% -> 50% -> 100%), re-running the same gate at each stage on
+fresh metrics. Hold keeps the current percentage; rollback drops to 0
+immediately from any stage. Each stage roughly doubles-to-quintuples exposure,
+so a defect that survived 1% gets caught at 5% before it can hurt a quarter of
+traffic.
+
+Complete the challenge below: the three-gate `can_promote` check, the
+promote/hold/rollback decision, and the ramp walk.
 
 ## Data and index release
 

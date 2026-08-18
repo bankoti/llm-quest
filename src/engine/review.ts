@@ -71,8 +71,15 @@ export function dueQuestions(now = Date.now()): ReviewQuestion[] {
   }
 
   if (changed) saveReview(state)
-  // Oldest due first, so nothing starves
-  return due.sort((a, b) => (state.cards[a.id]?.due ?? 0) - (state.cards[b.id]?.due ?? 0))
+  // Struggling cards first (lowest historical accuracy), oldest due as the
+  // tiebreak so nothing starves. New cards sit in the middle at 0.5.
+  const acc = (q: ReviewQuestion) => {
+    const c = state.cards[q.id]
+    return c && c.seen > 0 ? c.right / c.seen : 0.5
+  }
+  return due.sort((a, b) =>
+    acc(a) - acc(b) ||
+    (state.cards[a.id]?.due ?? 0) - (state.cards[b.id]?.due ?? 0))
 }
 
 export function dueCount(now = Date.now()): number {
@@ -80,8 +87,9 @@ export function dueCount(now = Date.now()): number {
 }
 
 // Record the first answer of a session: correct moves the card up a box,
-// wrong sends it back to box 0 (due again tomorrow). Correct answers earn XP
-// and keep the streak alive — reviews protect retention, not just engagement.
+// wrong sends it back to box 0 and requeues it in 10 minutes — a missed card
+// should be retrieved again while the correction is fresh, not tomorrow.
+// Correct answers earn XP and keep the streak alive.
 export function answerCard(questionId: string, correct: boolean, now = Date.now()): void {
   const state = loadReview()
   const card = state.cards[questionId] ?? { box: 0, due: now, seen: 0, right: 0 }
@@ -89,10 +97,11 @@ export function answerCard(questionId: string, correct: boolean, now = Date.now(
   if (correct) {
     card.right += 1
     card.box = Math.min(card.box + 1, INTERVAL_DAYS.length - 1)
+    card.due = now + INTERVAL_DAYS[card.box] * DAY
   } else {
     card.box = 0
+    card.due = now + 10 * 60 * 1000
   }
-  card.due = now + INTERVAL_DAYS[card.box] * DAY
   state.cards[questionId] = card
   if (correct) state.xpFromReview += REVIEW_XP
   saveReview(state)

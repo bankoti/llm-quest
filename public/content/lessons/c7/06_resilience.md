@@ -19,19 +19,13 @@ extra load.
 > **Gotcha:** do not retry invalid schema, authorization, policy rejection, or
 > deterministic context-limit errors. Retry storms amplify outages.
 
-## Circuit breaker
+## Circuit breaker (preview)
 
-![Circuit breaker state machine](content/images/c7/circuit_breaker.svg)
-
-
-A breaker tracks recent failures. In **closed** state calls flow. After a threshold
-it becomes **open** and fails fast to fallback. After a cooldown, **half-open**
-permits limited probes; success closes it, failure reopens it. Partition breakers
-by dependency/model/region so one fault does not disable everything.
-
-Complete the challenge below. The teaching state machine uses counts;
-production needs windows, concurrency safety, clocks, metrics, and distributed
-coordination where appropriate.
+A breaker tracks recent failures per dependency and fails fast to fallback when
+a dependency is clearly down, instead of paying the timeout on every call. You
+will build the full closed/open/half-open state machine in the Circuit Breaker
+level; here, what matters is that the fallback ladder below is where an open
+breaker sends traffic.
 
 ## Fallback ladder
 

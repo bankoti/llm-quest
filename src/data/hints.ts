@@ -308,9 +308,9 @@ export const HINTS: Record<string, [string, string, string]> = {
     'delay = base x 2^attempt x random_jitter, stop after max_retries. Compute total worst-case amplification — the test checks it stays bounded.',
   ],
   'c7-l6': [
-    'A canary gate compares the canary against a CONTEMPORANEOUS baseline, not against history, and rolls back automatically on a significant spike.',
-    'Compute error rates for both slices over the same window. Trigger only when the canary exceeds baseline by the specified margin/significance.',
-    'Implement the exact decision rule in the docstring (margin or statistical test). Return the rollback decision and the evidence — the test checks both.',
+    'Three functions, one philosophy: harm rolls back on weak evidence, promotion needs strong evidence. Check guardrails BEFORE the quality delta — a breach can never be bought back by quality.',
+    'decide() follows the docstring order exactly: breach -> rollback (regardless of samples); samples < min_samples -> hold; quality delta met -> promote; else hold.',
+    'next_ramp(): rollback -> 0, hold -> current_pct unchanged, promote -> first RAMP_STAGES entry strictly greater than current_pct (100 has no next stage, so it stays 100).',
   ],
 
   // Course 8
@@ -387,8 +387,8 @@ export const HINTS: Record<string, [string, string, string]> = {
     'Return a dict with "params" and "tokens". Verify: params*2/1e9 <= 40 AND 6*params*tokens <= 2e23.',
   ],
   'c9-l6': [
-    'Start with memory: params <= 40e9/2 = 20B. Then tokens = 2e23 / (6*params). Check kv_cache last.',
-    'KV cache = 2*kv_heads*head_dim*2*layers*256*8192 bytes. Try 8 kv_heads, 128 head_dim, 32 layers -> compute that GB.',
-    'DPO alignment: set beta=0.1, log_pi_chosen_minus_ref > 0 (e.g. 0.5), log_pi_rejected_minus_ref < 0 (e.g. -0.5). All four constraints must pass simultaneously.',
+    'validate() follows the docstring exactly: four flags, four thresholds. Remember the coupling — if memory_ok is False, remaining memory is 0 and kv_cache_ok must be False as well.',
+    'For the values, start with memory: params <= 40e9/2 = 20B. Then tokens <= 2e23/(6*params). KV cache = 2*kv_heads*head_dim*2*layers*64*2048 bytes — try 8 kv_heads, 128 head_dim, 32 layers and compute that GB against what the weights left free.',
+    'DPO alignment: beta=0.1, log_pi_chosen_minus_ref > 0 (e.g. 0.5), log_pi_rejected_minus_ref < 0 (e.g. -0.5). All four constraints must hold at once, and your own validate() is run against your recipe as the final check.',
   ],
 }

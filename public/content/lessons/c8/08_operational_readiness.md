@@ -1,5 +1,9 @@
 # 08 - Observability, Alerts, Runbooks, and Ownership
 
+Waypoint is approaching launch, which means someone will be paged for it at
+3am. This level builds what that person needs, and the gate checker a reviewer
+uses to confirm it exists before saying yes.
+
 Turn design and failure evidence into daily operations. Create dashboards for
 service health, model/inference health, retrieval/index health, quality/safety,
 traffic/experiments, and cost/capacity.

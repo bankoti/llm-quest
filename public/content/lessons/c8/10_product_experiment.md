@@ -1,5 +1,20 @@
 # 10 - Product Experiment and Launch Decision
 
+## The system you are shipping
+
+Every level in this course works on the same launch. **Waypoint** is a support
+assistant that answers order and product questions from retrieved help
+articles. Its retrieval stack came out of Course 5, its eval harness out of
+Course 6, its serving layer out of Course 7. Two weeks ago the team swapped
+the answer model for a distilled student that costs a tenth as much per query.
+Your job in this course is to get that system, cheaper model and all, through
+a launch review that would survive an auditor.
+
+The experiment you design here asks the money question: does Waypoint reduce
+support contacts without dragging down resolution quality?
+
+## Pre-registration
+
 Pre-register before analyzing outcomes: hypothesis, primary metric, guardrails,
 unit, eligibility, expected assignment, minimum detectable effect, power/sample,
 duration, ramp, exclusions, analysis, and stop conditions.

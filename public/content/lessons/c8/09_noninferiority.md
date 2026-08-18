@@ -5,6 +5,11 @@ expensive reranker with a cheaper one), the question is rarely "is the new
 one better?" It is "is the new one not meaningfully worse, given that it is
 10x cheaper?" That question has a name: non-inferiority.
 
+This is exactly the bet Waypoint made: the distilled student answers at a
+tenth the cost of the teacher. The gate you build here decides whether that
+trade holds on every segment that matters, including the billing and
+product-safety slices where a wrong answer is expensive.
+
 ## Superiority vs. non-inferiority
 
 ![Superiority vs non-inferiority CIs](content/images/c8/noninferiority.svg)

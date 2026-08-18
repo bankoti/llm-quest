@@ -1,7 +1,9 @@
 """Boss Level — Training Recipe Defense
 
-Fill in TrainingRecipe so that recipe.validate() returns a passing RecipeReport.
-All four constraints must pass simultaneously.
+Two tasks:
+1. Implement validate() — the grader feeds it known-good and known-bad
+   recipes and checks every flag.
+2. Fill in `recipe` with values that pass all four constraints at once.
 """
 from dataclasses import dataclass, field
 import math
@@ -36,44 +38,26 @@ class TrainingRecipe:
     log_pi_rejected_minus_ref: float  # should be negative
 
     def validate(self) -> RecipeReport:
-        report = RecipeReport()
-        notes = report.notes
+        """Return a RecipeReport with one flag per constraint.
 
-        # 1. Compute budget: 6*N*D <= 2e23
-        actual_flops = 6 * self.params * self.tokens
-        report.compute_ok = actual_flops <= 2e23
-        if not report.compute_ok:
-            notes.append(f"compute: {actual_flops:.2e} > 2e23")
+        1. compute_ok: training FLOPs (6 * params * tokens) <= 2e23.
+        2. memory_ok: model weights at bfloat16 (params * 2 bytes) fit in
+           40 GB (use 1e9 bytes per GB).
+        3. kv_cache_ok: the KV cache for 64 concurrent 2048-token contexts
+           fits in whatever the weights left free:
+             kv_bytes = 2 * num_kv_heads * head_dim * 2 * num_layers * 64 * 2048
+           (K and V, times 2 bytes per bf16 value). If memory_ok is False,
+           nothing remains: kv_cache_ok must be False too.
+        4. alignment_ok: 0 < beta <= 1, log_pi_chosen_minus_ref > 0,
+           log_pi_rejected_minus_ref < 0, and the DPO margin
+           beta * (chosen - rejected) > 0.
 
-        # 2. Model fits in 40GB at bfloat16
-        model_gb = self.params * 2 / 1e9
-        report.memory_ok = model_gb <= 40.0
-        if not report.memory_ok:
-            notes.append(f"memory: {model_gb:.1f}GB > 40GB")
-
-        # 3. KV cache: 64 contexts * 2048 tokens fit in remaining GPU memory
-        remaining_gb = 40.0 - model_gb if report.memory_ok else 0
-        kv_bytes = (2 * self.num_kv_heads * self.head_dim * 2 *
-                    self.num_layers * 64 * 2048)
-        kv_gb = kv_bytes / 1e9
-        report.kv_cache_ok = kv_gb <= remaining_gb
-        if not report.kv_cache_ok:
-            notes.append(f"kv_cache: {kv_gb:.1f}GB > {remaining_gb:.1f}GB remaining")
-
-        # 4. Alignment: valid DPO configuration
-        dpo_margin = (self.beta * self.log_pi_chosen_minus_ref
-                      - self.beta * self.log_pi_rejected_minus_ref)
-        report.alignment_ok = (0 < self.beta <= 1.0 and
-                               self.log_pi_chosen_minus_ref > 0 and
-                               self.log_pi_rejected_minus_ref < 0 and
-                               dpo_margin > 0)
-        if not report.alignment_ok:
-            notes.append(f"alignment: beta={self.beta}, margin={dpo_margin:.3f}")
-
-        return report
+        Append a human-readable note for every failed constraint.
+        """
+        raise NotImplementedError
 
 
-# TODO: fill in values that make recipe.validate().passed == True
+# TODO: fill in values so that recipe.validate().passed == True
 recipe = TrainingRecipe(
     params=0,           # replace
     tokens=0,           # replace

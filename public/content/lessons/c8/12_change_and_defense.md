@@ -12,6 +12,13 @@ regression plus rolling recent sets. Recalibrate thresholds, re-embed compatible
 indexes, invalidate caches, update risks/runbooks, and canary. Show why unchanged
 evidence remains valid and which evidence expires.
 
+This is where the course's thread ties off. The experiment (Experiment
+Design) said Waypoint was worth launching; the gate (Launch Gate) said the
+evidence was complete; the non-inferiority test said the student model held;
+the manifest pinned what shipped; the failure matrix said it breaks safely.
+A month in production is what tests whether those documents described a real
+system.
+
 The boss challenge grades the postmortem discipline behind this: first the
 arithmetic of a single incident timeline (detect / mitigate / recover, with
 impossible timelines rejected), then the report that spans incidents — mean
