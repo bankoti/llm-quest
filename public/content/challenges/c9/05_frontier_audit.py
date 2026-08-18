@@ -1,4 +1,4 @@
-"""Level 62 — Frontier Config Audit
+"""Level 70 — Frontier Config Audit
 
 Derive architecture facts from a frontier model config.
 """

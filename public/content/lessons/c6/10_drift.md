@@ -17,8 +17,15 @@ PSI = sum_i (current_i - reference_i) * ln(current_i / reference_i)
 ```
 
 It is a heuristic sensitive to bins and sample size, not a universal alarm
-threshold. Complete the challenge below and handle zero bins with a
-declared epsilon.
+threshold. A complementary test is the chi-squared distance:
+
+```text
+χ²(P, Q) = sum_i (P_i - Q_i)² / Q_i
+```
+
+Both PSI and χ² are zero when distributions match and positive otherwise;
+χ² is more sensitive to large deviations in low-probability bins.
+Complete the challenge below and handle zero bins with a declared epsilon.
 
 ## Monitor leading and lagging evidence
 

@@ -14,10 +14,10 @@ class TrainingBudget:
 
     def optimal_params(self) -> int:
         """Chinchilla-optimal parameter count."""
-        return int(0.2 * math.sqrt(self.compute_flops))
+        return int(math.sqrt(self.compute_flops / 120))
 
     def optimal_tokens(self) -> int:
-        return self.optimal_params() * 10
+        return self.optimal_params() * 20
 
     def recommend(self) -> dict:
         N = self.optimal_params()

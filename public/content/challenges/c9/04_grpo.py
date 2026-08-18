@@ -1,4 +1,4 @@
-"""Level 61 — GRPO Advantages
+"""Level 69 — GRPO Advantages
 
 Implement Group Relative Policy Optimization advantage computation.
 """
@@ -8,7 +8,8 @@ def grpo_advantages(rewards: List[float]) -> List[float]:
     """
     Normalize a group of rewards to advantages.
     advantage_i = (reward_i - mean) / std
-    
+
+    std is the population standard deviation (divide by N, not N-1).
     If std == 0 (all rewards equal), return all zeros.
     """
     raise NotImplementedError

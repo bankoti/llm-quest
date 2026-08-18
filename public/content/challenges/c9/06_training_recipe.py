@@ -1,7 +1,7 @@
 """Boss Level — Training Recipe Defense
 
 Fill in TrainingRecipe so that recipe.validate() returns a passing RecipeReport.
-All five constraints must pass simultaneously.
+All four constraints must pass simultaneously.
 """
 from dataclasses import dataclass, field
 import math

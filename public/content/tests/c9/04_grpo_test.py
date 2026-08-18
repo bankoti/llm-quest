@@ -22,6 +22,8 @@ advs      = [1.0,  0.0, -1.0]
 refs      = [-0.6, -1.0, -0.3]
 loss = grpo_loss(log_probs, advs, refs, kl_coeff=0.0)
 assert isinstance(loss, float), "loss must be a float"
+# kl_coeff=0: loss = -mean([-0.5*1, -1.0*0, -0.3*-1]) = 0.2/3
+assert abs(loss - (0.2/3)) < 1e-6, f"grpo_loss wrong: expected {0.2/3:.6f}, got {loss:.6f}"
 
 print(f"Advantages: {[round(a,3) for a in adv]}")
 print(f"KL penalty (0.4 vs 0.5): {kl:.4f}")

@@ -6,9 +6,9 @@ result = chinchilla_optimal(budget)
 assert isinstance(result, dict), "return a dict"
 N = result["params"]
 D = result["tokens"]
-expected_N = int(0.2 * math.sqrt(budget))
+expected_N = int(math.sqrt(budget / 120))
 assert abs(N - expected_N) <= 1, f"params: expected ~{expected_N}, got {N}"
-assert D == 10 * N, f"tokens should be 10*N, got {D}"
+assert D == 20 * N, f"tokens should be 20*N, got {D}"
 
 flops = training_flops(1_000_000, 10_000)
 assert abs(flops - 6e10) < 1, f"flops wrong: {flops}"
@@ -18,7 +18,7 @@ assert abs(mem - 14.0) < 0.1, f"memory: expected ~14GB, got {mem:.2f}GB"
 
 # Chinchilla-optimal for 2e23
 r2 = chinchilla_optimal(2e23)
-assert r2["tokens"] == 10 * r2["params"], "D* = 10*N* must hold"
+assert r2["tokens"] == 20 * r2["params"], "D* = 20*N* must hold"
 
 print(f"N* = {result['params']:,}")
 print(f"D* = {result['tokens']:,}")

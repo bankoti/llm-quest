@@ -14,6 +14,19 @@ x = x + GQA(RMSNorm(x))
 x = x + SwiGLU_or_MoE(RMSNorm(x))
 ```
 
+**SwiGLU** replaces the two-layer `W1 + GELU + W2` MLP with three projections
+and a multiplicative gate:
+
+```text
+SwiGLU(x) = ( silu(x @ W_gate) * (x @ W_up) ) @ W_down
+silu(z)   = z * sigmoid(z)          # smooth, never exactly zero
+```
+
+The gate (`W_gate`) and content (`W_up`) paths are multiplied element-wise
+before the final projection. This gating mechanism is why SwiGLU typically
+uses a smaller `hidden_width` (≈ 8/3 × C, vs 4 × C for a plain MLP) at the
+same parameter budget.
+
 RoPE is applied to queries and keys inside attention. The residual stream itself
 does not receive an added position vector. This separation makes each design
 choice independently testable.

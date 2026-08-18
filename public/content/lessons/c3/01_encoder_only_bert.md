@@ -65,5 +65,25 @@ different production latency and storage.
 4. Compare mean pooling with a designated classification token. Pooling is a
    task-head choice, not part of bidirectional attention.
 
+## Three attention modes
+
+The challenge for this level asks you to implement the reachability rules for
+three attention patterns:
+
+**Bidirectional self-attention** (BERT/encoders): every position can attend to
+every other position. Position `t` reaches `{0, 1, ..., length-1}`.
+
+**Causal self-attention** (GPT/decoders): each position can attend only to
+itself and earlier positions. Position `t` reaches `{0, 1, ..., t}`.
+
+**Cross-attention** (encoder-decoder models, e.g., T5, BART): a decoder
+position generates a query against the encoder's key-value pairs. The decoder
+position has no causal relationship to the encoder sequence — it can see
+**all** encoder positions regardless of where in the decoder output it sits.
+Position `decoder_pos` always reaches `{0, 1, ..., encoder_length - 1}`.
+
+Cross-attention is how encoder-decoder models transfer extracted meaning into
+generation: the decoder queries the encoder at every step.
+
 **Checkpoint:** Explain why a BERT-like encoder can score candidate relevance but
 cannot emit an unbounded answer with its MLM head alone.

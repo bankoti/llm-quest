@@ -7,17 +7,18 @@ dataset size, and compute. Kaplan et al. (2020) showed the relationship is a
 power law in each axis. Hoffmann et al. (2022), the Chinchilla paper, refined
 it: the compute-optimal frontier requires roughly equal token and parameter
 scaling. For a fixed compute budget `C` (FLOPs), the optimal model trains
-approximately `N* = 0.2 * sqrt(C)` parameters on `D* = 10 * N*` tokens.
+approximately `N* = sqrt(C / 120)` parameters on `D* = 20 * N*` tokens.
 
 ```text
 Compute budget C  (FLOPs, from training run)
-Optimal params  N* = 0.2 * sqrt(C)
-Optimal tokens  D* = 10 * N*
+Optimal params  N* = sqrt(C / 120)   # ≈ 0.091 * sqrt(C)
+Optimal tokens  D* = 20 * N*
 ```
 
-GPT-3 (175B params, ~300B tokens) trained parameter-heavy relative to tokens.
-Chinchilla (70B params, 1.4T tokens) matched its loss at one-third the
-parameters by spending the same compute on more tokens instead.
+A quick sanity check: 6 * N* * D* = 6 * N* * 20 * N* = 120 * N*^2 = 120 * (C/120) = C. The
+compute budget is fully used. GPT-3 (175B params, ~300B tokens) trained parameter-heavy
+relative to tokens. Chinchilla (70B params, 1.4T tokens) used a 20:1 token-to-parameter
+ratio — matching its loss at one-third the parameters by spending the same compute on more tokens.
 
 ## What the law measures and what it does not
 

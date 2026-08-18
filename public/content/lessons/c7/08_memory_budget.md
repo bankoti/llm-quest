@@ -54,11 +54,11 @@ kv_bytes = 2 * layers * kv_heads * head_dim * seq_len * batch_size * bytes_per_k
 The `2` is for K and V. `bytes_per_kv` defaults to 2 (BF16); quantizing KV
 to INT8 halves it.
 
-At a 32K-token context, batch 8, with 32 layers, 8 KV heads, head_dim 128,
+At a 32K-token context, batch 8, with 32 layers, 16 KV heads, head_dim 128,
 BF16:
 
 ```text
-2 x 32 x 8 x 128 x 32768 x 8 x 2 bytes = 68 GB
+2 x 32 x 16 x 128 x 32768 x 8 x 2 bytes = 68 GB
 ```
 
 That is roughly five times the weight footprint of a 7B model. Context length

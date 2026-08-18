@@ -12,4 +12,4 @@ try:
 except ValueError: pass
 print(f"✓ durations={r}")
 print("✓ ordering violations raise ValueError")
-print("\n+1000 XP — FINAL BOSS. ALL 49 LEVELS COMPLETE. 🏆")
+print("\n+1000 XP — FINAL BOSS. ALL 73 LEVELS COMPLETE. 🏆")

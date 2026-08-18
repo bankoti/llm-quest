@@ -66,11 +66,40 @@ MHA gives each query head independent key/value projections. MQA maximizes shari
 GQA sits between them and was introduced as a quality/speed compromise. This is an
 empirical architecture decision, not a theorem that one setting always wins.
 
+## Sliding-window causal mask
+
+Full causal attention lets every position attend to all prior positions. In
+long-context models, restricting each token to a local window trades recall of
+distant context for a much cheaper attention operation.
+
+The rule: position `t` may attend to position `s` if and only if:
+
+```text
+t - window < s  AND  s <= t
+```
+
+In matrix form, `mask[t, s] = True` where both conditions hold. Outside the
+window and above the diagonal, the mask is `False`.
+
+```python
+def causal_mask(length, window=None):
+    # full causal: no window
+    m = np.tril(np.ones((length, length), dtype=bool))
+    if window is not None:
+        # additionally exclude positions more than `window` steps back
+        m &= np.triu(m, -(window))
+    return m
+```
+
+When `window=None`, this degenerates to the standard lower-triangular causal
+mask. The challenge below asks you to implement both variants.
+
 ## Exercise
 
 In the challenge below, calculate the KV cache ratio for
 `Hq=32` with `Hkv` equal to 32, 8, and 1. Then implement KV-head repetition and
-verify the exact output head ordering.
+verify the exact output head ordering. Finally, implement the `causal_mask`
+function with the optional sliding-window parameter described above.
 
 ## Exit check
 

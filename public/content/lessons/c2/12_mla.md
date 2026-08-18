@@ -3,7 +3,7 @@
 GQA cut KV heads from 32 to 8, a 4x saving. With a 128K-token context that is
 still 3 GB of KV per sequence. Sequence length is the new bottleneck and GQA
 cannot touch it. MLA compresses K and V into a single low-rank latent vector,
-cutting cache by 93% on the DeepSeek-V2 numbers.
+cutting cache by 98.4% on the DeepSeek-V2 numbers (d_c = 512 vs 128 heads × 128 dims × 2 = 32,768 bytes per token → 64× reduction).
 
 ## The core idea
 
@@ -86,15 +86,20 @@ bandwidth saved.
 Worked example: a 128K-token context, batch 4, 60 layers, BF16.
 
 ```text
-Standard KV (128 heads, D=128):
-  2 x 128K x 4 x 60 x 128 x 128 x 2 bytes = 1,006 GB
+Standard KV (128 heads, D=128):   [K only; multiply by 2 for full K+V]
+  128K x 4 x 60 x 128 x 128 x 2 bytes = 1,006 GB
 
-GQA (8 KV heads):
-  2 x 128K x 4 x 60 x 8 x 128 x 2 bytes = 62.9 GB
+GQA (8 KV heads):                  [K only; multiply by 2 for full K+V]
+  128K x 4 x 60 x 8 x 128 x 2 bytes = 62.9 GB
 
-MLA (d_c=512):
+MLA (d_c=512):                     [single latent, no K+V split]
   128K x 4 x 60 x 512 x 2 bytes = 31.5 GB
 ```
+
+The table is a single-tensor comparison (K-only for Standard/GQA; the latent
+for MLA), which is why there is no leading `2 ×` on the first two rows. Each
+row answers "how many bytes grow with context per batch sequence?" — the ratio
+stays the same whether you count K alone or K+V.
 
 MLA is ~2x better than GQA here and ~32x better than MHA. The gap versus GQA
 widens as context grows because both grow linearly in T but MLA's constant

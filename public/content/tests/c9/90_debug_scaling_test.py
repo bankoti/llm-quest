@@ -5,7 +5,7 @@ budget = TrainingBudget(2e23)
 rec = budget.recommend()
 
 # The original recommend() passes (math is correct)
-expected_N = int(0.2 * math.sqrt(2e23))
+expected_N = int(math.sqrt(2e23 / 120))
 assert rec["params"] == expected_N, "original N* calculation broken"
 
 # But the model is too large to serve in 40GB at bfloat16

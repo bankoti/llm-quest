@@ -20,7 +20,7 @@ rope_theta:               500000.0
 ```
 
 The 14336 intermediate size looks large until you account for SwiGLU: it uses
-two weight matrices of that width, comparable in parameter count to a 4x
+three weight matrices of that width (gate, up, and down projections), comparable in parameter count to a 4x
 width standard FFN.
 
 ## DeepSeek-V3: MLA and shared experts

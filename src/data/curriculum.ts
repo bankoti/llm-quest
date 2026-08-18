@@ -150,7 +150,7 @@ export const COURSES: Course[] = [
       { id:'c4-l4', courseId:4, index:4, title:'Architecture Scorecard', description:'Score four patterns against your constraints.',               xp:150, type:'challenge', lessonFile:'c4/07_build_buy_model.md',   challengeFile:'c4/04_architecture_scorecard.py', estimateMinutes:25 },
       { id:'c4-l5', courseId:4, index:5, title:'Cost Break-Even',        description:'Calculate when AI cost justifies quality improvement.',       xp:200, type:'challenge', lessonFile:'c4/06_cost_and_capacity.md', challengeFile:'c4/05_cost_break_even.py',   estimateMinutes:35 },
       { id:'c4-d1', courseId:4, index:6, title:'Debug: Flattering Precision', description:'This metric gives everyone an A. Find out why.', xp:150, type:'debug', lessonFile:'c4/90_debug_precision.md', challengeFile:'c4/90_debug_precision.py', estimateMinutes:25 },
-      { id:'c4-l6', courseId:4, index:6, title:'Risk Register',          description:'Identify failure modes before they become incidents.',        xp:500, type:'boss',      lessonFile:'c4/08_risk_and_governance.md', challengeFile:'c4/06_risk_register.py',   estimateMinutes:55 },
+      { id:'c4-l6', courseId:4, index:7, title:'Risk Register',          description:'Identify failure modes before they become incidents.',        xp:500, type:'boss',      lessonFile:'c4/08_risk_and_governance.md', challengeFile:'c4/06_risk_register.py',   estimateMinutes:55 },
     ],
   },
   {
@@ -174,7 +174,7 @@ export const COURSES: Course[] = [
       { id:'c5-l4', courseId:5, index:4, title:'Constrained Search',    description:'Parse intent and apply hard filters before ranking.',         xp:200, type:'challenge', lessonFile:'c5/04_query_constraints.md', challengeFile:'c5/04_constrained_search.py', estimateMinutes:35 },
       { id:'c5-l5', courseId:5, index:5, title:'Reranking',             description:'Score candidates with a cross-encoder, apply business rules.', xp:150, type:'challenge', lessonFile:'c5/05_reranking.md',         challengeFile:'c5/05_rerank.py',           estimateMinutes:25 },
       { id:'c5-d1', courseId:5, index:6, title:'Debug: Backwards Ranking', description:'The retriever confidently returns the worst documents first.', xp:150, type:'debug', lessonFile:'c5/90_debug_topk.md', challengeFile:'c5/90_debug_topk.py', estimateMinutes:25 },
-      { id:'c5-l6', courseId:5, index:6, title:'Grounded Generation',   description:'Ground LLM output in retrieved context; validate citations.', xp:500, type:'boss',      lessonFile:'c5/07_grounded_generation.md', challengeFile:'c5/06_citation_validation.py', estimateMinutes:55 },
+      { id:'c5-l6', courseId:5, index:7, title:'Grounded Generation',   description:'Ground LLM output in retrieved context; validate citations.', xp:500, type:'boss',      lessonFile:'c5/07_grounded_generation.md', challengeFile:'c5/06_citation_validation.py', estimateMinutes:55 },
     ],
   },
   {
@@ -198,7 +198,7 @@ export const COURSES: Course[] = [
       { id:'c6-l4', courseId:6, index:4, title:'Judge Order Bias',       description:'Audit an LLM judge for position and verbosity bias.',        xp:200, type:'challenge', lessonFile:'c6/05_llm_judges.md',         challengeFile:'c6/04_judge_bias.py',      estimateMinutes:35 },
       { id:'c6-l5', courseId:6, index:5, title:'Inter-Rater Agreement',  description:'Compute Cohen\'s κ and diagnose rubric failures.',            xp:150, type:'challenge', lessonFile:'c6/02_rubrics_and_agreement.md', challengeFile:'c6/05_agreement.py',     estimateMinutes:25 },
       { id:'c6-d1', courseId:6, index:6, title:'Debug: The Generous Judge', description:'Model A never loses. The judge has a thumb on the scale.', xp:150, type:'debug', lessonFile:'c6/90_debug_winrate.md', challengeFile:'c6/90_debug_winrate.py', estimateMinutes:25 },
-      { id:'c6-l6', courseId:6, index:6, title:'Drift Detection',        description:'Detect distribution shift before it silently degrades quality.', xp:500, type:'boss',  lessonFile:'c6/10_drift.md',              challengeFile:'c6/06_drift.py',           estimateMinutes:55 },
+      { id:'c6-l6', courseId:6, index:7, title:'Drift Detection',        description:'Detect distribution shift before it silently degrades quality.', xp:500, type:'boss',  lessonFile:'c6/10_drift.md',              challengeFile:'c6/06_drift.py',           estimateMinutes:55 },
     ],
   },
   {
@@ -219,11 +219,11 @@ export const COURSES: Course[] = [
       { id:'c7-l1', courseId:7, index:1, title:'Fallback Behavior',      description:'Return a valid response when every AI component is down.',    xp:200, type:'challenge', lessonFile:'c7/06_resilience.md',         challengeFile:'c7/01_fallback.py',        estimateMinutes:35 },
       { id:'c7-l2', courseId:7, index:2, title:'Cache Identity',         description:'Version artifact identities so rollback never breaks state.', xp:150, type:'challenge', lessonFile:'c7/02_cache_and_decoding.md',        challengeFile:'c7/02_cache_identity.py',  estimateMinutes:25 },
       { id:'c7-l3', courseId:7, index:3, title:'Token & Deadline Budget', description:'Propagate deadlines; cut work before exceeding the budget.',  xp:200, type:'challenge', lessonFile:'c7/03_latency_budgets.md', challengeFile:'c7/03_token_deadline.py',  estimateMinutes:35 },
-      { id:'c7-l4', courseId:7, index:4, title:'Circuit Breaker',        description:'Open a circuit when downstream latency crosses a threshold.', xp:200, type:'challenge', lessonFile:'c7/05_observability.md',         challengeFile:'c7/04_circuit_breaker.py', estimateMinutes:35 },
+      { id:'c7-l4', courseId:7, index:4, title:'Circuit Breaker',        description:'Open a circuit when the failure count crosses a threshold.',  xp:200, type:'challenge', lessonFile:'c7/06_resilience.md',            challengeFile:'c7/04_circuit_breaker.py', estimateMinutes:35 },
       { id:'c7-l5', courseId:7, index:5, title:'Overload Admission',     description:'Shed load gracefully; never queue work you cannot serve.',   xp:150, type:'challenge', lessonFile:'c7/04_routing_and_backpressure.md', challengeFile:'c7/05_admission.py',  estimateMinutes:25 },
       { id:'c7-l7', courseId:7, index:7, title:'Memory-Budget Serving', description:'Calculate what fits: weights, KV cache, and max batch size for any device.', xp:200, type:'challenge', lessonFile:'c7/08_memory_budget.md', challengeFile:'c7/07_memory_budget.py', estimateMinutes:35 },
       { id:'c7-l8', courseId:7, index:8, title:'Speculative Decoding', description:'Draft cheap, verify exact: the acceptance math behind 2-3x serving speedups.', xp:200, type:'challenge', lessonFile:'c7/09_speculative_decoding.md', challengeFile:'c7/08_spec_decode.py', estimateMinutes:35 },
-      { id:'c7-d1', courseId:7, index:8, title:'Debug: Retry Storm', description:'The retry logic looks polite. Under an outage it becomes a mob.', xp:150, type:'debug', lessonFile:'c7/90_debug_retry.md', challengeFile:'c7/90_debug_retry.py', estimateMinutes:25 },
+      { id:'c7-d1', courseId:7, index:6, title:'Debug: Retry Storm', description:'The retry logic looks polite. Under an outage it becomes a mob.', xp:150, type:'debug', lessonFile:'c7/90_debug_retry.md', challengeFile:'c7/90_debug_retry.py', estimateMinutes:25 },
       { id:'c7-l6', courseId:7, index:9, title:'Canary Gate',            description:'Block a rollout automatically when error rate spikes.',       xp:500, type:'boss',      lessonFile:'c7/07_deployments.md',        challengeFile:'c7/06_canary_gate.py',     estimateMinutes:55 },
     ],
   },
@@ -248,7 +248,7 @@ export const COURSES: Course[] = [
       { id:'c8-l4', courseId:8, index:4, title:'Artifact Manifest',      description:'Version every dependency so the build is fully reproducible.', xp:150, type:'challenge', lessonFile:'c8/11_artifact_ops.md', challengeFile:'c8/04_artifact_manifest.py', estimateMinutes:25 },
       { id:'c8-l5', courseId:8, index:5, title:'Failure Matrix',         description:'Map every failure mode to a bounded, verified control.',      xp:200, type:'challenge', lessonFile:'c8/07_failure_campaign.md',   challengeFile:'c8/05_failure_matrix.py',  estimateMinutes:35 },
       { id:'c8-d1', courseId:8, index:6, title:'Debug: The Confident Gate', description:'This rollout gate approves anything uncertain. Uncertain is not safe.', xp:150, type:'debug', lessonFile:'c8/90_debug_gate.md', challengeFile:'c8/90_debug_gate.py', estimateMinutes:25 },
-      { id:'c8-l6', courseId:8, index:6, title:'Final Defense',          description:'Ship, break, fix, and defend the complete system.',           xp:1000,type:'boss',      lessonFile:'c8/12_change_and_defense.md', challengeFile:'c8/06_incident_timing.py', estimateMinutes:90 },
+      { id:'c8-l6', courseId:8, index:7, title:'Final Defense',          description:'Ship, break, fix, and defend the complete system.',           xp:1000,type:'boss',      lessonFile:'c8/12_change_and_defense.md', challengeFile:'c8/06_incident_timing.py', estimateMinutes:90 },
     ],
   },
   {
@@ -273,7 +273,7 @@ export const COURSES: Course[] = [
       { id:'c9-l5', courseId:9, index:5, title:'Frontier Config Audit',   description:'Derive parameter counts and KV cache from Llama 3 / DeepSeek configs.',   xp:200, type:'challenge', lessonFile:'c9/05_frontier_configs.md', challengeFile:'c9/05_frontier_audit.py', estimateMinutes:35 },
       { id:'c9-l7', courseId:9, index:6, title:'Test-Time Compute', description:'Buy accuracy with inference FLOPs: pass@n, majority voting, and the small-vs-large trade.', xp:200, type:'challenge', lessonFile:'c9/07_test_time_compute.md', challengeFile:'c9/07_test_time.py', estimateMinutes:35 },
       { id:'c9-d1', courseId:9, index:7, title:'Debug: Budget That Forgot Inference', description:'The Chinchilla formula is correct. The objective is wrong.', xp:150, type:'debug', lessonFile:'c9/90_debug_scaling.md', challengeFile:'c9/90_debug_scaling.py', estimateMinutes:25 },
-      { id:'c9-l6', courseId:9, index:7, title:'Training Recipe Defense', description:'Design a full training recipe that satisfies compute, memory, and alignment constraints.', xp:1000, type:'boss', lessonFile:'c9/06_training_recipe.md', challengeFile:'c9/06_training_recipe.py', estimateMinutes:75 },
+      { id:'c9-l6', courseId:9, index:8, title:'Training Recipe Defense', description:'Design a full training recipe that satisfies compute, memory, and alignment constraints.', xp:1000, type:'boss', lessonFile:'c9/06_training_recipe.md', challengeFile:'c9/06_training_recipe.py', estimateMinutes:75 },
     ],
   },
 ]

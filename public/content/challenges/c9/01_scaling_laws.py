@@ -1,4 +1,4 @@
-"""Level 58 — Scaling Laws
+"""Level 66 — Scaling Laws
 
 Implement Chinchilla compute-optimal scaling and FLOP estimation.
 """
@@ -10,7 +10,7 @@ def chinchilla_optimal(compute_flops: float) -> dict:
       'params'  - compute-optimal parameter count (N*)
       'tokens'  - compute-optimal token count (D*)
     
-    Use: N* = 0.2 * sqrt(C), D* = 10 * N*
+    Use: N* = sqrt(C / 120), D* = 20 * N*
     """
     raise NotImplementedError
 
