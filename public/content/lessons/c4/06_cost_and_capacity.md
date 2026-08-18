@@ -52,5 +52,5 @@ precision for uncertain prices or utilization.
 Complete the challenge below. Its tiny arithmetic is intentionally
 transparent so the architecture review can inspect assumptions.
 
-**Checkpoint:** Produce a monthly low/base/high table and a unit-cost equation.
+**Think it through (ungraded):** Produce a monthly low/base/high table and a unit-cost equation.
 Separate one-time migration cost, recurring fixed cost, and variable cost.

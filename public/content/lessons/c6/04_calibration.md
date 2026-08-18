@@ -17,6 +17,21 @@ confidence and empirical accuracy:
 ECE = sum_m (|B_m| / n) * |accuracy(B_m) - confidence(B_m)|
 ```
 
+Work one tiny set by hand: 4 predictions, 2 equal-width bins:
+
+```text
+confidence: [0.3, 0.4, 0.8, 0.9]     outcome: [0, 1, 1, 1]
+
+bin [0.0, 0.5): members 0.3, 0.4 -> mean conf 0.35, accuracy 1/2 = 0.50, gap 0.15
+bin [0.5, 1.0]: members 0.8, 0.9 -> mean conf 0.85, accuracy 2/2 = 1.00, gap 0.15
+
+ECE = (2/4) * 0.15 + (2/4) * 0.15 = 0.15
+```
+
+Both bins here are *under*confident, and both gaps count with the same
+sign: ECE measures distance from the diagonal, not direction. Direction
+is what the reliability plot is for.
+
 Expected calibration error depends on binning and can hide local failures. Also
 report Brier score or log loss, reliability plots, and critical-slice behavior.
 Complete the challenge below and test a perfectly calibrated toy set and
@@ -49,5 +64,5 @@ Calibration measured on a balanced benchmark may fail under production class
 prevalence. Evaluate by traffic-weighted distribution and key slices, and monitor
 the confidence/output distribution after launch.
 
-**Checkpoint:** Choose thresholds for ordinary relevance and a dietary constraint.
+**Think it through (ungraded):** Choose thresholds for ordinary relevance and a dietary constraint.
 Explain why they should differ and which labeled data supports each.

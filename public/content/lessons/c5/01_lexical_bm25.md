@@ -46,5 +46,5 @@ by hand. Then complete the challenge below.
 - empty and punctuation-only queries return no candidates;
 - a schema or tokenizer change creates a new index version.
 
-**Checkpoint:** Create one exact identifier query where lexical retrieval should
+**Think it through (ungraded):** Create one exact identifier query where lexical retrieval should
 remain authoritative even if dense similarity disagrees.

@@ -46,6 +46,6 @@ Compare candidate Recall@100, reranked NDCG@10/MRR, critical violations, p95
 latency, and fallback quality. An NDCG gain is unacceptable if reranking drops a
 hard constraint or consumes the whole request reserve.
 
-**Checkpoint:** Build a 20-example hard-negative set where lexical and dense
+**Think it through (ungraded):** Build a 20-example hard-negative set where lexical and dense
 retrievers fail in opposite directions. Explain how it changes the training
 distribution.

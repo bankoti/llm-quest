@@ -40,5 +40,5 @@ These are architecture options on a continuum:
 Complete the challenge below. Test duplicate IDs, absent documents,
 empty rankings, and deterministic ties.
 
-**Checkpoint:** Evaluate each candidate source alone and fused. A fusion gain is
+**Think it through (ungraded):** Evaluate each candidate source alone and fused. A fusion gain is
 meaningful only if it survives critical slices and latency budget.

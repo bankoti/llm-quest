@@ -49,8 +49,17 @@ prioritize review; they do not prove safety. Every high risk needs an owner,
 preventive or detective control, verification method, residual risk decision,
 and review date.
 
-Complete the challenge below. Then add one low-likelihood,
-high-impact scenario that a simple average would under-prioritize.
+The boss challenge grades both halves of this lesson: first quantify and
+rank residual risk, then return to the causal chain above and map each
+control to the step it breaks. The test hands you a five-step chain with
+two controls placed; your code must name the three uncovered steps —
+the places where the register still owes an owner and a verification.
 
-**Checkpoint:** Show that the deterministic fallback does not bypass policy
-filters. Reliability controls must preserve security invariants.
+**Think it through (ungraded):** add one low-likelihood, high-impact
+scenario that a simple average of likelihood and impact would
+under-prioritize. Multiplicative residual scoring keeps it visible;
+an averaged score buries it.
+
+**Think it through (ungraded):** Show that the deterministic fallback does
+not bypass policy filters. Reliability controls must preserve security
+invariants.

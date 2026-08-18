@@ -12,6 +12,13 @@ regression plus rolling recent sets. Recalibrate thresholds, re-embed compatible
 indexes, invalidate caches, update risks/runbooks, and canary. Show why unchanged
 evidence remains valid and which evidence expires.
 
+The boss challenge grades the postmortem discipline behind this: first the
+arithmetic of a single incident timeline (detect / mitigate / recover, with
+impossible timelines rejected), then the report that spans incidents — mean
+time per phase across the fleet and, the actual decision, which phase gets
+the next engineering hour. One slow incident is a story; the mean across
+incidents is a budget.
+
 ## Final portfolio
 
 - charter and acceptance matrix;

@@ -44,5 +44,5 @@ Complete the challenge below. Reject a design that allocates no reserve
 or exceeds the critical path. Then change vector retrieval from sequential to
 parallel and explain why total latency changes while per-stage budgets do not.
 
-**Checkpoint:** Define separate SLOs for online search and offline index freshness.
+**Think it through (ungraded):** Define separate SLOs for online search and offline index freshness.
 One cannot compensate for the other.

@@ -53,5 +53,5 @@ output schema, language distribution, quantization, or serving stack. Use public
 results to shortlist, then run the frozen harness with exact model, revision,
 template, precision, and decoding settings.
 
-**Checkpoint:** Write an exit plan for the selected option: portable data,
+**Think it through (ungraded):** Write an exit plan for the selected option: portable data,
 evaluation harness, adapter boundary, and maximum switching time.

@@ -47,6 +47,12 @@ time. Re-evaluate on the frozen set. If a taxonomy fix resolves most high-severi
 failures, do it. Remaining errors then specify what semantic, generative, or
 labeling experiment must beat.
 
-**Checkpoint:** Complete the challenge below. Write three failure
-examples with query, expected item, actual rank, error class, and likely repair.
-Do not summarize only with one score.
+The challenge below grades the section's central claim directly: you will
+build a report over queries tagged with their traffic slice, where the
+aggregate P@k looks acceptable while the tail slice scores zero. A report
+that shows only the aggregate passes no review; yours must surface the
+per-slice means and name the worst slice.
+
+**Think it through (ungraded):** Write three failure examples with query,
+expected item, actual rank, error class, and likely repair. Do not summarize
+only with one score.

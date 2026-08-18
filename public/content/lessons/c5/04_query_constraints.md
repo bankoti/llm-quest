@@ -48,8 +48,11 @@ asking a clarification question, or using a reversible default.
 fallback. A production extractor additionally needs a deadline, schema version,
 locale handling, audit sample, and adversarial tests.
 
-Complete the challenge below. Add a meat item with a higher
-semantic score and verify the hard vegan constraint still wins.
+Complete the challenge below. Its final test is this lesson's opening
+scenario made concrete: a meat sandwich with a HIGHER semantic score than
+the vegan one, and a vegan hard constraint. If your `search` ranks before
+it filters — or lets similarity outvote eligibility — it ships the meat
+sandwich and fails.
 
-**Checkpoint:** List every constraint that can affect user safety or contractual
+**Think it through (ungraded):** List every constraint that can affect user safety or contractual
 eligibility. Show the non-model enforcement point for each.

@@ -26,6 +26,13 @@ depend on the broken component for rollback.
 Define primary/secondary owners for service, model, data/index, security, and
 product decision. Record change approvals and on-call handoff.
 
+The challenge below is the launch review in miniature. It hands you raw
+evidence (measured value, threshold, direction) rather than pre-judged
+booleans, because that is where real reviews go wrong: for quality, higher
+is better; for latency and cost, lower is. Your gate checker must get the
+direction right, block the launch on a single failure, and name the gate
+that blocked it — "no" is not actionable, "no, because latency_p95" is.
+
 **Exit gate:** alerts fire in drills; every alert has a usable runbook and owner;
 operators can identify versions and disable optional AI; telemetry loss itself is
 detected without leaking private data.

@@ -23,3 +23,19 @@ def apply_constraints(items,max_price=None,category=None,required_tags=None)->Li
     Returns a new list (original order preserved).
     """
     raise NotImplementedError
+def search(items,semantic_scores,*,max_price=None,category=None,required_tags=None)->List[str]:
+    """The full pipeline, in the only safe order: hard constraints FIRST,
+    semantic ranking second.
+
+    semantic_scores: dict item_id -> similarity score (higher = more similar).
+
+    1. Filter items with apply_constraints.
+    2. Sort the survivors by semantic score, highest first.
+    3. Return their ids.
+
+    Eligibility is not negotiable: an item that fails a hard constraint is
+    excluded no matter how semantically similar it looks. "Chicken sandwich"
+    is very close to "vegan chicken sandwich" in embedding space — and
+    categorically unacceptable.
+    """
+    raise NotImplementedError

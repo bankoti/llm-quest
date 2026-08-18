@@ -1,25 +1,36 @@
-def choose_pattern(head_coverage: float, latency_ms: int, unlabeled_pairs: int) -> str:
-    """Choose where AI should run for a search stack. Return one of:
-    "head-cache" | "live-model" | "teacher-student"
+from dataclasses import dataclass
+from typing import List
 
-    Decision rules (apply in order — see lesson "Choose Where AI Runs"):
+@dataclass
+class Option:
+    name: str                  # "live-model", "head-cache", "teacher-student", ...
+    quality: float             # weighted quality score 0..1 (higher is better)
+    p95_ms: float              # measured 95th-percentile latency
+    data_leaves_region: bool   # True if user data would leave the allowed region
+    has_rollback: bool         # True if a rollback / version-pinning path exists
 
-    1. head_coverage >= 0.5 -> "head-cache"
-       Traffic is skewed: half or more of requests hit precomputable head
-       queries. Cache validated answers; only misses need a model.
+def gate_failures(option: Option, *, deadline_ms: float) -> List[str]:
+    """Name every hard gate this option violates. Check in this order:
 
-    2. else, latency_ms >= 150 -> "live-model"
-       Coverage is low but the deadline is loose enough for a live model
-       call with schema validation and a hard timeout.
+        "privacy"  — data_leaves_region is True
+        "latency"  — p95_ms > deadline_ms
+        "rollback" — has_rollback is False
 
-    3. else -> "teacher-student"
-       Low coverage AND a tight deadline: no live call fits. Distill —
-       a teacher labels the unlabeled_pairs offline, a small student
-       serves online within the deadline.
+    Return the violated gate names in that order; empty list means the
+    option passes all gates. This list is the reviewable evidence: an
+    architecture review wants to see WHICH gate killed an option, not
+    just that it disappeared.
+    """
+    raise NotImplementedError
 
-    Args:
-        head_coverage:  fraction of traffic answerable from the head cache (0..1)
-        latency_ms:     end-to-end deadline for this component
-        unlabeled_pairs: logged (query, item) pairs available for distillation
+def choose_option(options: List[Option], *, deadline_ms: float) -> str:
+    """The lesson's decision method, in code.
+
+    1. Eliminate every option with at least one gate failure.
+       A weighted quality score must NEVER compensate for a hard
+       violation — that is the gotcha this challenge grades.
+    2. Among survivors, return the name of the highest-quality option.
+    3. If nothing survives, return "no-viable-option". That answer is
+       real: it means the constraints must change, not the scoring.
     """
     raise NotImplementedError

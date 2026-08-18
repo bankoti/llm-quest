@@ -49,6 +49,6 @@ Define alert owner, investigation runbook, retraining trigger, cooldown, and
 rollback. Automatic retraining without label and release gates can automate drift
 into production.
 
-**Checkpoint:** Create a drift scenario where PSI is high but quality is stable,
+**Think it through (ungraded):** Create a drift scenario where PSI is high but quality is stable,
 and one where PSI is low but a critical rare slice fails. Explain the needed
 monitoring layers.

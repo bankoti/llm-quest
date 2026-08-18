@@ -49,19 +49,25 @@ freshness, operability, unit cost, and reversibility.
 
 > **Gotcha:** do not let a weighted score compensate for a hard violation.
 
-**Checkpoint:** For each pattern, name its source of truth, online failure mode,
+**Think it through (ungraded):** For each pattern, name its source of truth, online failure mode,
 version boundary, and fallback.
-## Challenge decision rules
+## From patterns to a graded decision
 
-The challenge `choose_pattern` tests three of the patterns above using numeric
-thresholds. The mapping and logic:
+The challenge below compresses the decision method into code you can test.
+Each candidate `Option` carries a weighted quality score plus three hard-gate
+facts: does data leave the allowed region, does p95 fit the deadline, is
+there a rollback path.
 
-| Return value | Pattern above | When to use |
-|---|---|---|
-| `"head-cache"` | Validated head cache | `head_coverage >= 0.5` — majority of traffic is computable ahead of time |
-| `"live-model"` | Direct live generation | Coverage too low for a cache; `latency_ms >= 150` — deadline is loose enough for a real-time call |
-| `"teacher-student"` | Teacher offline, student online | Low coverage **and** tight deadline — no live call fits; distill offline |
+Work the method in order:
 
-Apply the rules in order: check `head_coverage` first, then `latency_ms`. The
-`unlabeled_pairs` argument tells you how much distillation data is available but
-does not change the routing decision in this simplified version.
+1. `gate_failures` names every violated gate (`"privacy"`, `"latency"`,
+   `"rollback"`). The list is the evidence an architecture review wants:
+   *which* gate killed an option, not just that it vanished.
+2. `choose_option` eliminates any option with a non-empty failure list,
+   then picks the highest quality among survivors.
+
+The test is built so the two best-scoring options each violate one gate. An
+implementation that lets quality compensate for a gate fails the test —
+which is exactly the gotcha above, now graded. It also checks that loosening
+the deadline changes the answer: the decision belongs to the constraints,
+not to the model leaderboard.

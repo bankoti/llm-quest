@@ -37,6 +37,25 @@ kappa = (observed_agreement - expected_agreement) /
         (1 - expected_agreement)
 ```
 
+By hand, two raters, 10 items, labels {relevant, not}:
+
+```text
+               rater B: rel   not
+rater A: rel            4     1
+         not            1     4
+
+observed agreement  p_o = (4 + 4) / 10 = 0.80
+marginals: each rater says "rel" 5/10 and "not" 5/10
+chance agreement    p_e = 0.5*0.5 + 0.5*0.5 = 0.50
+kappa = (0.80 - 0.50) / (1 - 0.50) = 0.60
+```
+
+Now skew the prevalence: both raters say "relevant" 9 times out of 10
+and agree on 8 items. Raw agreement is still 0.80, but chance agreement
+jumps to `p_e = 0.9*0.9 + 0.1*0.1 = 0.82`, so kappa = (0.80 - 0.82) /
+(1 - 0.82) = -0.11. Same raw agreement, opposite verdict. That is
+exactly why percent agreement is inflated when one label dominates.
+
 Kappa is sensitive to prevalence and does not prove either rater is correct.
 Use confusion matrices and disagreement examples. Weighted kappa or Krippendorff’s
 alpha may fit ordinal/multiple-rater settings; choose before analysis.
@@ -53,6 +72,6 @@ escalation.
 > **Tip:** re-label after rubric changes rather than silently mixing label
 > versions.
 
-**Checkpoint:** Write five boundary examples between grades 1/2 and 2/3. If two
+**Think it through (ungraded):** Write five boundary examples between grades 1/2 and 2/3. If two
 qualified annotators cannot apply the rubric consistently, model evaluation will
 not repair it.

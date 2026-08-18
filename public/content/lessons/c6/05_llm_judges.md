@@ -44,5 +44,5 @@ If prompts or models are tuned repeatedly against one judge, they may learn the
 judge’s preferences rather than user value. Hold out a judge-audit set, rotate
 human review, and evaluate critical dimensions independently.
 
-**Checkpoint:** Draft a judge card stating intended use, forbidden use, validated
+**Think it through (ungraded):** Draft a judge card stating intended use, forbidden use, validated
 population, agreement, biases tested, failure handling, and revision date.

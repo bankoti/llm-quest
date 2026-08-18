@@ -50,6 +50,6 @@ reside internally. Delimit them, minimize tools, enforce authorization outside
 the model, and test adversarial text. A prompt instruction cannot grant access to
 a source the caller is not permitted to retrieve.
 
-**Checkpoint:** For five generated sentences, mark atomic claims and the exact
+**Think it through (ungraded):** For five generated sentences, mark atomic claims and the exact
 source span supporting each. Remove unsupported claims rather than inventing a
 plausible citation.

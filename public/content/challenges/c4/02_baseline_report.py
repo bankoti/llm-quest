@@ -3,28 +3,35 @@ def precision_at_k(results,relevant,k)->float:
 
     precision@k = |relevant ∩ results[:k]| / k
 
-    Args:
-        results:  ordered list of retrieved item ids (best first)
-        relevant: collection of known-relevant item ids
-        k:        budget; denominator is always k even if fewer items retrieved
+    The denominator is always k, even if fewer than k items were retrieved:
+    the metric charges you for the whole budget you were given.
     Returns float in [0, 1].
     """
     raise NotImplementedError
-def mean_precision(queries,k)->float:
-    """Mean P@k across a set of queries.
 
-    Args:
-        queries: list of (results, relevant) tuples
-        k:       budget passed to precision_at_k for every query
+def mean_precision(queries,k)->float:
+    """Mean P@k across queries.
+
+    queries: list of (results, relevant) tuples.
     Returns the arithmetic mean of per-query P@k values.
     """
     raise NotImplementedError
-def baseline_report(queries,k)->dict:
-    """Aggregate evaluation report over a query set.
 
-    Returns a dict with at least:
-        'queries'             — int, number of queries evaluated
-        'k'                   — int, the k value used
-        'mean_precision_at_k' — float, mean P@k across all queries
+def baseline_report(queries,k)->dict:
+    """Slice-aware evaluation report — the graded version of the lesson's
+    core claim: an aggregate score can hide a completely dead slice.
+
+    queries: list of (results, relevant, slice_name) triples, where
+             slice_name tags the traffic slice ("head", "torso", "tail", ...).
+
+    Returns a dict with:
+        "queries"             — int, total number of queries
+        "k"                   — int, the k used
+        "mean_precision_at_k" — float, mean P@k over ALL queries
+        "slices"              — dict slice_name -> mean P@k within that slice
+        "worst_slice"         — the slice name with the lowest mean P@k
+
+    The report must make a zero-scoring slice impossible to miss even when
+    the aggregate looks healthy.
     """
     raise NotImplementedError

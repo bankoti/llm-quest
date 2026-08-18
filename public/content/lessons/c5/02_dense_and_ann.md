@@ -45,5 +45,5 @@ switch an alias after evaluation.
 Complete the challenge below. Then perturb one dimension and see
 why unnormalized dot product can prefer magnitude rather than direction.
 
-**Checkpoint:** Design an exact-versus-ANN harness with a frozen query sample and
+**Think it through (ungraded):** Design an exact-versus-ANN harness with a frozen query sample and
 state the minimum recall and maximum p95 that permit publication.
