@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { INTERACTIVE_LESSONS } from './lessons'
-import { loadTrack, stars, scoredCount, computeStreak } from './types'
+import { loadTrack, stars, scoredCount, computeStreak, mixDoneToday } from './types'
 
 const TOTAL = INTERACTIVE_LESSONS.length
 
@@ -67,6 +67,21 @@ export function InteractiveHubPage() {
 
         {/* calendar heatmap — last 28 days */}
         {completed > 0 && <StreakCalendar activeDates={streak.activeDates} />}
+
+        {/* daily mix — interleaved retrieval across completed lessons */}
+        {completed > 0 && (
+          <Link to="/interactive/mix"
+            className="flex items-center gap-3 p-4 mb-4 rounded-xl border bg-sky-950/30 border-sky-800/60 hover:border-sky-500 transition-colors group">
+            <span className="text-2xl">🥣</span>
+            <span className="flex-1">
+              <span className="block font-semibold text-sky-200 group-hover:text-sky-100">Daily mix</span>
+              <span className="block text-xs text-sky-500/80">
+                {mixDoneToday() ? 'done today ✓ — come back tomorrow' : '6 quick checks across everything you\u2019ve finished · keeps your streak'}
+              </span>
+            </span>
+            <span className="text-sky-600 group-hover:text-sky-400 text-lg">›</span>
+          </Link>
+        )}
 
         {/* weakest-first practice */}
         {weakSpots > 0 && (

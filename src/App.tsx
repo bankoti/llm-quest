@@ -4,6 +4,7 @@ import { DemoBrilliantPage } from '@/pages/DemoBrilliantPage'
 import { InteractiveHubPage } from '@/interactive/InteractiveHubPage'
 import { InteractiveLessonPage } from '@/interactive/InteractiveLessonPage'
 import { PracticePage } from '@/interactive/PracticePage'
+import { DailyMixPage } from '@/interactive/DailyMixPage'
 import { loadProgress, ProgressState } from '@/engine/progress'
 import { HomePage } from '@/pages/HomePage'
 import { MapPage } from '@/pages/MapPage'
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/demo" element={<DemoBrilliantPage />} />  {/* hidden: Brilliant-style experiment */}
         <Route path="/interactive" element={<InteractiveHubPage />} />
         <Route path="/interactive/practice" element={<PracticePage />} />
+        <Route path="/interactive/mix" element={<DailyMixPage />} />
         <Route path="/interactive/:slug" element={<InteractiveLessonPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

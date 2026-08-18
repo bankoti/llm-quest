@@ -3,9 +3,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { INTERACTIVE_LESSONS } from './lessons'
-import { scoredCount, saveLesson, stars as calcStars } from './types'
-import type { Step, PredictQuestion } from './types'
+import { INTERACTIVE_LESSONS, WARMUPS } from './lessons'
+import { scoredCount, saveLesson, stars as calcStars, loadTrack } from './types'
+import type { Step, PredictQuestion, NumericQuestion } from './types'
+import { getLevel } from '@/data/curriculum'
 import { beacon } from '@/engine/beacon'
 
 // ── atoms ─────────────────────────────────────────────────────────────────────
@@ -47,16 +48,30 @@ function StepConcept({ step, onDone }: { step: Extract<Step, { kind: 'concept' }
   )
 }
 
-export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>; onDone: (firstTry: boolean) => void }) {
+// Confidence lock-in: the learner stages an option, then commits as
+// "sure" or "not sure" BEFORE the reveal. Calibration (sure-but-wrong) is
+// summarized at the finale. Only the first commit counts for scoring.
+export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>; onDone: (firstTry: boolean, sureFirst?: boolean) => void }) {
+  const [staged, setStaged] = useState<number | null>(null)
   const [picked, setPicked] = useState<number | null>(null)
   const [wrongOnes, setWrongOnes] = useState<number[]>([])
+  const [firstSure, setFirstSure] = useState<boolean | null>(null)
   const solved = picked === step.answer
 
-  const pick = (i: number) => {
-    if (solved) return
-    setPicked(i)
-    if (i !== step.answer) setWrongOnes(w => (w.includes(i) ? w : [...w, i]))
+  const stage = (i: number) => {
+    if (solved || wrongOnes.includes(i)) return
+    setStaged(i)
   }
+  const commit = (sure: boolean) => {
+    if (staged === null) return
+    if (firstSure === null) setFirstSure(sure)
+    setPicked(staged)
+    if (staged !== step.answer) setWrongOnes(w => (w.includes(staged) ? w : [...w, staged]))
+    setStaged(null)
+  }
+  const wrongWhy = picked !== null && !solved
+    ? (step.whys?.[picked] ?? step.nudge)
+    : null
   return (
     <div className="w-full max-w-lg">
       <p className="text-lg text-gray-100 mb-3">{step.prompt}</p>
@@ -65,14 +80,16 @@ export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>
         {step.options.map((o, i) => {
           const isWrong = wrongOnes.includes(i)
           const isRight = solved && i === step.answer
+          const isStaged = staged === i
           return (
-            <motion.button key={i} onClick={() => pick(i)}
+            <motion.button key={i} onClick={() => stage(i)}
               animate={picked === i && isWrong ? { x: [0, -8, 8, -5, 5, 0] } : {}}
               transition={{ duration: 0.35 }}
-              disabled={solved}
+              disabled={solved || isWrong}
               className={`px-4 py-3 rounded-xl border text-left font-mono text-sm transition-colors
                 ${isRight ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300'
                 : isWrong ? 'bg-red-900/20 border-red-800 text-red-300'
+                : isStaged ? 'bg-violet-600/20 border-violet-500 text-violet-200'
                 : 'bg-gray-800/60 border-gray-700 text-gray-200 hover:border-violet-500'}`}>
               {o}
             </motion.button>
@@ -80,15 +97,29 @@ export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>
         })}
       </div>
       <AnimatePresence>
-        {picked !== null && !solved && (
+        {staged !== null && !solved && (
+          <motion.div key={'c' + staged} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="mt-4 flex items-center gap-3">
+            <span className="text-sm text-gray-400">Lock it in:</span>
+            <button onClick={() => commit(true)}
+              className="px-4 py-2 rounded-lg bg-emerald-700/40 border border-emerald-600 text-emerald-200 text-sm font-semibold hover:bg-emerald-700/60">
+              I'm sure
+            </button>
+            <button onClick={() => commit(false)}
+              className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-600 text-gray-300 text-sm font-semibold hover:bg-gray-700">
+              Best guess
+            </button>
+          </motion.div>
+        )}
+        {wrongWhy && staged === null && (
           <motion.p key={'n' + picked} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="mt-4 text-sm text-amber-300">{step.nudge} Try again, no penalty.</motion.p>
+            className="mt-4 text-sm text-amber-300">{wrongWhy} Try again, no penalty.</motion.p>
         )}
         {solved && (
           <motion.div key="ok" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
             <p className="text-sm text-emerald-300 font-semibold">Correct.</p>
             <p className="text-sm text-gray-300 mt-1">{step.explain}</p>
-            <ContinueBtn onClick={() => onDone(wrongOnes.length === 0)} />
+            <ContinueBtn onClick={() => onDone(wrongOnes.length === 0, firstSure ?? false)} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -154,10 +185,95 @@ export function StepPredict({ step, onDone }: { step: Extract<Step, { kind: 'pre
   )
 }
 
+// numeric entry: compute the value, don't recognize it. Two failed attempts
+// unlock a reveal that counts as a miss — no infinite stalls.
+function NumericQ({ q, onDone }: { q: NumericQuestion; onDone: (firstTry: boolean) => void }) {
+  const [val, setVal] = useState('')
+  const [attempts, setAttempts] = useState(0)
+  const [state, setState] = useState<'open' | 'right' | 'revealed'>('open')
+  const tol = q.tolerance ?? Math.abs(q.answer) * 0.01
+
+  const check = () => {
+    const n = parseFloat(val.replace(/[,_ ]/g, ''))
+    if (!isFinite(n)) return
+    if (Math.abs(n - q.answer) <= tol) {
+      setState('right')
+      onDone(attempts === 0)
+    } else {
+      setAttempts(a => a + 1)
+    }
+  }
+  const reveal = () => {
+    setState('revealed')
+    setVal(String(q.answer))
+    onDone(false)
+  }
+  const settled = state !== 'open'
+  return (
+    <div className="mb-5">
+      <p className="font-mono text-sm text-gray-200 mb-2">{q.label} <span className="text-gray-500">→ ?</span></p>
+      <div className="flex items-center gap-2">
+        <input value={val} onChange={e => setVal(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !settled) check() }}
+          disabled={settled} inputMode="decimal" placeholder="type a number"
+          className={`w-40 px-3 py-2 rounded-lg font-mono text-sm border bg-gray-900 outline-none
+            ${state === 'right' ? 'border-emerald-500 text-emerald-300'
+            : state === 'revealed' ? 'border-amber-600 text-amber-300'
+            : 'border-gray-700 text-gray-100 focus:border-violet-500'}`} />
+        {q.unit && <span className="text-xs text-gray-500 font-mono">{q.unit}</span>}
+        {!settled && (
+          <button onClick={check}
+            className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold">
+            Check
+          </button>
+        )}
+      </div>
+      {!settled && attempts > 0 && (
+        <p className="mt-2 text-xs text-amber-300">
+          Not it — recompute and try again.
+          {attempts >= 2 && <>{' '}<button onClick={reveal} className="underline text-amber-200">Show the answer</button></>}
+        </p>
+      )}
+      {settled && <p className="mt-2 text-xs text-gray-400">{q.reveal}</p>}
+    </div>
+  )
+}
+
+export function StepNumeric({ step, onDone }: { step: Extract<Step, { kind: 'numeric' }>; onDone: (firstTryAll: boolean) => void }) {
+  const [doneCount, setDoneCount] = useState(0)
+  const [allFirstTry, setAllFirstTry] = useState(true)
+  const total = step.questions.length
+  const onQDone = (ft: boolean) => {
+    if (!ft) setAllFirstTry(false)
+    setDoneCount(n => n + 1)
+  }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-3">{step.prompt}</p>
+      {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
+      {step.questions.map((q, i) => <NumericQ key={i} q={q} onDone={onQDone} />)}
+      {doneCount === total && <ContinueBtn onClick={() => onDone(allFirstTry)} />}
+    </div>
+  )
+}
+
 // ── finale card ───────────────────────────────────────────────────────────────
 
-function Finale({ lessonSlug, firstTries, scored }: { lessonSlug: string; firstTries: number; scored: number }) {
+// first main-track level whose warm-up is this lesson and which the learner
+// has not completed yet — the "now apply it" transfer link
+function applyTarget(slug: string): { id: string; title: string } | undefined {
+  let raw: Record<string, { status?: string }> = {}
+  try { raw = JSON.parse(localStorage.getItem('llmquest_progress_v1') ?? '{}')?.levels ?? {} } catch {}
+  const ids = Object.keys(WARMUPS).filter(id => WARMUPS[id] === slug)
+  const open = ids.find(id => raw[id]?.status !== 'complete') ?? ids[0]
+  if (!open) return undefined
+  const lvl = getLevel(open)
+  return lvl ? { id: lvl.id, title: lvl.title } : undefined
+}
+
+function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }: { lessonSlug: string; firstTries: number; scored: number; missedCount: number; sure: number; sureWrong: number }) {
   const s = scored === 0 || firstTries / scored >= 0.99 ? 3 : firstTries / scored >= 0.6 ? 2 : 1
+  const apply = applyTarget(lessonSlug)
   return (
     <div className="w-full max-w-lg text-center">
       <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5 }}>
@@ -166,12 +282,34 @@ function Finale({ lessonSlug, firstTries, scored }: { lessonSlug: string; firstT
         <p className="text-gray-300 mb-1">{firstTries} of {scored} checks on the first try.</p>
         {s === 3 && <p className="text-emerald-400 text-sm mb-2">Perfect round. No second guesses.</p>}
         {s < 3 && <p className="text-amber-300 text-sm mb-2">Replay to earn 3 stars — no time limit, no pressure.</p>}
+        {sureWrong > 0 && (
+          <p className="text-sm text-rose-300 mb-2">
+            Calibration check: you locked in "I'm sure" on {sureWrong} answer{sureWrong > 1 ? 's' : ''} that {sureWrong > 1 ? 'were' : 'was'} wrong.
+            Confident misses are the ones worth a second look.
+          </p>
+        )}
+        {sure > 0 && sureWrong === 0 && scored > 0 && (
+          <p className="text-sm text-emerald-400/80 mb-2">Well calibrated: every "I'm sure" was right.</p>
+        )}
       </motion.div>
-      <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+      {apply && (
+        <Link to={`/level/${apply.id}`}
+          className="mt-6 block px-6 py-4 rounded-xl bg-emerald-700/30 border border-emerald-600 hover:bg-emerald-700/50 text-left">
+          <span className="block text-xs text-emerald-400 mb-1">Now apply it — graded challenge</span>
+          <span className="block font-semibold text-emerald-200">{apply.title} →</span>
+        </Link>
+      )}
+      <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
         <Link to="/interactive"
           className="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold">
           Back to track
         </Link>
+        {missedCount > 0 && (
+          <Link to="/interactive/practice"
+            className="px-6 py-3 rounded-xl bg-amber-700/40 border border-amber-600 hover:bg-amber-700/60 text-amber-200 font-semibold">
+            Practice your {missedCount} miss{missedCount > 1 ? 'es' : ''}
+          </Link>
+        )}
         <a href={`/interactive/${lessonSlug}`} onClick={() => window.location.reload()}
           className="px-6 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold">
           Replay
@@ -197,30 +335,36 @@ export function InteractiveLessonPage() {
   const [streak, setStreak] = useState(0)
   const [bestStreak, setBestStreak] = useState(0)
   const [done, setDone] = useState(false)
+  const [sure, setSure] = useState(0)
+  const [sureWrong, setSureWrong] = useState(0)
 
   const scored = lesson ? scoredCount(lesson) : 0
 
   // ftDelta/missStep are passed explicitly so the final step's result is included
   // in the saved record (state updates would not be visible to this closure yet)
-  const next = useCallback((ftDelta = 0, missStep: number | null = null) => {
+  const next = useCallback((ftDelta = 0, missStep: number | null = null, sureDelta = 0, sureWrongDelta = 0) => {
     if (!lesson) return
     const ft = firstTries + ftDelta
     const ms = missStep === null ? missed : [...missed, missStep]
+    const su = sure + sureDelta
+    const sw = sureWrong + sureWrongDelta
     setFirstTries(ft)
     setMissed(ms)
+    setSure(su)
+    setSureWrong(sw)
     if (step + 1 >= lesson.steps.length) {
-      saveLesson(lesson.slug, { firstTries: ft, scored, completedAt: new Date().toISOString(), missed: ms })
+      saveLesson(lesson.slug, { firstTries: ft, scored, completedAt: new Date().toISOString(), missed: ms, sure: su, sureWrong: sw })
       beacon('lesson_complete', lesson.slug)
       setDone(true)
     } else {
       setStep(s => s + 1)
     }
-  }, [step, lesson, firstTries, missed, scored])
+  }, [step, lesson, firstTries, missed, scored, sure, sureWrong])
 
-  const scored_step = useCallback((ft: boolean) => {
+  const scored_step = useCallback((ft: boolean, sureFirst?: boolean) => {
     if (ft) setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns })
     else setStreak(0)
-    next(ft ? 1 : 0, ft ? null : step)
+    next(ft ? 1 : 0, ft ? null : step, sureFirst ? 1 : 0, sureFirst && !ft ? 1 : 0)
   }, [next, step])
 
   if (!lesson) return (
@@ -250,7 +394,7 @@ export function InteractiveLessonPage() {
       <AnimatePresence mode="wait">
         {done ? (
           <motion.div key="done" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.25 }}>
-            <Finale lessonSlug={lesson.slug} firstTries={firstTries} scored={scored} />
+            <Finale lessonSlug={lesson.slug} firstTries={firstTries} scored={scored} missedCount={missed.length} sure={sure} sureWrong={sureWrong} />
           </motion.div>
         ) : (
           <motion.div key={step} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.25 }}
@@ -260,6 +404,7 @@ export function InteractiveLessonPage() {
               if (s.kind === 'concept') return <StepConcept step={s} onDone={() => next()} />
               if (s.kind === 'mcq') return <StepMcq step={s} onDone={scored_step} />
               if (s.kind === 'predict') return <StepPredict step={s} onDone={scored_step} />
+              if (s.kind === 'numeric') return <StepNumeric step={s} onDone={scored_step} />
               if (s.kind === 'widget') return <s.widget onDone={() => next()} />
               return null
             })()}

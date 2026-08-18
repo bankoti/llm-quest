@@ -19,6 +19,10 @@ export interface McqStep {
   answer: number
   explain: string
   nudge: string
+  // optional per-option feedback for wrong picks, index-aligned with options.
+  // Falls back to `nudge` where absent. Fill these in for the most-missed
+  // steps once beacon data says which those are.
+  whys?: (string | undefined)[]
 }
 
 export interface PredictQuestion {
@@ -35,6 +39,23 @@ export interface PredictStep {
   questions: PredictQuestion[]
 }
 
+// numeric-entry prediction: the learner computes the value instead of
+// recognizing it in a list (generation effect). tolerance is absolute.
+export interface NumericQuestion {
+  label: string
+  answer: number
+  tolerance?: number
+  unit?: string
+  reveal: string
+}
+
+export interface NumericStep {
+  kind: 'numeric'
+  prompt: string
+  code?: string
+  questions: NumericQuestion[]
+}
+
 export interface WidgetProps { onDone: () => void }
 
 export interface WidgetStep {
@@ -42,7 +63,7 @@ export interface WidgetStep {
   widget: ComponentType<WidgetProps>
 }
 
-export type Step = ConceptStep | McqStep | PredictStep | WidgetStep
+export type Step = ConceptStep | McqStep | PredictStep | NumericStep | WidgetStep
 
 export interface InteractiveLesson {
   slug: string
@@ -54,14 +75,17 @@ export interface InteractiveLesson {
 }
 
 export const scoredCount = (l: InteractiveLesson) =>
-  l.steps.filter(s => s.kind === 'mcq' || s.kind === 'predict').length
+  l.steps.filter(s => s.kind === 'mcq' || s.kind === 'predict' || s.kind === 'numeric').length
 
 // ── local progress for this track only ───────────────────────────────────────
 // Deliberately separate from llmquest_progress_v1: the interactive track
 // never touches main XP, gating, or the certificate.
 const KEY = 'llmquest_interactive_v1'
 
-export interface LessonRecord { firstTries: number; scored: number; completedAt: string; missed?: number[] }
+// sure / sureWrong: confidence calibration across a run. `sure` counts first
+// commits where the learner locked in as confident; `sureWrong` the subset
+// that were wrong. Best-run semantics like firstTries.
+export interface LessonRecord { firstTries: number; scored: number; completedAt: string; missed?: number[]; sure?: number; sureWrong?: number }
 export type TrackState = Record<string, LessonRecord>
 
 export function loadTrack(): TrackState {
@@ -109,6 +133,7 @@ export function computeStreak(track: TrackState): StreakInfo {
   for (const rec of Object.values(track)) {
     if (rec.completedAt) dates.add(toDateStr(rec.completedAt))
   }
+  for (const d of loadMixDates()) dates.add(d)
   if (dates.size === 0) return { current: 0, longest: 0, activeDates: dates }
 
   const sorted = [...dates].sort()
@@ -146,4 +171,37 @@ export function computeStreak(track: TrackState): StreakInfo {
 export function dailyPick<T>(arr: T[]): T {
   const day = Math.floor(Date.now() / 86400000)
   return arr[day % arr.length]
+}
+
+// ── daily mix ─────────────────────────────────────────────────────────────────
+// A 2-minute interleaved retrieval session across completed lessons.
+// Completing it counts toward the streak (merged in computeStreak).
+const MIX_KEY = 'llmquest_mix_v1'
+
+export function loadMixDates(): string[] {
+  try { return JSON.parse(localStorage.getItem(MIX_KEY) ?? '[]') } catch { return [] }
+}
+
+export function recordMixDay(): void {
+  const today = toDateStr(new Date().toISOString())
+  const dates = loadMixDates()
+  if (!dates.includes(today)) {
+    dates.push(today)
+    localStorage.setItem(MIX_KEY, JSON.stringify(dates))
+  }
+}
+
+export function mixDoneToday(): boolean {
+  return loadMixDates().includes(toDateStr(new Date().toISOString()))
+}
+
+// deterministic PRNG so the day's mix is stable across reloads
+export function mulberry32(seed: number): () => number {
+  let a = seed >>> 0
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
 }
