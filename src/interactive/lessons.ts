@@ -196,7 +196,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         kind: 'predict',
         ...dailyPick([
           { prompt: 'B=2, H=4, T=8, D=16. Trace the shapes through one attention head.',
-            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
+            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nV: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
             questions: [
               { label: 'scores shape', options: ['(2, 4, 8, 8)', '(2, 4, 8, 16)', '(2, 8, 8, 4)'], answer: 0,
                 reveal: 'Q(B,H,T,D) @ K.T(B,H,D,T) → (B,H,T,T) = (2,4,8,8). One score per query-key pair.' },
@@ -204,7 +204,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
                 reveal: '(B,H,T,T) @ V(B,H,T,D) → (B,H,T,D) = (2,4,8,16). Each position is a blend of value vectors.' },
             ] },
           { prompt: 'B=1, H=8, T=16, D=64. Trace the shapes through one attention head.',
-            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
+            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nV: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
             questions: [
               { label: 'scores shape', options: ['(1, 8, 16, 16)', '(1, 8, 16, 64)', '(1, 16, 8, 8)'], answer: 0,
                 reveal: '(1,8,16,64) @ (1,8,64,16) → (1,8,16,16). T×T attention map.' },
@@ -212,7 +212,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
                 reveal: '(1,8,16,16) @ (1,8,16,64) → (1,8,16,64). Same shape as Q, K, V.' },
             ] },
           { prompt: 'B=4, H=2, T=6, D=32. Trace the shapes through one attention head.',
-            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
+            code: 'Q: (B, H, T, D)\nK: (B, H, T, D)\nV: (B, H, T, D)\nscores = Q @ K.transpose(-2,-1)  # ??\nout  = softmax(scores/√D) @ V    # ??',
             questions: [
               { label: 'scores shape', options: ['(4, 2, 6, 6)', '(4, 2, 6, 32)', '(4, 6, 6, 2)'], answer: 0,
                 reveal: '(4,2,6,32) @ (4,2,32,6) → (4,2,6,6). T×T regardless of D.' },
