@@ -55,6 +55,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         title: 'Batches: (B, T, C)',
         lines: [
           'Real model tensors carry three axes: B sequences per batch, T token positions, C channels (how many numbers describe each position).',
+          'Two operations appear everywhere. The @ operator is matrix multiplication: (m, n) @ (n, p) → (m, p) — the inner dimensions must match and disappear. Broadcasting stretches a smaller tensor across a missing or size-1 axis: adding (2, 2) and (2,) works because (2,) broadcasts across both rows.',
           'Slicing selects pieces without touching values. A colon means "all of this axis." A negative index counts from the end. Every slice has a predictable shape.',
         ],
         cta: 'Explore slices',
@@ -96,6 +97,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'Every LLM works on integers, not characters. A tokenizer splits a string into subword pieces, then looks each piece up in a vocabulary to produce an integer ID.',
           'GPT-4 uses ~100k token IDs. A word in the training vocabulary is typically one token. A rare word or a typo gets split into byte-level pieces. This is why token count matters for cost and context.',
+          'The embedding layer is a weight matrix of shape (vocab_size, embedding_dim). Row i holds the learned vector for token ID i. Looking up a token is just an index into this matrix — one row per ID.',
         ],
         cta: 'Show me BPE',
       },
@@ -166,6 +168,8 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'A feed-forward network processes each position independently. Self-attention allows every position to gather information from all others in a single step.',
           'Each position produces three vectors: a Query (what am I looking for?), a Key (what do I contain?), and a Value (what do I pass on?). The output is a weighted sum of values, where weights come from query-key dot products.',
+          'In batched code, Q, K, and V each have shape (B, H, T, D): B sequences, H parallel attention heads, T positions, D per-head channels. Running H heads in parallel lets each head specialise in a different relationship.',
+          'Before softmax, scores are divided by √D. With D-dimensional vectors, dot-product variance grows with D. Large scores push softmax toward a one-hot distribution, collapsing gradients to near zero. √D scaling keeps variance ≈ 1 regardless of head size.',
         ],
         cta: 'Show me the weights',
       },
@@ -297,6 +301,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'Training repeats four steps: (1) forward pass — run the model on a batch; (2) loss — measure how wrong the predictions are; (3) backward — compute how each weight contributed to that wrongness; (4) step — nudge every weight in the direction that reduces loss.',
           'Language models train on next-token prediction: given the first N tokens of a sequence, predict token N+1. Cross-entropy loss measures the gap between the predicted probability distribution and the actual next token.',
+          'The step size applied to each weight update is the learning rate. Too small and loss flatlines; too large and loss spikes or diverges. PyTorch adds gradients into .grad buffers rather than overwriting them, so optimizer.zero_grad() must be called before each new backward pass to prevent gradients from accumulating across batches.',
         ],
         cta: 'Show me the knob',
       },
@@ -378,7 +383,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
           'T = 0 (greedy: always the argmax)',
           'T = 1.0 with a fixed random seed',
           'Top-p = 1.0',
-          'Beam search width = 1',
+          'Top-k = 50 with temperature 0.5',
         ],
         answer: 0,
         explain: 'T = 0 is pure greedy: argmax of logits, no randomness at all. A fixed seed with T > 0 gives reproducibility only if the sampling environment is bit-for-bit identical, which is fragile across library versions and hardware.',
@@ -417,7 +422,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         kind: 'mcq',
         prompt: 'During autoregressive generation with KV-cache enabled, how many new key-value pairs are computed per new token?',
         options: [
-          'One pair per layer (for the new token only)',
+          'One K + one V per layer — two new entries (the new token only)',
           'T pairs per layer (full recomputation)',
           'H pairs per layer (one per attention head)',
           'Zero: the whole KV-cache is recomputed every step',
@@ -469,11 +474,20 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         title: 'Pre-training is not alignment',
         lines: [
           'A pre-trained model predicts the next token well. It does not know whether it should be helpful, honest, or harmless. It will complete "How do I..." with whatever text statistically follows in training data.',
-          'RLHF adds a second phase: humans compare pairs of model responses and rate which is better. These ratings train a reward model (RM) that scores responses. Reinforcement learning then fine-tunes the base model to maximize RM score, subject to a KL penalty that keeps it close to the original.',
+          'RLHF has three phases. First, supervised fine-tuning (SFT): the model is fine-tuned on demonstration data to teach basic instruction-following. Second, a reward model (RM) is trained on human preference pairs — it starts from the SFT checkpoint and replaces the lm_head (which outputs vocab_size logits) with a single linear layer that outputs one scalar score. Third, RL (typically PPO) fine-tunes the policy to maximise RM score while a KL penalty keeps it close to the SFT model.',
         ],
         cta: 'See reward hacking',
       },
       { kind: 'widget', widget: RewardHackPlay },
+      {
+        kind: 'concept',
+        title: 'Scaling feedback: RLAIF',
+        lines: [
+          'Human labeling is the bottleneck of RLHF: expensive, slow, and inconsistent at scale. RLAIF (RL from AI Feedback) replaces human raters with a capable LLM that generates preference labels. Constitutional AI (CAI) is Anthropic\'s variant: a set of written principles guides the AI critic, making the preference generation auditable.',
+          'Both approaches still produce a reward model trained on preference pairs. The difference is in who wrote the labels, not in the RL or architecture.',
+        ],
+        cta: 'Continue',
+      },
       {
         kind: 'mcq',
         prompt: 'The KL penalty in RLHF (PPO) keeps the fine-tuned model close to the SFT base. What goes wrong if you remove it?',
@@ -539,6 +553,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'Token IDs are arbitrary integers: "cat" = 5246 says nothing about cats. The embedding layer replaces each ID with a learned vector of hundreds of numbers, and those vectors are where meaning lives.',
           'Training pushes words that appear in similar contexts toward each other. After enough data, direction and distance encode real relationships: similarity, category, even analogy.',
+          'Similarity is measured by dot product. For unit-length vectors the dot product equals the cosine of the angle between them: 1 means same direction (synonyms), 0 means orthogonal (unrelated), -1 means opposite direction (antonyms). This is cosine similarity.',
         ],
         cta: 'Explore the space',
       },
@@ -596,6 +611,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'In a dense transformer, every token flows through every parameter. But the feed-forward network, roughly two thirds of all parameters, does not need to be monolithic.',
           'MoE replaces one big FFN with several smaller "experts" plus a tiny router. The router scores the experts per token and sends each token through only the top 2. Total parameters grow; compute per token barely moves.',
+          'Only the FFN blocks are replicated N times. Attention layers, embeddings, and layer norms exist exactly once per transformer layer. So total parameters ≠ N × (dense model size); the non-FFN parts are shared across all experts.',
         ],
         cta: 'Route some tokens',
       },
@@ -703,6 +719,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'Full fine-tuning updates every weight: best quality ceiling, but a 7B model needs ~84 GB of GPU memory once you add gradients and optimizer state to the weights themselves.',
           'LoRA (Low-Rank Adaptation) freezes the base model and adds a thin bypass to chosen layers: the update to W is factored as B x A, where A is (r x d) and B is (d x r) with rank r as small as 4. Train only A and B; at inference, merge them into W for zero added latency.',
+          'Why does this work? Empirical measurement shows that fine-tuning weight deltas concentrate in a few directions — the update is intrinsically low-rank. Adaptation mostly re-mixes features the model already learned, and a thin B×A captures that kind of change directly.',
         ],
         cta: 'Pick a rank',
       },
@@ -734,6 +751,16 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         nudge: 'The model forgot old skills while learning new ones. What is that called?',
       },
       { kind: 'widget', widget: DistillPlay },
+      {
+        kind: 'concept',
+        title: 'Knowledge distillation',
+        lines: [
+          'Distillation trains a small student model to imitate a large teacher model. Instead of learning from one-hot labels, the student learns from the teacher\'s full output distribution — the probability it assigns to every token.',
+          'Hard labels: the true answer is 1, everything else 0. Soft labels: the teacher\'s probability distribution, e.g., Paris = 0.85, Lyon = 0.08, Rome = 0.04. The non-zero mass on wrong tokens is what Hinton called dark knowledge — relational information (Lyon is geographically close to Paris) that never shows up in any correct answer.',
+          'SFT stands for supervised fine-tuning: training on labeled instruction-response pairs to teach the model to follow instructions before any RL phase.',
+        ],
+        cta: 'Why soft labels win',
+      },
       {
         kind: 'mcq',
         prompt: 'You want a 1B student to match a 70B teacher. Why are soft labels strictly better than hard labels for this?',
@@ -808,7 +835,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         kind: 'predict',
         prompt: 'Draft proposes 4 tokens per round; the target accepts each with probability 0.8 (independent, stop at first reject). Predict the expected speedup shape.',
         questions: [
-          { label: 'Expected accepted tokens per target pass (plus the free fix token)', options: ['~3.6 — near the full 5 but discounted by rejections', 'Exactly 5 every round', '~1.2 — barely better than sequential'], answer: 0,
+          { label: 'Expected accepted tokens per target pass (plus the free fix token)', options: ['~3-4 tokens: most drafts accepted, rejections trim the tail', 'Exactly 5 every round', '~1.2 — barely better than sequential'], answer: 0,
             reveal: 'E = 0.8 + 0.64 + 0.512 + 0.41 ≈ 2.36 accepted, +1 token the target supplies on rejection or completion ≈ 3.4-3.6 tokens per big-model pass, versus 1 for sequential decoding. Acceptance rate is the whole game: a well-matched draft model is what makes it pay.' },
         ],
       },
@@ -884,6 +911,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         title: 'One mechanism, many roles',
         lines: [
           'Multi-head attention runs several attention computations in parallel, each with its own Q, K, V weight matrices. The outputs are concatenated and projected back to the residual stream.',
+          'In practice all H heads\' Q projections are packed into one (hidden_dim, hidden_dim) matrix, then sliced into H chunks of head_dim at runtime. The same applies to K, V, and the output projection W_O. Shape (hidden_dim, hidden_dim), not H separate (hidden_dim, head_dim) matrices.',
           'Different heads spontaneously specialise. Interpretability research finds heads that track syntactic roles, resolve pronouns, copy from earlier positions, or aggregate global context. No two heads learn the same job.',
         ],
         cta: 'Inspect the heads',
@@ -1000,6 +1028,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'Training loss measures how well the model fits the data it has seen. It always improves with more training — given enough capacity, a model can memorise every training example.',
           'Validation loss measures performance on data the model has never seen. When validation loss starts rising while training loss keeps falling, the model has stopped learning general patterns and started memorising specifics. This is overfitting.',
+          'A test set must stay unseen throughout training and hyperparameter search. Use a separate validation set for early stopping and model selection; report test loss only once, at the very end. Using test data for any earlier decision contaminates it — the reported number will look better than true out-of-sample performance.',
         ],
         cta: 'Find the optimal stopping point',
       },
@@ -1042,6 +1071,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         lines: [
           'A language model is stateless: one input, one output. An agent wraps the model in a loop: the model reasons about what to do, calls a tool, observes the result, and repeats until it has enough to answer.',
           'Tools are deterministic black boxes — a calculator, a search engine, a code interpreter, a database query. The agent decides when to delegate to a tool versus when to answer from its own knowledge.',
+          'Chain-of-thought (CoT) prompting asks the model to reason step-by-step from its own memory before answering. ReAct interleaves reasoning steps with tool calls: Reason → Act (call tool) → Observe (read result) → Reason again. Each observation grounds the next reasoning step in a real fact rather than a model extrapolation.',
         ],
         cta: 'Try two tool-call decisions',
       },
@@ -1096,7 +1126,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         title: 'Full-stack trace',
         lines: [
           'A prompt enters as a string. It exits as tokens → embeddings → transformer layers → logits → sampled token → decoded string. Each level you have studied connects to the next.',
-          'This capstone asks you to predict five facts that cross layer boundaries. No new concepts: everything is from lessons 1–7.',
+          'This capstone asks you to predict five facts that cross layer boundaries. No new concepts: everything is from earlier in the track.',
         ],
         cta: 'Start the gauntlet',
       },
