@@ -7,7 +7,7 @@ versioned and observable.
 
 ## Bound every queue
 
-![Observability three types](content/images/c7/observability_triangle.svg)
+![Bounded queue with load shedding](content/images/c7/bounded_queue.svg)
 
 
 Unbounded queues turn overload into extreme latency and memory exhaustion. For

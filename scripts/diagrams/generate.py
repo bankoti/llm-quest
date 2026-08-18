@@ -8,9 +8,9 @@ from pathlib import Path
 
 BASE = Path(__file__).parent.parent.parent / "public" / "content" / "images"
 
-import d_c1, d_c2, d_c4, d_c6
+import d_c1, d_c2, d_c4, d_c6, d_c7
 
-all_diagrams = d_c1.DIAGRAMS + d_c2.DIAGRAMS + d_c4.DIAGRAMS + d_c6.DIAGRAMS
+all_diagrams = d_c1.DIAGRAMS + d_c2.DIAGRAMS + d_c4.DIAGRAMS + d_c6.DIAGRAMS + d_c7.DIAGRAMS
 
 for rel_path, fn in all_diagrams:
     out = BASE / rel_path
