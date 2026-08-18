@@ -1,4 +1,5 @@
 # 03 - Tokenization: text becomes model input
+<!-- challenge: challenges/c1/02_tokenizer.py -->
 
 A model never sees text. It sees integers, and the mapping from text to
 integers is a design decision whose consequences persist for the life of the

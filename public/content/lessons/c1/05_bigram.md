@@ -1,4 +1,5 @@
 # 05 - The bigram baseline
+<!-- challenge: challenges/c1/04_bigram.py -->
 
 Before the Transformer, spend one level on a model so small you can print
 every parameter. It validates your entire pipeline and sets a loss number that
@@ -51,7 +52,26 @@ result shaped `(V, 1)` instead of `(V,)`, so the division broadcasts each row's
 total across that row. Afterward every row of `probabilities` sums to 1: a
 proper distribution over next tokens.
 
-The neural version learns logits by minimizing cross entropy. The count version
+The neural version learns logits by minimizing cross entropy.
+
+## Cross-entropy loss
+
+Given logits (one number per vocabulary token) for each position, the formula is:
+
+```text
+CE = -mean( log( softmax(logits)[i, target_i] ) )
+```
+
+Step by step:
+
+1. `softmax(logits)` converts raw scores to a probability distribution over the vocabulary.
+2. Index into it with the actual next token `target_i` to get the model's assigned probability for the correct answer.
+3. Take the log — high probability gives a small negative number; low probability a large negative number.
+4. Negate and average over all positions.
+
+A uniform model over a 65-token vocabulary has CE = log(65) ≈ 4.17. Any model
+below that has learned something. The challenge below has you implement this
+formula directly. The count version
 directly estimates probabilities from frequency. Their predictions should become
 similar with enough data and optimization.
 

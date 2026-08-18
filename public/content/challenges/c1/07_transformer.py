@@ -22,7 +22,7 @@ def multihead_attention(x, Wq, Wk, Wv, Wo, n_heads):
     raise NotImplementedError
 
 def feed_forward(x, W1, W2):
-    """Linear -> ReLU -> Linear."""
+    """Linear -> GELU -> Linear. GELU(x) = x * sigmoid(1.702 * x) approx."""
     raise NotImplementedError
 
 def transformer_block(x, Wq, Wk, Wv, Wo, W1, W2, n_heads):

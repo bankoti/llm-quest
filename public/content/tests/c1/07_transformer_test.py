@@ -13,6 +13,17 @@ V2=V.copy(); V2[:,-1]+=100
 out2=causal_attention(Q,K,V2)
 assert np.allclose(out[:,:-1],out2[:,:-1],atol=1e-5), "causality violated"
 
+# Exercise helpers independently — can't be bypassed by inlining into transformer_block
+ff_out = feed_forward(x, W1, W2)
+assert ff_out.shape == (B, T, C), f"feed_forward shape: {ff_out.shape}"
+
+mha_out = multihead_attention(x, Wq, Wk, Wv, Wo, H)
+assert mha_out.shape == (B, T, C), f"multihead_attention shape: {mha_out.shape}"
+x2_mha = x.copy(); x2_mha[:, -1] += 10
+mha_out2 = multihead_attention(x2_mha, Wq, Wk, Wv, Wo, H)
+assert np.allclose(mha_out[:, :-1], mha_out2[:, :-1], atol=1e-4), \
+    "multihead_attention causality violated"
+
 blk=transformer_block(x,Wq,Wk,Wv,Wo,W1,W2,H)
 assert blk.shape==(B,T,C), f"block shape: {blk.shape}"
 x2=x.copy(); x2[:,-1]+=10

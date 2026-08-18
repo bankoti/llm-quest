@@ -1,4 +1,5 @@
 # 06 - Gradients, backpropagation, and optimization
+<!-- challenge: challenges/c1/05_gradients.py -->
 
 Training is a loop that nudges numbers. This level makes you watch one nudge
 at a time until nothing about `loss.backward()` is mysterious.

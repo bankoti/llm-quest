@@ -1,4 +1,5 @@
 # 07 - Causal self-attention
+<!-- challenge: challenges/c1/06_attention.py -->
 
 Attention is a soft dictionary lookup: every position asks a question, every
 earlier position advertises what it knows, and the answer is a weighted blend.

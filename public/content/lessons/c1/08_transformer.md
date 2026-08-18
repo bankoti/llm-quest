@@ -1,4 +1,5 @@
 # 08 - Assemble a decoder-only Transformer
+<!-- challenge: challenges/c1/07_transformer.py -->
 
 Every part is on the bench: tokenizer, batches, attention, MLP. This level is
 pure assembly, and the skill it trains is refusing to move on while any shape

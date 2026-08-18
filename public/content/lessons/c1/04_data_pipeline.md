@@ -1,4 +1,5 @@
 # 04 - From token IDs to training batches
+<!-- challenge: challenges/c1/03_batches.py -->
 
 One off-by-one in this file and the model trains to predict a token it can
 already see. The loss plummets, the samples are garbage, and nothing raises an
