@@ -28,10 +28,9 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     steps:[
       {kind:'concept',title:'Match with Q and K; retrieve V',lines:[
         'Every position is projected through three learned linear layers. Its query describes what it seeks. Its key describes what it can match. Its value carries the information it contributes if selected.',
-        'Transposing a matrix swaps its rows and columns: if K has shape (T, D), its transpose K.T has shape (D, T). This makes inner dimensions meet: (T,D)@(D,T) gives a (T,T) score matrix, one score per query-key pair.',
-        'For query position i and candidate j, score = Qᵢ · Kⱼ. Softmax converts all scores for query i into attention weights. The output at i is the weighted sum of value vectors Vⱼ.',
-        'Q and K decide where to look; V decides what comes back. Keeping matching separate from content lets the model learn flexible routing.',
-        'To prevent large dot products from pushing softmax toward near-zero gradients, scores are divided by the square root of d_k before softmax. For d_k=64 the divisor is 8. The full formula is: softmax(Q @ K.T / sqrt(d_k)) @ V.',
+        'K.T is the transpose of K: if K has shape (T, D), then K.T has shape (D, T), making inner dimensions meet for Q@K.T: (T,D)@(D,T) gives a (T,T) score matrix with one score per query-key pair.',
+        'For query position i and candidate j, score = Qᵢ · Kⱼ. Softmax converts those scores into attention weights. The output is the weighted sum of value vectors.',
+        'Q and K decide where to look; V decides what comes back.',
       ],cta:'Separate the roles'},
       {kind:'widget',widget:QkvPlay},
       {kind:'worked',title:'One query, two candidates',prompt:'A query has dot products 3 with key A and 1 with key B.',stages:[
@@ -40,6 +39,11 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'Retrieve values',body:'Output = 0.88×V_A + 0.12×V_B. Values, not keys, are mixed.'},
       ],takeaway:'Attention is soft lookup: query-key matching produces weights used to mix values.'},
       {kind:'mcq',prompt:'Which vectors form the attention output?',options:['Value vectors, weighted by query-key scores','Key vectors only','Query vectors only','Token IDs'],answer:0,explain:'Queries and keys produce weights; those weights scale values.',nudge:'Match with Q/K; retrieve V.'},
+      {kind:'concept',title:'Why scores are scaled before softmax',lines:[
+        'Large dot products push softmax toward near-zero gradients, making learning unstable. Scores are divided by the square root of d_k before softmax: softmax(Q @ K.T / sqrt(d_k)) @ V.',
+        'This scaling is called scaled dot-product attention. Every attention formula you encounter in papers and code uses it.',
+      ],cta:'Compute the divisor'},
+      {kind:'numeric',prompt:'Compute the scaling divisor.',questions:[{label:'d_k = 64 → divisor = sqrt(64)',answer:8,tolerance:0,unit:'',reveal:'sqrt(64) = 8. Each score is divided by 8 before softmax.'}]},
       {kind:'predict',prompt:'Q, K, and V each have shape (T, D).',questions:[
         {label:'Q @ K.T shape',options:['(T, T)','(T, D)','(D, D)'],answer:0,reveal:'Every query scores every key.'},
         {label:'softmax(scores) @ V shape',options:['(T, D)','(T, T)','(D,)'],answer:0,reveal:'Each position receives one D-number mixture.'},
@@ -244,10 +248,29 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     ],
   },
   {
-    slug:'model-capstone',title:'Model Mechanics Checkpoint',emoji:'🏁',blurb:'Retrieve and connect the complete path before applications.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['validation-generalization','decoding-controls'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
+    slug:'llm-in-practice',title:'Prompting, Chat Format, and Failure Modes',emoji:'💬',blurb:'Three ideas every practitioner uses from day one: few-shot prompting, chat structure, and hallucination.',minutes:7,
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['next-token-prediction','decoding-controls'],outcomes:['Use few-shot prompting to shape behavior','Describe system/user/assistant turn structure','Name hallucination as a structural failure mode'],concepts:['few-shot prompting','zero-shot','system prompt','chat format','hallucination'],
     steps:[
-      {kind:'concept',title:'Two traces, one model',lines:['Inference uses fixed weights to turn context into next-token distributions. Training adds targets, loss, backpropagation, and optimizer updates to change those weights.','Three practitioner concepts extend what you have built. Few-shot prompting places example input-output pairs in the prompt to demonstrate desired behavior without updating weights. Chat models structure their context as system, user, and assistant turns; the system prompt sets standing instructions before the user speaks. Hallucination names the failure mode where a model produces confident-sounding text not grounded in training data or context; it is a structural property of next-token prediction, not an edge case.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them makes knowledge usable.'],cta:'Start the checkpoint'},
+      {kind:'concept',title:'What happens before the model runs',lines:[
+        'Few-shot prompting places example input-output pairs in the context before the real question. The model observes the pattern and continues it without any weight update. Zero-shot gives only the question; few-shot gives a short demonstration.',
+        'Chat models structure their context as a sequence of turns: a system prompt sets standing instructions, then user and assistant turns alternate. The system prompt is part of the model\'s input, not a separate mechanism; it controls tone, role, and policy for the conversation.',
+        'Hallucination is the name for output that sounds confident but is not grounded in training data or retrieved context. It is a structural property of next-token prediction: the model generates plausible-looking continuations even when no grounding exists. Retrieval and calibration reduce it; no technique eliminates it.',
+      ],cta:'Apply each idea'},
+      {kind:'worked',title:'Build a few-shot prompt',prompt:'The task: classify sentiment as positive or negative.',stages:[
+        {label:'Write examples',body:'"Review: Great product! → positive\nReview: Waste of money. → negative"'},
+        {label:'Add the real input',body:'"Review: Arrived on time and works perfectly. → "'},
+        {label:'Let the model continue',body:'The model has seen the pattern and completes the turn without training.'},
+      ],takeaway:'Few-shot prompting is structured context, not code or weight change.'},
+      {kind:'mcq',prompt:'You need a model to answer in a formal tone for all users without modifying weights. Best mechanism?',options:['System prompt setting the required tone','Few-shot with informal examples','Higher temperature','Fine-tuning for every user'],answer:0,explain:'The system prompt is always present in the context and sets persistent instructions.',nudge:'Which mechanism persists across all turns without changing the model?'},
+      {kind:'mcq',prompt:'A model confidently states a plausible-sounding but incorrect fact. What is the most accurate description?',options:['Hallucination: the model generated a plausible continuation unsupported by evidence','A tokenization error','A temperature misconfiguration','A gradient that did not converge'],answer:0,explain:'Hallucination is a prediction behavior, not a parameter bug. The model produces confident text even when grounding is absent.',nudge:'Is the output a pattern continuation or a verified fact?'},
+      {kind:'predict',prompt:'You have a question and three labeled examples.',questions:[{label:'Using all three examples is called...',options:['Three-shot prompting','Zero-shot prompting','Fine-tuning','System prompting'],answer:0,reveal:'The number of examples before the real question names the prompting strategy.'}]},
+    ],
+  },
+  {
+    slug:'model-capstone',title:'Model Mechanics Checkpoint',emoji:'🏁',blurb:'Retrieve and connect the complete path before applications.',minutes:8,
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['validation-generalization','decoding-controls','llm-in-practice'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
+    steps:[
+      {kind:'concept',title:'Two traces, one model',lines:['Inference uses fixed weights to turn context into next-token distributions. Training adds targets, loss, backpropagation, and optimizer updates to change those weights.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them makes knowledge usable.'],cta:'Start the checkpoint'},
       {kind:'mcq',prompt:'Which path describes one inference cycle?',options:['text → IDs → embeddings → blocks → logits → probabilities → token choice','text → loss → gradient → ID','embedding → tokenizer → optimizer → text','probability → update → vocabulary'],answer:0,explain:'That is the forward and decoding path. Loss and gradients belong to training.',nudge:'Start with text and end with a token choice.'},
       {kind:'mcq',prompt:'Which event changes model weights?',options:['An optimizer step during training','Appending a generated token','Softmax during inference','Tokenization'],answer:0,explain:'Only a training update changes parameters.',nudge:'Which applies gradients?'},
       {kind:'predict',prompt:'Retrieve the roles.',questions:[
