@@ -430,7 +430,7 @@ export function GenerationPlay({ onDone }: WidgetProps) {
   return (
     <div className="w-full max-w-lg">
       <p className="text-lg text-gray-100 mb-1">Generation is a loop: predict a distribution, pick a token, feed it back in.</p>
-      <p className="text-sm text-gray-400 mb-4">Tap generate and watch all three things move: context, distribution, KV-cache.</p>
+      <p className="text-sm text-gray-400 mb-4">Tap generate and watch context, probability, and cached K/V grow together.</p>
 
       {/* context row */}
       <p className="text-[10px] font-mono text-gray-500 mb-1">context ({nTokens} tokens)</p>
@@ -479,7 +479,7 @@ export function GenerationPlay({ onDone }: WidgetProps) {
       ) : (
         <ContinueBtn onClick={onDone} label="Got it, continue" />
       )}
-      <p className="mt-3 text-xs text-gray-500">Green bar = sampled token. Only its K and V get appended; nothing is recomputed.</p>
+      <p className="mt-3 text-xs text-gray-500">Green bar = selected token. Its K and V are appended; prior K/V projections are reused, while the new query still attends across cached positions.</p>
     </div>
   )
 }
@@ -1627,6 +1627,164 @@ export function AgentPlay({ onDone }: WidgetProps) {
           <ContinueBtn onClick={onDone} label="Got it, continue" />
         </motion.div>
       )}
+    </div>
+  )
+}
+
+// ── novice foundations: matrix multiplication, one output cell at a time ─────
+
+const MM_A = [[1, 2, 3], [4, 5, 6]]
+const MM_B = [[2, 1], [0, 3], [1, 2]]
+const MM_OUT = [[5, 13], [14, 31]]
+
+export function MatmulPlay({ onDone }: WidgetProps) {
+  const [cell, setCell] = useState<[number, number] | null>(null)
+  const [tried, setTried] = useState<Set<string>>(new Set())
+  const choose = (r: number, c: number) => {
+    setCell([r, c])
+    setTried(t => new Set(t).add(`${r}-${c}`))
+  }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Each output cell is one row dotted with one column.</p>
+      <p className="text-sm text-gray-400 mb-5">Tap two output cells. The shared length 3 is the work that happens inside each dot product.</p>
+      <div className="flex flex-wrap items-center gap-3 font-mono text-sm">
+        <div>
+          <p className="text-[10px] text-gray-500 mb-1">A (2 × 3)</p>
+          <div className="grid gap-1">{MM_A.map((row, r) => <div key={r} className="flex gap-1">{row.map((v, c) => <Cell key={c} v={v} hot={cell?.[0] === r} />)}</div>)}</div>
+        </div>
+        <span className="text-gray-600">@</span>
+        <div>
+          <p className="text-[10px] text-gray-500 mb-1">B (3 × 2)</p>
+          <div className="grid gap-1">{MM_B.map((row, r) => <div key={r} className="flex gap-1">{row.map((v, c) => <Cell key={c} v={v} hot={cell?.[1] === c} />)}</div>)}</div>
+        </div>
+        <span className="text-gray-600">=</span>
+        <div>
+          <p className="text-[10px] text-gray-500 mb-1">C (2 × 2)</p>
+          <div className="grid gap-1">{MM_OUT.map((row, r) => <div key={r} className="flex gap-1">{row.map((v, c) => <button key={c} onClick={() => choose(r, c)}><Cell v={cell?.[0] === r && cell?.[1] === c ? v : '?'} hot={cell?.[0] === r && cell?.[1] === c} /></button>)}</div>)}</div>
+        </div>
+      </div>
+      {cell && (() => {
+        const [r, c] = cell
+        const products = MM_A[r].map((v, i) => `${v}×${MM_B[i][c]}`)
+        return <motion.p key={`${r}-${c}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 text-sm text-gray-300 font-mono">
+          C[{r},{c}] = {products.join(' + ')} = <span className="text-emerald-400">{MM_OUT[r][c]}</span>
+        </motion.p>
+      })()}
+      {tried.size >= 2 ? <ContinueBtn onClick={onDone} label="I see the row-column rule" /> : <p className="mt-6 text-xs text-gray-500">Reveal {2 - tried.size} more output cell{tried.size === 1 ? '' : 's'}.</p>}
+    </div>
+  )
+}
+
+// ── novice foundations: dot product as similarity ─────────────────────────────
+
+const DOT_ITEMS = [
+  { label: 'same direction', vector: '[0.9, 0.1]', score: 0.9, note: 'large positive score: strong match' },
+  { label: 'sideways', vector: '[0.0, 1.0]', score: 0.0, note: 'zero score: no alignment' },
+  { label: 'opposite', vector: '[-1.0, 0.0]', score: -1.0, note: 'negative score: points the other way' },
+]
+
+export function DotProductPlay({ onDone }: WidgetProps) {
+  const [active, setActive] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  const choose = (i: number) => { setActive(i); setTried(t => new Set(t).add(i)) }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">A dot product answers: “how much do these directions agree?”</p>
+      <p className="text-sm text-gray-400 mb-4">Query q = [1, 0]. Tap each candidate. Multiply matching positions, then add.</p>
+      <div className="grid gap-2">
+        {DOT_ITEMS.map((item, i) => <button key={item.label} onClick={() => choose(i)} className={`${chipCls(active === i)} flex justify-between gap-3 text-left`}>
+          <span>{item.label}</span><span>{item.vector}</span>
+        </button>)}
+      </div>
+      {active !== null && <motion.div key={active} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
+        <p className="font-mono text-sm text-gray-200">[1, 0] · {DOT_ITEMS[active].vector} = <span className="text-emerald-400">{DOT_ITEMS[active].score.toFixed(1)}</span></p>
+        <p className="text-sm text-gray-400 mt-1">{DOT_ITEMS[active].note}</p>
+      </motion.div>}
+      {tried.size === DOT_ITEMS.length ? <ContinueBtn onClick={onDone} label="Similarity makes sense" /> : <p className="mt-6 text-xs text-gray-500">Try all three directions ({tried.size}/3).</p>}
+    </div>
+  )
+}
+
+// ── novice foundations: a linear layer produces one score per output row ─────
+
+const LINEAR_ROWS = [
+  { token: 'cat', w: '[1.0, 0.5]', score: 1.5, calc: '2×1.0 + (-1)×0.5' },
+  { token: 'dog', w: '[0.8, 0.2]', score: 1.4, calc: '2×0.8 + (-1)×0.2' },
+  { token: 'rain', w: '[-0.3, 1.0]', score: -1.6, calc: '2×(-0.3) + (-1)×1.0' },
+]
+
+export function LinearScorePlay({ onDone }: WidgetProps) {
+  const [active, setActive] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  const choose = (i: number) => { setActive(i); setTried(t => new Set(t).add(i)) }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">One input vector, many learned rows, one score per row.</p>
+      <p className="text-sm text-gray-400 mb-4">Hidden state h = [2, -1]. Tap a vocabulary row to compute its raw score.</p>
+      <div className="grid gap-2">
+        {LINEAR_ROWS.map((row, i) => <button key={row.token} onClick={() => choose(i)} className={`${chipCls(active === i)} flex justify-between`}><span>{row.token}</span><span>{row.w}</span></button>)}
+      </div>
+      {active !== null && <motion.div key={active} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 text-sm font-mono">
+        <p className="text-gray-300">{LINEAR_ROWS[active].calc} = <span className="text-emerald-400">{LINEAR_ROWS[active].score.toFixed(1)}</span></p>
+        <p className="text-gray-500 mt-1">That raw score is the logit for “{LINEAR_ROWS[active].token}”.</p>
+      </motion.div>}
+      {tried.size === LINEAR_ROWS.length ? <ContinueBtn onClick={onDone} label="I see where logits come from" /> : <p className="mt-6 text-xs text-gray-500">Compute every row ({tried.size}/3).</p>}
+    </div>
+  )
+}
+
+// ── novice foundations: logits -> softmax probabilities ───────────────────────
+
+const SOFTMAX_LOGITS = [3, 1, 0]
+const SOFTMAX_LABELS = ['cat', 'dog', 'rain']
+
+export function SoftmaxPlay({ onDone }: WidgetProps) {
+  const [temp, setTemp] = useState(1)
+  const [tried, setTried] = useState<Set<number>>(new Set([1]))
+  const scaled = SOFTMAX_LOGITS.map(x => x / temp)
+  const exps = scaled.map(Math.exp)
+  const sum = exps.reduce((a, b) => a + b, 0)
+  const probs = exps.map(x => x / sum)
+  const choose = (t: number) => { setTemp(t); setTried(s => new Set(s).add(t)) }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">Softmax turns any real scores into positive shares that sum to 100%.</p>
+      <p className="text-sm text-gray-400 mb-4">The ranking stays the same. Temperature changes how concentrated the shares are.</p>
+      <div className="flex gap-2 mb-5">{[0.5, 1, 2].map(t => <button key={t} onClick={() => choose(t)} className={chipCls(temp === t)}>T = {t}</button>)}</div>
+      <div className="space-y-3">
+        {SOFTMAX_LABELS.map((label, i) => <div key={label}>
+          <div className="flex justify-between text-xs font-mono mb-1"><span className="text-gray-300">{label} · logit {SOFTMAX_LOGITS[i]}</span><span className="text-emerald-400">{(probs[i] * 100).toFixed(1)}%</span></div>
+          <div className="h-2 rounded bg-gray-800 overflow-hidden"><motion.div animate={{ width: `${probs[i] * 100}%` }} className="h-full bg-violet-500" /></div>
+        </div>)}
+      </div>
+      <p className="mt-4 text-xs text-gray-500 font-mono">total = {(probs.reduce((a, b) => a + b, 0) * 100).toFixed(0)}%</p>
+      {tried.size === 3 ? <ContinueBtn onClick={onDone} label="Scores to probabilities: clear" /> : <p className="mt-6 text-xs text-gray-500">Compare all three temperatures ({tried.size}/3).</p>}
+    </div>
+  )
+}
+
+// ── novice attention: separate Q, K and V roles before showing the equation ───
+
+const QKV_CARDS = [
+  { role: 'Query', question: 'What am I looking for?', example: '“it” asks for a likely noun it refers to' },
+  { role: 'Key', question: 'What kind of match can I offer?', example: '“animal” advertises that it is a noun and possible referent' },
+  { role: 'Value', question: 'What information will I contribute?', example: 'the learned meaning carried forward if “animal” is selected' },
+]
+
+export function QkvPlay({ onDone }: WidgetProps) {
+  const [active, setActive] = useState<number | null>(null)
+  const [tried, setTried] = useState<Set<number>>(new Set())
+  const choose = (i: number) => { setActive(i); setTried(t => new Set(t).add(i)) }
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-lg text-gray-100 mb-1">“The animal did not cross because it was tired.”</p>
+      <p className="text-sm text-gray-400 mb-4">For the token “it”, Q and K decide where to look. V decides what comes back. Tap each role.</p>
+      <div className="grid sm:grid-cols-3 gap-2">{QKV_CARDS.map((card, i) => <button key={card.role} onClick={() => choose(i)} className={`${chipCls(active === i)} text-left`}><span className="block font-semibold">{card.role}</span><span className="block mt-1 text-[10px] opacity-70">{card.question}</span></button>)}</div>
+      {active !== null && <motion.div key={active} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 border-l-2 border-violet-600 pl-3">
+        <p className="text-sm text-gray-300">{QKV_CARDS[active].example}</p>
+      </motion.div>}
+      {tried.size === 3 ? <ContinueBtn onClick={onDone} label="Q, K and V have separate jobs" /> : <p className="mt-6 text-xs text-gray-500">Open all three roles ({tried.size}/3).</p>}
     </div>
   )
 }

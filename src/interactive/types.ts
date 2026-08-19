@@ -30,6 +30,8 @@ export interface PredictQuestion {
   options: string[]
   answer: number
   reveal: string
+  nudge?: string
+  whys?: (string | undefined)[]
 }
 
 export interface PredictStep {
@@ -47,6 +49,7 @@ export interface NumericQuestion {
   tolerance?: number
   unit?: string
   reveal: string
+  hint?: string
 }
 
 export interface NumericStep {
@@ -56,6 +59,24 @@ export interface NumericStep {
   questions: NumericQuestion[]
 }
 
+// A worked example reveals one reasoning step at a time. It bridges a
+// demonstration and an independent check without asking a novice to make an
+// unsupported leap.
+export interface WorkedStage {
+  label: string
+  body: string
+  code?: string
+}
+
+export interface WorkedStep {
+  kind: 'worked'
+  title: string
+  prompt: string
+  stages: WorkedStage[]
+  takeaway: string
+  cta?: string
+}
+
 export interface WidgetProps { onDone: () => void }
 
 export interface WidgetStep {
@@ -63,7 +84,9 @@ export interface WidgetStep {
   widget: ComponentType<WidgetProps>
 }
 
-export type Step = ConceptStep | McqStep | PredictStep | NumericStep | WidgetStep
+export type Step = ConceptStep | WorkedStep | McqStep | PredictStep | NumericStep | WidgetStep
+
+export type LessonTrack = 'core' | 'extension'
 
 export interface InteractiveLesson {
   slug: string
@@ -71,6 +94,12 @@ export interface InteractiveLesson {
   emoji: string
   blurb: string
   minutes: number
+  moduleId: string
+  moduleTitle: string
+  prerequisites: string[]
+  outcomes: string[]
+  concepts: string[]
+  track?: LessonTrack
   steps: Step[]
 }
 
@@ -80,7 +109,9 @@ export const scoredCount = (l: InteractiveLesson) =>
 // ── local progress for this track only ───────────────────────────────────────
 // Deliberately separate from llmquest_progress_v1: the interactive track
 // never touches main XP, gating, or the certificate.
-const KEY = 'llmquest_interactive_v1'
+// v2 intentionally starts a fresh record: the dependency-first redesign changes
+// step indexes and lesson meaning, so v1 missed-step records are not safe to replay.
+const KEY = 'llmquest_interactive_v2'
 
 // sure / sureWrong: confidence calibration across a run. `sure` counts first
 // commits where the learner locked in as confident; `sureWrong` the subset
@@ -176,7 +207,7 @@ export function dailyPick<T>(arr: T[]): T {
 // ── daily mix ─────────────────────────────────────────────────────────────────
 // A 2-minute interleaved retrieval session across completed lessons.
 // Completing it counts toward the streak (merged in computeStreak).
-const MIX_KEY = 'llmquest_mix_v1'
+const MIX_KEY = 'llmquest_mix_v2'
 
 export function loadMixDates(): string[] {
   try { return JSON.parse(localStorage.getItem(MIX_KEY) ?? '[]') } catch { return [] }

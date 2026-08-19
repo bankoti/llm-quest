@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "npm run validate:interactive && tsc && vite build",
+    "preview": "vite preview",
+    "validate:interactive": "node scripts/validate-interactive.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

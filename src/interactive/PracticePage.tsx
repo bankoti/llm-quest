@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { INTERACTIVE_LESSONS } from './lessons'
+import { INTERACTIVE_LESSONS } from './curriculum'
 import { loadTrack, stars, clearMiss } from './types'
 import type { InteractiveLesson, McqStep, PredictStep, NumericStep } from './types'
 import { StepMcq, StepPredict, StepNumeric } from './InteractiveLessonPage'

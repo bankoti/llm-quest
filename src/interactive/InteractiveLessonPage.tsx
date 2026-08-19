@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { INTERACTIVE_LESSONS, WARMUPS } from './lessons'
+import { INTERACTIVE_LESSONS, WARMUPS, unmetPrerequisites } from './curriculum'
 import { scoredCount, saveLesson, stars as calcStars, loadTrack } from './types'
 import type { Step, PredictQuestion, NumericQuestion } from './types'
 import { getLevel } from '@/data/curriculum'
@@ -44,6 +44,38 @@ function StepConcept({ step, onDone }: { step: Extract<Step, { kind: 'concept' }
       {step.lines.map((l, i) => <p key={i} className="text-gray-300 mb-3 leading-relaxed">{l}</p>)}
       {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
       <ContinueBtn onClick={onDone} label={step.cta ?? 'Continue'} />
+    </div>
+  )
+}
+
+function StepWorked({ step, onDone }: { step: Extract<Step, { kind: 'worked' }>; onDone: () => void }) {
+  const [shown, setShown] = useState(0)
+  const complete = shown >= step.stages.length
+  return (
+    <div className="w-full max-w-lg">
+      <p className="text-xs font-mono uppercase tracking-widest text-amber-400 mb-2">Worked example</p>
+      <h2 className="text-2xl font-bold text-white mb-3">{step.title}</h2>
+      <p className="text-gray-300 mb-5 leading-relaxed">{step.prompt}</p>
+      <div className="border-l-2 border-gray-800 pl-4 space-y-4">
+        {step.stages.slice(0, shown).map((stage, i) => (
+          <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+            <p className="text-xs font-mono text-violet-400 mb-1">{i + 1}. {stage.label}</p>
+            <p className="text-sm text-gray-300 leading-relaxed">{stage.body}</p>
+            {stage.code && <pre className="mt-2 bg-gray-900 border border-gray-800 rounded-lg p-3 font-mono text-sm text-sky-300 overflow-x-auto">{stage.code}</pre>}
+          </motion.div>
+        ))}
+      </div>
+      {!complete ? (
+        <button onClick={() => setShown(n => n + 1)}
+          className="mt-6 px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold">
+          {shown === 0 ? 'Walk through it' : `Show step ${shown + 1}`}
+        </button>
+      ) : (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6">
+          <p className="text-sm text-emerald-300 border-l-2 border-emerald-600 pl-3">{step.takeaway}</p>
+          <ContinueBtn onClick={onDone} label={step.cta ?? 'Try one yourself'} />
+        </motion.div>
+      )}
     </div>
   )
 }
@@ -157,30 +189,33 @@ function PredictQ({ q, onDone }: { q: PredictQuestion; onDone: (firstTry: boolea
           )
         })}
       </div>
-      {pick !== null && !done && <p className="mt-2 text-xs text-amber-300">Not quite. Try again.</p>}
+      {pick !== null && !done && <p className="mt-2 text-xs text-amber-300">{q.whys?.[pick] ?? q.nudge ?? 'Not quite. Re-check the rule and try again.'}</p>}
       {done && <p className="mt-2 text-xs text-gray-400">{q.reveal}</p>}
     </div>
   )
 }
 
 export function StepPredict({ step, onDone }: { step: Extract<Step, { kind: 'predict' }>; onDone: (firstTryAll: boolean) => void }) {
-  const [doneCount, setDoneCount] = useState(0)
+  const [current, setCurrent] = useState(0)
   const [allFirstTry, setAllFirstTry] = useState(true)
-  const [key, setKey] = useState(0)
   const total = step.questions.length
+  const complete = current >= total
 
   const onQDone = (ft: boolean) => {
     if (!ft) setAllFirstTry(false)
-    setDoneCount(n => n + 1)
+    setCurrent(n => n + 1)
   }
   return (
     <div className="w-full max-w-lg">
       <p className="text-lg text-gray-100 mb-3">{step.prompt}</p>
       {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
-      {step.questions.map((q, i) => (
-        <PredictQ key={key + '-' + i} q={q} onDone={(ft) => onQDone(ft)} />
-      ))}
-      {doneCount === total && <ContinueBtn onClick={() => onDone(allFirstTry)} />}
+      {!complete && (
+        <>
+          {total > 1 && <p className="text-xs font-mono text-gray-500 mb-3">question {current + 1} of {total}</p>}
+          <PredictQ key={current} q={step.questions[current]} onDone={onQDone} />
+        </>
+      )}
+      {complete && <ContinueBtn onClick={() => onDone(allFirstTry)} />}
     </div>
   )
 }
@@ -240,19 +275,25 @@ function NumericQ({ q, onDone }: { q: NumericQuestion; onDone: (firstTry: boolea
 }
 
 export function StepNumeric({ step, onDone }: { step: Extract<Step, { kind: 'numeric' }>; onDone: (firstTryAll: boolean) => void }) {
-  const [doneCount, setDoneCount] = useState(0)
+  const [current, setCurrent] = useState(0)
   const [allFirstTry, setAllFirstTry] = useState(true)
   const total = step.questions.length
+  const complete = current >= total
   const onQDone = (ft: boolean) => {
     if (!ft) setAllFirstTry(false)
-    setDoneCount(n => n + 1)
+    setCurrent(n => n + 1)
   }
   return (
     <div className="w-full max-w-lg">
       <p className="text-lg text-gray-100 mb-3">{step.prompt}</p>
       {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
-      {step.questions.map((q, i) => <NumericQ key={i} q={q} onDone={onQDone} />)}
-      {doneCount === total && <ContinueBtn onClick={() => onDone(allFirstTry)} />}
+      {!complete && (
+        <>
+          {total > 1 && <p className="text-xs font-mono text-gray-500 mb-3">question {current + 1} of {total}</p>}
+          <NumericQ key={current} q={step.questions[current]} onDone={onQDone} />
+        </>
+      )}
+      {complete && <ContinueBtn onClick={() => onDone(allFirstTry)} />}
     </div>
   )
 }
@@ -274,6 +315,8 @@ function applyTarget(slug: string): { id: string; title: string } | undefined {
 function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }: { lessonSlug: string; firstTries: number; scored: number; missedCount: number; sure: number; sureWrong: number }) {
   const s = scored === 0 || firstTries / scored >= 0.99 ? 3 : firstTries / scored >= 0.6 ? 2 : 1
   const apply = applyTarget(lessonSlug)
+  const lessonIdx = INTERACTIVE_LESSONS.findIndex(l => l.slug === lessonSlug)
+  const nextLesson = lessonIdx >= 0 ? INTERACTIVE_LESSONS[lessonIdx + 1] : undefined
   return (
     <div className="w-full max-w-lg text-center">
       <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5 }}>
@@ -292,10 +335,18 @@ function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }
           <p className="text-sm text-emerald-400/80 mb-2">Well calibrated: every "I'm sure" was right.</p>
         )}
       </motion.div>
+      {nextLesson && (
+        <Link to={`/interactive/${nextLesson.slug}`}
+          className="mt-6 block px-6 py-4 rounded-xl bg-violet-700/30 border border-violet-600 hover:bg-violet-700/50 text-left">
+          <span className="block text-xs text-violet-400 mb-1">Next concept</span>
+          <span className="block font-semibold text-violet-200">{nextLesson.title} →</span>
+          <span className="block text-xs text-gray-400 mt-1">{nextLesson.blurb}</span>
+        </Link>
+      )}
       {apply && (
         <Link to={`/level/${apply.id}`}
-          className="mt-6 block px-6 py-4 rounded-xl bg-emerald-700/30 border border-emerald-600 hover:bg-emerald-700/50 text-left">
-          <span className="block text-xs text-emerald-400 mb-1">Now apply it — graded challenge</span>
+          className="mt-3 block px-6 py-4 rounded-xl bg-emerald-700/30 border border-emerald-600 hover:bg-emerald-700/50 text-left">
+          <span className="block text-xs text-emerald-400 mb-1">Apply it in code — graded challenge</span>
           <span className="block font-semibold text-emerald-200">{apply.title} →</span>
         </Link>
       )}
@@ -325,6 +376,8 @@ function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }
 export function InteractiveLessonPage() {
   const { slug } = useParams<{ slug: string }>()
   const lesson = INTERACTIVE_LESSONS.find(l => l.slug === slug)
+  const completedSlugs = new Set(Object.keys(loadTrack()).filter(s => loadTrack()[s]?.completedAt))
+  const missing = lesson ? unmetPrerequisites(lesson.slug, completedSlugs) : []
 
   useEffect(() => {
     if (lesson) beacon('lesson_start', lesson.slug)
@@ -376,6 +429,21 @@ export function InteractiveLessonPage() {
     </div>
   )
 
+  if (missing.length > 0) {
+    const names = missing.map(s => INTERACTIVE_LESSONS.find(l => l.slug === s)).filter(Boolean)
+    return (
+      <div className="min-h-screen bg-gray-950 text-gray-100 flex items-center justify-center px-6">
+        <div className="max-w-md">
+          <p className="text-xs font-mono uppercase tracking-widest text-amber-500 mb-2">Build the foundation first</p>
+          <h1 className="text-2xl font-bold mb-3">{lesson.title} depends on earlier ideas</h1>
+          <p className="text-gray-400 mb-5">This course never assumes a concept you have not built. Complete {names.length === 1 ? 'this lesson' : 'these lessons'} first:</p>
+          <div className="grid gap-2">{names.map(l => l && <Link key={l.slug} to={`/interactive/${l.slug}`} className="p-4 rounded-xl bg-gray-900 border border-gray-800 hover:border-violet-600"><span className="font-semibold">{l.emoji} {l.title}</span><span className="block text-sm text-gray-500 mt-1">{l.blurb}</span></Link>)}</div>
+          <Link to="/interactive" className="inline-block mt-6 text-violet-400 text-sm">← Back to course</Link>
+        </div>
+      </div>
+    )
+  }
+
   const totalSteps = lesson.steps.length
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col items-center px-6 py-8">
@@ -402,6 +470,7 @@ export function InteractiveLessonPage() {
             {(() => {
               const s = lesson.steps[step]
               if (s.kind === 'concept') return <StepConcept step={s} onDone={() => next()} />
+              if (s.kind === 'worked') return <StepWorked step={s} onDone={() => next()} />
               if (s.kind === 'mcq') return <StepMcq step={s} onDone={scored_step} />
               if (s.kind === 'predict') return <StepPredict step={s} onDone={scored_step} />
               if (s.kind === 'numeric') return <StepNumeric step={s} onDone={scored_step} />

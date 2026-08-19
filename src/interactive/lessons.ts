@@ -21,6 +21,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '📐',
     blurb: 'Every LLM bug shows up first as a wrong shape. Master the rules here.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -90,6 +95,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '✂️',
     blurb: 'Why "cat" might be one token but "unbelievable" might be three.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -167,6 +177,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '👁️',
     blurb: 'The mechanism that lets every token talk to every other token.',
     minutes: 6,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -247,6 +262,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🔬',
     blurb: 'Word order, the causal mask, and how gradients actually reach layer 1.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -312,6 +332,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🔁',
     blurb: 'Forward pass, loss, backward, step — and why the learning rate rules them all.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -375,6 +400,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🎲',
     blurb: 'How a trained model turns probabilities into words — and why temperature matters.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -437,6 +467,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '⚡',
     blurb: 'KV-cache, quantization, and why fitting on one GPU is an engineering problem.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -504,6 +539,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🎯',
     blurb: 'Reward modeling, PPO, and why reward hacking makes alignment hard.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -588,13 +628,18 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🗺️',
     blurb: 'How words become points in space, and why distance means similarity.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
         title: 'Meaning as geometry',
         lines: [
           'Token IDs are arbitrary integers: "cat" = 5246 says nothing about cats. The embedding layer replaces each ID with a learned vector of hundreds of numbers, and those vectors are where meaning lives.',
-          'Training pushes words that appear in similar contexts toward each other. After enough data, direction and distance encode real relationships: similarity, category, even analogy.',
+          'Training pushes tokens used in similar contexts toward useful geometric relationships. Clean word analogies are most reliable in older static word embeddings; transformer token representations change with context, so treat vector arithmetic as intuition, not a universal rule.',
           'Similarity is measured by dot product. For unit-length vectors the dot product equals the cosine of the angle between them: 1 means same direction (synonyms), 0 means orthogonal (unrelated), -1 means opposite direction (antonyms). This is cosine similarity.',
         ],
         cta: 'Explore the space',
@@ -616,7 +661,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'mcq',
-        prompt: 'The famous result king - man + woman ≈ queen demonstrates what property of embedding spaces?',
+        prompt: 'In a static word-embedding model, king - man + woman ≈ queen. What property does that illustrate?',
         options: [
           'Relationships are encoded as consistent directions (linear structure)',
           'Embeddings memorize word co-occurrence counts exactly',
@@ -624,7 +669,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
           'Gender is stored in a single dedicated dimension',
         ],
         answer: 0,
-        explain: 'The offset from man to woman is roughly the same direction as king to queen: the "gender direction". Analogies work because training pressure organizes relationships into consistent linear directions, not because any single dimension holds them.',
+        explain: 'In static word embeddings, the offset from man to woman can resemble the offset from king to queen. This illustrates approximate linear directions, not a dedicated gender dimension and not a guarantee for contextual transformer representations.',
         nudge: 'The arithmetic works with vector offsets. What does a consistent offset represent?',
       },
       {
@@ -646,13 +691,18 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🚦',
     blurb: 'Why a 47B model can run at 13B cost: routers, experts, and sparse compute.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
         title: 'Not every parameter, every token',
         lines: [
           'In a dense transformer, every token flows through every parameter. But the feed-forward network, roughly two thirds of all parameters, does not need to be monolithic.',
-          'MoE replaces one big FFN with several smaller "experts" plus a tiny router. The router scores the experts per token and sends each token through only the top 2. Total parameters grow; compute per token barely moves.',
+          'MoE replaces one big FFN with several smaller "experts" plus a learned router. The router is a small linear layer that scores every expert from the token representation, then sends that token through only the top 2. Total parameters grow; compute per token barely moves.',
           'Only the FFN blocks are replicated N times. Attention layers, embeddings, and layer norms exist exactly once per transformer layer. So total parameters ≠ N × (dense model size); the non-FFN parts are shared across all experts.',
         ],
         cta: 'Route some tokens',
@@ -705,6 +755,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '📚',
     blurb: 'Ground the model in documents it never trained on — and dodge the wrong Apollo.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -739,7 +794,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
           'Use a bigger generation model so it can ignore bad context',
         ],
         answer: 0,
-        explain: 'The theater matched on the word "Apollo" (lexical overlap) despite wrong meaning. Dense embeddings catch meaning but miss exact terms; BM25 catches terms but misses meaning. Fusing both and reranking the union beats either alone, which is exactly what Course 5 has you build.',
+        explain: 'The theater matched on the word "Apollo" (lexical overlap) despite wrong meaning. Dense embeddings catch meaning but miss exact terms; BM25 catches terms but misses meaning. Fusing both and reranking the union often beats either alone. BM25 is a lexical method: it scores exact term overlap rather than learned semantic similarity.',
         nudge: 'The failure is lexical overlap without semantic match. What combines both signals?',
       },
       {
@@ -760,6 +815,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🔧',
     blurb: 'Adapt a 7B model on one GPU by training 0.1% of it.',
     minutes: 6,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -848,6 +908,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🚀',
     blurb: 'Two frontier levers: speculative decoding for speed, test-time compute for quality.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -903,6 +968,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🔭',
     blurb: 'Why bigger is not always better — compute-optimal training and the Chinchilla insight.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -965,6 +1035,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🧠',
     blurb: 'Each head specialises — coreference, syntax, position, global context.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -1026,6 +1101,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🌲',
     blurb: 'Beam search, sampling, top-p, top-k — and when each one wins.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -1087,6 +1167,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '📉',
     blurb: 'Why training loss is not the metric you care about — and how to stop at the right moment.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -1130,13 +1215,18 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🤖',
     blurb: 'How an LLM becomes an agent: loops, tool calls, and when to stop.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
         title: 'From model to agent',
         lines: [
           'A language model is stateless: one input, one output. An agent wraps the model in a loop: the model reasons about what to do, calls a tool, observes the result, and repeats until it has enough to answer.',
-          'Tools are deterministic black boxes — a calculator, a search engine, a code interpreter, a database query. The agent decides when to delegate to a tool versus when to answer from its own knowledge.',
+          'Tools are external functions such as a calculator, search engine, code interpreter, or database query. The model requests one through a structured tool call (typically a function name plus JSON arguments); the surrounding program executes it and returns the observation. The agent decides when to call a tool versus answer from context.',
           'Chain-of-thought (CoT) prompting asks the model to reason step-by-step from its own memory before answering. ReAct interleaves reasoning steps with tool calls: Reason → Act (call tool) → Observe (read result) → Reason again. Each observation grounds the next reasoning step in a real fact rather than a model extrapolation.',
         ],
         cta: 'Try two tool-call decisions',
@@ -1186,6 +1276,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🏆',
     blurb: 'End-to-end: trace a prompt through every layer of the stack.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -1275,6 +1370,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '📇',
     blurb: 'Decode any 2026 model announcement: total vs active, context, license.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -1339,6 +1439,11 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🌀',
     blurb: 'Linear attention, fixed-size state, and why 2026 models mix 3:1.',
     minutes: 5,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
@@ -1366,7 +1471,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         kind: 'concept',
         title: 'The 2026 recipe: 3 to 1',
         lines: [
-          'Qwen3.8-27B, the model every local-agent setup adopted this month, interleaves Gated DeltaNet linear-attention layers with full softmax layers at a 3:1 ratio. Three cheap layers carry the bulk of the modeling; every fourth layer is real attention holding exact-recall ability for the whole stack.',
+          'Some hybrid models interleave three linear-attention layers with one full softmax-attention layer. A linear-attention layer compresses history into a fixed-size running state; every fourth full-attention layer preserves access to exact earlier positions.',
           'The same shape shows up across the frontier: DeepSeek V4 and MiniMax M3 reach their 1M-token windows with sparse attention — full attention that only looks at a selected subset of positions. Different mechanism, same bet: pay the softmax bill on a fraction of the work, keep the recall.',
         ],
       },
@@ -1390,13 +1495,18 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
     emoji: '🌫️',
     blurb: 'Generating text in parallel instead of left-to-right — and what it costs.',
     minutes: 4,
+    moduleId: 'legacy',
+    moduleTitle: 'Legacy source',
+    prerequisites: [],
+    outcomes: [],
+    concepts: [],
     steps: [
       {
         kind: 'concept',
         title: 'Left-to-right is a latency floor',
         lines: [
           'Everything in this track so far generates autoregressively: one forward pass, one token, repeat. 256 tokens means 256 sequential passes, and no amount of hardware removes the "sequential" — each token needs the one before it. That is the latency floor speculative decoding chips away at.',
-          'Diffusion language models remove the floor a different way. Start a block of positions fully masked, then denoise all of them in parallel over a handful of steps — each step firms up the tokens the model is confident about. In practice they run blockwise semi-autoregressive: blocks are generated in order, but inside each active block, every position updates at once.',
+          'Diffusion language models remove the floor differently. They begin a block with unknown placeholder tokens ("masked" here means hidden content, not the causal mask used during training). Denoising means repeatedly replacing those unknowns with increasingly confident token guesses. Blocks are generated in order, but positions inside the active block update in parallel.',
         ],
         cta: 'Count the passes',
       },

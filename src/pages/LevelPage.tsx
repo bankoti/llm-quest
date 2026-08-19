@@ -13,7 +13,7 @@ import { SplitPane } from '@/components/SplitPane'
 import { isAdminMode } from '@/engine/admin'
 import { HINTS } from '@/data/hints'
 import { hintXpMultiplier } from '@/components/Arena/xpUtils'
-import { WARMUPS } from '@/interactive/lessons'
+import { WARMUPS } from '@/interactive/curriculum'
 
 interface Props { onProgressChange: (p: ProgressState) => void }
 

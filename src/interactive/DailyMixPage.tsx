@@ -5,12 +5,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { INTERACTIVE_LESSONS } from './lessons'
+import { INTERACTIVE_LESSONS } from './curriculum'
 import { loadTrack, recordMixDay, mulberry32 } from './types'
 import type { InteractiveLesson, McqStep, PredictStep, NumericStep } from './types'
 import { StepMcq, StepPredict, StepNumeric } from './InteractiveLessonPage'
 
-const MIX_SIZE = 6
+const mixSize = (completedLessons: number) => Math.max(6, Math.min(10, Math.ceil(completedLessons * 0.6)))
 
 interface MixItem {
   lesson: InteractiveLesson
@@ -23,6 +23,7 @@ function buildMix(): MixItem[] {
   const track = loadTrack()
   const completed = INTERACTIVE_LESSONS.filter(l => track[l.slug]?.completedAt)
   if (completed.length === 0) return []
+  const targetSize = mixSize(completed.length)
 
   const rand = mulberry32(Math.floor(Date.now() / 86400000))
   const pools = completed.map(lesson => ({
@@ -40,10 +41,10 @@ function buildMix(): MixItem[] {
   }
   const out: MixItem[] = []
   let round = 0
-  while (out.length < MIX_SIZE) {
+  while (out.length < targetSize) {
     let picked = false
     for (const p of pools) {
-      if (out.length >= MIX_SIZE) break
+      if (out.length >= targetSize) break
       if (p.steps.length === 0) continue
       const idx = Math.floor(rand() * p.steps.length)
       out.push({ lesson: p.lesson, step: p.steps.splice(idx, 1)[0] })
@@ -51,7 +52,7 @@ function buildMix(): MixItem[] {
     }
     if (!picked) break
     round++
-    if (round > MIX_SIZE) break
+    if (round > targetSize) break
   }
   return out
 }
