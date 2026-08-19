@@ -1,7 +1,7 @@
 // InteractiveLessonPage: the step player for the interactive track.
 // No Pyodide, no progress writes to the main system.
 import { useState, useCallback, useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { INTERACTIVE_LESSONS, WARMUPS, unmetPrerequisites } from './curriculum'
 import { scoredCount, saveLesson, stars as calcStars, loadTrack } from './types'
@@ -361,10 +361,10 @@ function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }
             Practice your {missedCount} miss{missedCount > 1 ? 'es' : ''}
           </Link>
         )}
-        <a href={`/interactive/${lessonSlug}`} onClick={() => window.location.reload()}
+        <Link to={`/interactive/${lessonSlug}`}
           className="px-6 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-semibold">
           Replay
-        </a>
+        </Link>
       </div>
       <p className="mt-10 text-xs text-gray-600">Interactive track progress is separate from your main XP and certificate.</p>
     </div>
@@ -375,6 +375,13 @@ function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }
 
 export function InteractiveLessonPage() {
   const { slug } = useParams<{ slug: string }>()
+  const location = useLocation()
+  // location.key changes on every navigation — remount resets step/done state
+  // when moving lesson -> next lesson (same route, different param) or replaying.
+  return <LessonPlayer key={`${slug}:${location.key}`} slug={slug} />
+}
+
+function LessonPlayer({ slug }: { slug?: string }) {
   const lesson = INTERACTIVE_LESSONS.find(l => l.slug === slug)
   const completedSlugs = new Set(Object.keys(loadTrack()).filter(s => loadTrack()[s]?.completedAt))
   const missing = lesson ? unmetPrerequisites(lesson.slug, completedSlugs) : []
