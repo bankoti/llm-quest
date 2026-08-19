@@ -155,39 +155,39 @@ export const HINTS: Record<string, [string, string, string]> = {
 
   // Course 4
   'c4-l1': [
-    'Route to the cheapest adequate option. The decision thresholds are spelled out in the docstring — encode them exactly.',
-    'Check coverage first: high repeat coverage (>= 0.5) means a head cache serves most traffic. Then check the latency budget for live model feasibility.',
-    'coverage >= 0.5 -> head-cache; else latency_budget_ms >= 150 -> live-model; otherwise teacher-student. Order of checks matters.',
+    'Hard gates eliminate before quality scoring. gate_failures checks privacy, latency, and rollback — violations by name, in that order. choose_option filters first, then picks the highest quality survivor.',
+    'gate_failures: if data_leaves_region -> append "privacy"; if p95_ms > deadline_ms -> append "latency"; if not has_rollback -> append "rollback". Return the list.',
+    'choose_option: survivors = [o for o in options if not gate_failures(o, deadline_ms=deadline_ms)]. Return max(survivors, key=lambda o: o.quality).name, or "no-viable-option" if survivors is empty.',
   ],
   'c4-l2': [
-    'A baseline report is honest bookkeeping: compute each metric from the logged requests exactly as defined in the docstring.',
-    'Aggregate per the spec: means for latency, rates for success/failure. Watch division by zero on empty slices.',
-    'Percentiles: sort values, index = ceil(p/100 * n) - 1 (or the docstring formula). Do not use np.percentile if the spec defines its own method.',
+    'precision@k = |relevant ∩ top_k| / k. The denominator is always k, even when fewer than k items were retrieved — you pay for the full budget.',
+    'baseline_report groups queries by slice_name. Compute mean P@k per slice. worst_slice is the slice name with the lowest mean. The point: aggregate can look healthy while one slice is at zero.',
+    'precision_at_k: set(results[:k]) & set(relevant) gives the hits; divide by k. For slices: collect per-slice P@k scores in a dict, then min by value for worst_slice.',
   ],
   'c4-l3': [
-    'Serial latencies add: the component budgets must sum to no more than the end-to-end SLO.',
-    'Allocate proportionally (or per the docstring weights), then verify: sum(budgets) <= total. Leave the specified headroom if the spec asks for it.',
-    'Error budget = (1 - slo) x total requests (or minutes). Burn rate = actual failures / budget. Both formulas are one-liners once you read the units.',
+    'critical_path_ms = fixed_ms + sum(sequential_ms) + max(parallel_ms) + reserve_ms. Sequential stages all run; parallel stages fan out so you only pay the slowest.',
+    'remaining_ms = target_ms - critical_path_ms. A negative result means the design already breaks the SLO before any real-world variance.',
+    'One-liner each. Guard max(parallel_ms) against an empty list if the spec allows it (use max(parallel_ms, default=0)). Both functions are just arithmetic over the keyword args.',
   ],
   'c4-l4': [
-    'The scorecard is a weighted sum: for each pattern, score = sum over criteria of weight x rating.',
-    'Normalize exactly as the docstring says (weights sum to 1, or divide at the end). Highest total wins; ties break per the spec.',
-    'Build a dict of pattern -> total, then max by value. Most failures here are using raw ratings when the spec wants weighted ones.',
+    'meets_slo checks two hard gates: latency_p95_ms <= latency_slo_ms AND cost_per_1k_req <= cost_slo. Both must pass for the pattern to qualify.',
+    'rank_patterns filters out patterns that fail meets_slo, then sorts survivors by quality_score descending. Returns a list of names.',
+    'meets_slo: return self.latency_p95_ms <= latency_slo_ms and self.cost_per_1k_req <= cost_slo. rank_patterns: filter with p.meets_slo(...), then sorted(..., key=lambda p: p.quality_score, reverse=True) to get names.',
   ],
   'c4-l5': [
-    'Break-even: added cost per query vs added value per query. Value = quality lift x value per unit of quality.',
-    'Cost per query = (input_tokens + output_tokens) x price_per_token. Compare against baseline cost, not zero.',
-    'Break-even volume (if asked) = fixed_costs / (value_per_query - marginal_cost_per_query). Negative margin means never — return the sentinel the spec defines.',
+    'break_even_requests = fixed_cost / (teacher_cost - student_cost). That denominator is the per-request saving from switching to the student.',
+    'months_to_payback: extra profit per request = revenue*(ai_rate - baseline_rate) - (ai_cost - baseline_cost). Daily profit = daily_requests * extra_per_request. Months = setup_cost / (daily_profit * 30).',
+    'break_even_requests: watch out for teacher_cost <= student_cost (no saving, never pays back — return float("inf") or per the docstring). months_to_payback: days = setup_cost / daily_profit; return days / 30.',
   ],
   'c4-d1': [
-    'Everyone gets an A — so the metric must be structurally unable to fail. Feed it a known-terrible prediction set mentally and trace the code.',
-    'Check the denominator. Precision = TP / (TP + FP). If the code divides by (TP + FN) or by all positives, it is computing something else.',
-    'Fix the denominator to predicted positives (TP + FP), and handle the zero-predictions case explicitly as the docstring specifies.',
+    'A retriever returning one doc out of a k=10 budget just scored 100%. Precision@k should charge you for the whole budget — trace where the denominator comes from.',
+    'The bug: denominator is len(top) (how many were retrieved) instead of k (the budget). One result means len(top)=1, so 1/1=1.0 regardless of quality.',
+    'Fix: return hits / k. Also guard the case where retrieved is empty: if k == 0 or not retrieved return 0.0 before computing hits.',
   ],
   'c4-l6': [
-    'Each risk entry needs likelihood, impact, score = likelihood x impact, a mitigation, and an owner. The boss is completeness, not creativity.',
-    'Rank risks by score descending. The docstring lists which failure modes MUST appear — include the LLM-specific ones (injection, drift, cost).',
-    'Follow the exact dict keys and score scale in the spec. Most failures are missing required fields or sorting ascending.',
+    'residual_score = likelihood * impact * exposure * (1 - control_strength). prioritize returns names sorted by residual_score descending (highest risk first).',
+    'uncovered_steps walks the causal chain and returns steps not covered by any control. Each control is placed at exactly one step. Raise ValueError if a control names a step not in the chain.',
+    'uncovered_steps: covered = {step for _, step in controls}; check each step in controls is valid first. scenario_mitigated: all(s in covered for s in chain).',
   ],
 
   // Course 5
@@ -234,9 +234,9 @@ export const HINTS: Record<string, [string, string, string]> = {
     'NDCG = DCG / IDCG, and IDCG of all-zero relevances needs a guard (return 0). Off-by-one in the log position is the most common failure.',
   ],
   'c6-l2': [
-    'The student trains to match the TEACHER outputs (soft scores), not the ground-truth labels.',
-    'The loss compares student predictions to teacher scores — MSE or the docstring loss. Training loop: predict, compute loss, gradient step.',
-    'Keep the student small as specified, train on teacher soft targets, and evaluate on held-out data. Check the convergence criterion in the spec.',
+    'The student learns to match the teacher output distribution after temperature scaling. Implement kl_divergence(p, q) first, then build distillation_loss on top of it.',
+    'kl_divergence(p, q) = sum(p * log(p / q)). distillation_loss: divide both logit arrays by T, apply softmax, then T^2 * kl_divergence(p_teacher, p_student). The T^2 compensates for softer gradients at high temperature.',
+    'kl_divergence: add eps before log to avoid log(0). Return a scalar float. distillation_loss: call softmax(logits / temperature) for both, then temperature**2 * kl_divergence(p_t, p_s). Mean over the batch.',
   ],
   'c6-l3': [
     'ECE: bin predictions by confidence, then compare average confidence to accuracy inside each bin.',
