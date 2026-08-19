@@ -303,9 +303,9 @@ export const HINTS: Record<string, [string, string, string]> = {
   ],
 
   'c7-d1': [
-    'Under an outage this retry code multiplies traffic. Look for what is missing between attempts.',
-    'Three missing pieces to check: exponential backoff (delay grows per attempt), jitter (randomized delay), and a hard retry cap.',
-    'delay = base x 2^attempt x random_jitter, stop after max_retries. Compute total worst-case amplification — the test checks it stays bounded.',
+    'Under an outage this retry code multiplies traffic instead of shedding it. Look at how the delay scales with the attempt number.',
+    'Two things to fix: the delay grows linearly (base_ms * a) when it should double each attempt, and late attempts need a hard cap. No jitter required.',
+    'Fix: min(base_ms * 2**(a-1), cap_ms). The bug is the linear multiplier a — replace it with a power of 2. cap_ms is already a parameter.',
   ],
   'c7-l6': [
     'Three functions, one philosophy: harm rolls back on weak evidence, promotion needs strong evidence. Check guardrails BEFORE the quality delta — a breach can never be bought back by quality.',
