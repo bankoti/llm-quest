@@ -188,9 +188,9 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         nudge: 'For normalized vectors: 1 means same direction, 0 means sideways, -1 means opposite.',
       },
       {
-        kind: 'predict', prompt: 'Predict the stronger match to q = [1, 1].', questions: [
-          { label: 'candidate with larger dot product', options: ['b = [1, -1]', 'they tie', 'a = [0.8, 0.8]'], answer: 2, reveal: 'q·a = 1.6; q·b = 0. The matching signs in a reinforce each other.' },
-          { label: 'q = [1, -1]; stronger match', options: ['they tie', 'a = [0.5, 0.5]', 'b = [1, -1]'], answer: 2, reveal: 'q·a = 0 while q·b = 2. Alignment, not vector length alone, drives the match.' },
+        kind: 'predict', prompt: 'Compare each pair using the dot product.', questions: [
+          { label: 'For q = [1, 1], which candidate is the stronger match?', options: ['b = [1, -1]', 'they tie', 'a = [0.8, 0.8]'], answer: 2, reveal: 'q·a = 1.6; q·b = 0. The matching signs in a reinforce each other.' },
+          { label: 'For q = [1, -1], which candidate is the stronger match?', options: ['they tie', 'a = [0.5, 0.5]', 'b = [1, -1]'], answer: 2, reveal: 'q·a = 0 while q·b = 2. Alignment, not vector length alone, drives the match.' },
         ],
       },
     ],
