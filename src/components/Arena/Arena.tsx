@@ -171,7 +171,10 @@ export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Pro
           </span>
         )}
 
-        <span className="ml-auto text-xs text-gray-600 font-mono hidden md:block"
+        {hints.length > 0 && failCount === 0 && revealed === 0 && (
+          <span className="text-xs text-gray-500 font-mono">💡 {hints.length} hints available; the first unlocks after 2 attempts</span>
+        )}
+        <span className="ml-auto text-xs text-gray-600 font-mono hidden lg:block"
               title="Use any AI assistant. The tests grade whether you understood what to build.">
           🤝 AI allowed — tests grade understanding, not typing
         </span>
@@ -226,6 +229,7 @@ export function Arena({ levelId, starterCode, testCode, xp, hints, onPass }: Pro
         {result && (
           <motion.div
             key={result.ok ? 'pass' : `fail-${result.error}`}
+            role={result.ok ? 'status' : 'alert'} aria-live="polite"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

@@ -19,7 +19,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'Mix information',body:'The new representation for “it” includes information from “animal,” helping later layers resolve the reference.'},
       ],takeaway:'Attention is routing: score candidate sources, normalize the scores, then blend their information.'},
       {kind:'mcq',prompt:'What does one attention output at a position represent?',options:['A weighted mixture of information from available positions','The token with the largest ID','A token selected from the vocabulary','The average of model weights'],answer:0,explain:'Attention weights control how much each source position contributes.',nudge:'The output happens inside the model, before vocabulary prediction.'},
-      {kind:'predict',prompt:'A pronoun strongly attends to a nearby noun.',questions:[{label:'effect of increasing that noun’s weight',options:['More of the noun’s information enters the pronoun representation','The noun is emitted next','The vocabulary shrinks'],answer:0,reveal:'Attention weights scale how much each source contributes.'}]},
+      {kind:'predict',prompt:'A pronoun strongly attends to a nearby noun.',questions:[{label:'effect of increasing that noun’s weight',options:['More of the noun’s information enters the pronoun representation','The noun is emitted next','The vocabulary shrinks'],answer:0,reveal:'Attention weights scale how much each source contributes.'},{label:'if its attention weight falls near zero',options:['Almost none of its value enters the mixture','It is deleted from the vocabulary','It must be generated next'],answer:0,reveal:'Near-zero attention weight makes that source contribute almost nothing.'}]},
     ],
   },
   {
@@ -76,7 +76,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       {kind:'worked',title:'Read one mask row',prompt:'At position 2 in a four-token sequence, which positions are allowed?',stages:[
         {label:'Include the past',body:'Positions 0 and 1 are known.'},{label:'Include the present',body:'Position 2 may attend to itself.'},{label:'Block the future',body:'Position 3 receives −∞ before softmax.'},
       ],takeaway:'The row is [allowed, allowed, allowed, blocked]; the future receives zero weight.'},
-      {kind:'predict',prompt:'For a length-5 sequence, query is at position 1 (zero-indexed). Unlike the worked example which used position 2 (three allowed), position 1 can attend to positions 0 and 1 only.',questions:[{label:'how many positions may it attend to?',options:['2 positions','1 position','4 positions','5 positions'],answer:0,reveal:'Positions 0 and 1: the past plus itself — two positions total.'}]},
+      {kind:'predict',prompt:'For a length-5 sequence, query is at position 1 (zero-indexed). Unlike the worked example which used position 2 (three allowed), position 1 can attend to positions 0 and 1 only.',questions:[{label:'how many positions may it attend to?',options:['2 positions','1 position','4 positions','5 positions'],answer:0,reveal:'Positions 0 and 1: the past plus itself — two positions total.'},{label:'query at position 4 may attend to',options:['all 5 positions','only position 4','positions 0 through 3 only'],answer:0,reveal:'The final position can use every earlier position plus itself.'}]},
     ],
   },
   {
@@ -90,7 +90,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ],cta:'Commit before the demo'},
       {kind:'mcq',prompt:'Without position information, what is the problem with “dog bites man” vs “man bites dog”?',options:['The model sees the same token content without a reliable order signal','The tokenizer gives dog and man the same ID','Softmax sorts tokens','The causal mask reverses them'],answer:0,explain:'Token identity says what is present; position says where it occurs.',nudge:'The words are the same; only order changes.'},
       {kind:'widget',widget:PositionPlay},
-      {kind:'predict',prompt:'Use the same word at positions 1 and 7.',questions:[{label:'after adding position information',options:['The representations differ because positions differ','They remain identical','Both token IDs change'],answer:0,reveal:'Identity stays the same while position-dependent representation differs.'}]},
+      {kind:'predict',prompt:'Use the same word at positions 1 and 7.',questions:[{label:'after adding position information',options:['The representations differ because positions differ','They remain identical','Both token IDs change'],answer:0,reveal:'Identity stays the same while position-dependent representation differs.'},{label:'without position information',options:['The model cannot distinguish them','Only one copy appears','Attention is disabled'],answer:0,reveal:'Without position encoding, identical tokens at different positions produce identical representations.'}]},
     ],
   },
   {
@@ -112,7 +112,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'transformer-block',title:'Inside One Transformer Block',emoji:'🏗️',blurb:'Assemble attention, a per-position network, residual paths, and normalization.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['multihead-attention'],outcomes:['Trace one transformer block','Separate attention, FFN, residual, and normalization'],concepts:['feed-forward network','activation','residual connection','normalization','residual stream'],
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['multihead-attention','causal-attention'],outcomes:['Trace one transformer block','Separate attention, FFN, residual, and normalization'],concepts:['feed-forward network','activation','residual connection','normalization','residual stream'],
     steps:[
       {kind:'concept',title:'Routing, then processing',lines:[
         'Attention moves information between positions. A feed-forward network (FFN) then processes each position independently using learned linear layers and a nonlinear activation, commonly GELU or ReLU. Both suppress small or negative values; without any nonlinearity, stacked linear layers collapse to a single linear map, so depth would add nothing. Attention communicates; the FFN transforms.',
@@ -136,7 +136,27 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ]},
       {kind:'mcq',prompt:'How do attention and the FFN differ?',options:['Attention exchanges information across positions; the FFN transforms each position independently','The FFN exchanges information across positions; attention transforms each position independently','They are the same operation under different names','Attention transforms features; the FFN moves information between batches'],answer:0,explain:'Their roles are communication across positions and processing within each position.',nudge:'Ask where information can move.'},
       {kind:'mcq',prompt:'Why add x + f(x)?',options:['It preserves a direct path for information and learning signals','It doubles sequence length','It makes all features equal','It removes weights'],answer:0,explain:'The identity path can bypass a transformation when needed.',nudge:'What remains if f(x) is poor?'},
-      {kind:'predict',prompt:'Input is (B,T,C); the block preserves hidden width.',questions:[{label:'output shape',options:['(B,T,C)','(B,C,T)','(T,T)','(B,T)'],answer:0,reveal:'Residual additions require matching input and output shapes.'}]},
+      {kind:'predict',prompt:'Input is (B,T,C); the block preserves hidden width.',questions:[{label:'output shape',options:['(B,T,C)','(B,C,T)','(T,T)','(B,T)'],answer:0,reveal:'Residual additions require matching input and output shapes.'},{label:'if the FFN output shape mismatched x',options:['The residual addition x + f(x) would fail','Training would be faster','Vocabulary size would change'],answer:0,reveal:'Addition requires identical shapes; a dimension mismatch is a runtime error.'}]},
+    ],
+  },
+  {
+    slug:'parameter-counts',title:'Counting Parameters',emoji:'🔢',blurb:'Trace where the numbers in a model headline come from, by hand.',minutes:7,
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['transformer-block'],outcomes:['Count embedding parameters','Count per-block parameters','Verify a published total'],concepts:['parameter count','embedding table','projection size','weight sharing'],
+    steps:[
+      {kind:'concept',title:'Two slabs per block plus one table',lines:[
+        'A transformer model\'s parameter count comes from a small set of learned matrices. The token embedding table has V rows of width C. A position table, if present, adds context_length times C entries.',
+        'Inside each block, attention uses four C-by-C projections (Q, K, V, output). The FFN typically expands to 4C and returns: two matrices of size C times 4C. LayerNorm adds a tiny fraction.',
+        'Many models reuse the token embedding table as the output projection (weight tying), adding zero extra parameters for the final logit layer.',
+      ],cta:'Count GPT-2 small'},
+      {kind:'mcq',prompt:'A 12-block model with width 768 uses weight tying. Where do most parameters live?',options:['In the repeated per-block projections (attention + FFN)','In the final softmax','In the tokenizer','In the position table alone'],answer:0,explain:'12 blocks of attention and FFN projections total about 85M versus 39M for embeddings.',nudge:'Which component is repeated 12 times?'},
+      {kind:'numeric',prompt:'Quick parameter retrieval.',questions:[
+        {label:'4 attention projections, each 768x768, per block (millions)',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M. Recall from the parameter-counts lesson.'},
+      ]},
+      {kind:'mcq',prompt:'GPT-2 reuses the embedding table as the output head. What does weight tying save?',options:['An entire V x C matrix of additional parameters','All block parameters','The position table','The FFN weights'],answer:0,explain:'Without tying, a separate (V, C) output matrix would add another 38.6M parameters.',nudge:'Which matrix would otherwise appear twice?'},
+      {kind:'predict',prompt:'A new model doubles width to 1536 with the same 12 blocks and vocab.',questions:[
+        {label:'per-block parameter change',options:['Roughly quadruples (C squared appears in projections)','Doubles','Stays the same'],answer:0,reveal:'Attention projections are C x C, so doubling C quadruples each projection.'},
+        {label:'embedding table change',options:['Doubles (V stays, C doubles)','Quadruples','Unchanged'],answer:0,reveal:'The embedding table is V x C; doubling C doubles it linearly.'},
+      ]},
     ],
   },
   {
@@ -153,7 +173,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ],takeaway:'The network predicts one distribution per cycle; the outer loop builds the sequence.'},
       {kind:'widget',widget:GenerationPlay},
       {kind:'mcq',prompt:'What changes from one generated token to the next?',options:['Context grows; model weights stay fixed','The model retrains','Vocabulary changes','Tokenizer learns merges'],answer:0,explain:'Inference reuses fixed parameters. Only context and temporary activations change.',nudge:'Training changes weights; inference uses them.'},
-      {kind:'predict',prompt:'Run greedy decoding twice with identical computation.',questions:[{label:'result',options:['The same sequence','A random sequence','Different IDs but same text'],answer:0,reveal:'Greedy chooses the same argmax at each step.'}]},
+      {kind:'predict',prompt:'Run greedy decoding twice with identical computation.',questions:[{label:'result',options:['The same sequence','A random sequence','Different IDs but same text'],answer:0,reveal:'Greedy chooses the same argmax at each step.'},{label:'if you switch to sampling with temperature 1',options:['Results may differ across runs','Results must still match','The model retrains between runs'],answer:0,reveal:'Sampling introduces randomness; different draws can yield different sequences.'}]},
     ],
   },
   {
@@ -205,7 +225,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'gradients',title:'Gradients: Which Way Should We Change?',emoji:'🧗',blurb:'Build gradient intuition as a local slope before backpropagation.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['training-objective'],outcomes:['Describe local sensitivity','Choose update direction','Use gradient magnitude'],concepts:['parameter','gradient','slope','gradient descent'],
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['training-objective','training-data'],outcomes:['Describe local sensitivity','Choose update direction','Use gradient magnitude'],concepts:['parameter','gradient','slope','gradient descent'],
     steps:[
       {kind:'concept',title:'A gradient is a local “what if?”',lines:[
         'Model weights are adjustable numbers, also called parameters. After computing loss, we need to know how a small change to each weight would change that loss.',
@@ -268,7 +288,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       {kind:'worked',title:'Use each split for one job',prompt:'Choose when to stop and then report quality.',stages:[
         {label:'Train',body:'Use training data for gradients.'},{label:'Select',body:'Use validation data for stopping and settings.'},{label:'Report',body:'Use untouched test data after choices are fixed.'},
       ],takeaway:'Train learns, validation guides, test reports.'},
-      {kind:'predict',prompt:'Choose clean test-set use.',questions:[{label:'correct strategy',options:['Evaluate once after all choices are fixed','Stop on test loss every epoch','Add test data to training'],answer:0,reveal:'A test set is credible only if it did not influence development.'}]},
+      {kind:'predict',prompt:'Choose clean test-set use.',questions:[{label:'correct strategy',options:['Evaluate once after all choices are fixed','Stop on test loss every epoch','Add test data to training'],answer:0,reveal:'A test set is credible only if it did not influence development.'},{label:'using test loss to choose hyperparameters',options:['Leaks test information into development decisions','Is identical to validation use','Improves generalization'],answer:0,reveal:'Decisions guided by test data make the final test-set report optimistic.'}]},
     ],
   },
   {
@@ -292,7 +312,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'probability of NOT sampling the (2 decimals)',answer:0.5,tolerance:0.01,reveal:'1 - 0.50 = 0.50: half of all draws leave the most likely token behind.'},
       ]},
       {kind:'mcq',prompt:'A grading tool must return the same completion for the same input. Which strategy?',options:['Greedy decoding','High-temperature sampling','Uniform choice','Sampling every token'],answer:0,explain:'Greedy always selects the argmax and adds no random draw.',nudge:'Which removes randomness?'},
-      {kind:'predict',prompt:'Sample five completions at temperature 1.',questions:[{label:'expected result',options:['They may differ because choices are sampled','They must be identical','Only IDs differ'],answer:0,reveal:'Random sampling can introduce variation at every position.'}]},
+      {kind:'predict',prompt:'Sample five completions at temperature 1.',questions:[{label:'expected result',options:['They may differ because choices are sampled','They must be identical','Only IDs differ'],answer:0,reveal:'Random sampling can introduce variation at every position.'},{label:'at temperature 0 instead',options:['All five would be identical','They would still differ','Sampling becomes impossible'],answer:0,reveal:'Temperature 0 collapses to greedy argmax, removing all variation.'}]},
     ],
   },
   {
@@ -309,11 +329,11 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'Accumulate',body:'0.50 → 0.75 → 0.87 → 0.95.'},{label:'Stop',body:'Three tokens reach only 0.87, still short of p=0.90, so include the fourth: 0.95 crosses the threshold.'},{label:'Sample',body:'Sample among four; exclude the fifth.'},
       ],takeaway:'Top-p adapts candidate count to probability concentration.'},
       {kind:'mcq',prompt:'Why can beam search sound generic?',options:['It favors high-probability sequences, often common phrases','It samples uniformly','It deletes low IDs','It raises temperature'],answer:0,explain:'Specific or surprising text often scores lower than safe common wording.',nudge:'What wording is common in training data?'},
-      {kind:'predict',prompt:'Raise temperature with top-p=0.9.',questions:[{label:'nucleus size',options:['Usually grows as probability spreads','Always shrinks to one','Cannot change'],answer:0,reveal:'A flatter distribution needs more tokens to reach 90%.'}]},
+      {kind:'predict',prompt:'Raise temperature with top-p=0.9.',questions:[{label:'nucleus size',options:['Usually grows as probability spreads','Always shrinks to one','Cannot change'],answer:0,reveal:'A flatter distribution needs more tokens to reach 90%.'},{label:'at very low temperature with top-p=0.9',options:['Nucleus shrinks because probability concentrates','Nucleus always stays the same size','Top-p is ignored'],answer:0,reveal:'Concentrated probability means fewer tokens are needed to reach the cumulative threshold.'}]},
     ],
   },
   {
-    slug:'llm-in-practice',title:'Prompting, Chat Format, and Failure Modes',emoji:'💬',blurb:'Three ideas every practitioner uses from day one: few-shot prompting, chat structure, and hallucination.',minutes:7,
+    slug:'llm-in-practice',title:'Prompting, Chat Format, and Failure Modes',emoji:'💬',blurb:'Three ideas every practitioner needs immediately: few-shot prompting, chat structure, and hallucination.',minutes:7,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['next-token-prediction','decoding-controls'],outcomes:['Use few-shot prompting to shape behavior','Describe system/user/assistant turn structure','Name hallucination as a structural failure mode'],concepts:['few-shot prompting','zero-shot','system prompt','chat format','hallucination'],
     steps:[
       {kind:'concept',title:'What happens before the model runs',lines:[
@@ -328,12 +348,12 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ],takeaway:'Few-shot prompting is structured context, not code or weight change.'},
       {kind:'mcq',prompt:'You need a model to answer in a formal tone for all users without modifying weights. Best mechanism?',options:['System prompt setting the required tone','Few-shot with informal examples','Higher temperature','Fine-tuning for every user'],answer:0,explain:'The system prompt is always present in the context and sets persistent instructions.',nudge:'Which mechanism persists across all turns without changing the model?'},
       {kind:'mcq',prompt:'A model confidently states a plausible-sounding but incorrect fact. What is the most accurate description?',options:['Hallucination: the model generated a plausible continuation unsupported by evidence','A tokenization error','A temperature misconfiguration','A gradient that did not converge'],answer:0,explain:'Hallucination is a prediction behavior, not a parameter bug. The model produces confident text even when grounding is absent.',nudge:'Is the output a pattern continuation or a verified fact?'},
-      {kind:'predict',prompt:'You have a question and three labeled examples.',questions:[{label:'Using all three examples is called...',options:['Three-shot prompting','Zero-shot prompting','Fine-tuning','System prompting'],answer:0,reveal:'The number of examples before the real question names the prompting strategy.'}]},
+      {kind:'predict',prompt:'You have a question and three labeled examples.',questions:[{label:'Using all three examples is called...',options:['Three-shot prompting','Zero-shot prompting','Fine-tuning','System prompting'],answer:0,reveal:'The number of examples before the real question names the prompting strategy.'},{label:'removing all examples and asking directly',options:['Zero-shot prompting','Impossible without fine-tuning','System prompt injection'],answer:0,reveal:'Zero-shot means no examples precede the real question; the model relies on pretrained patterns.'}]},
     ],
   },
   {
     slug:'model-capstone',title:'Model Mechanics Checkpoint',emoji:'🏁',blurb:'Retrieve and connect the complete path before applications.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['validation-generalization','decoding-controls','llm-in-practice'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['validation-generalization','decoding-controls','llm-in-practice','parameter-counts'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
     steps:[
       {kind:'concept',title:'Two traces, one model',lines:['Inference uses fixed weights to turn context into next-token distributions. Training adds targets, loss, backpropagation, and optimizer updates to change those weights.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them makes knowledge usable.'],cta:'Start the checkpoint'},
       {kind:'mcq',prompt:'Which path describes one inference cycle?',options:['text → IDs → embeddings → blocks → logits → probabilities → token choice','text → loss → gradient → ID','embedding → tokenizer → optimizer → text','probability → update → vocabulary'],answer:0,explain:'That is the forward and decoding path. Loss and gradients belong to training.',nudge:'Start with text and end with a token choice.'},
@@ -344,15 +364,9 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'validation set',options:['guides choices without updating weights','provides final reporting only','is used for every gradient'],answer:0,reveal:'Validation supports selection; test stays untouched for reporting.'},
       ]},
       {kind:'numeric',prompt:'A sequence has 6 known tokens.',questions:[{label:'next-token targets',answer:5,tolerance:0,reveal:'Every token except the first is a target for the preceding context.'}]},
-      {kind:'worked',title:'Count GPT-2 small, by hand',prompt:'Vocabulary V = 50,257, width C = 768, 12 blocks. Where do the famous 124M parameters live?',stages:[
-        {label:'Embeddings',body:'Token table V x C = 50,257 x 768 = 38.6M. The position table 1024 x 768 adds 0.8M.'},
-        {label:'Attention, per block',body:'Q, K, V, and output projections are each C x C: 4 x 768 x 768 = 2.36M.'},
-        {label:'FFN, per block',body:'Expand to 4C and back: 768 x 3072 + 3072 x 768 = 4.72M.'},
-        {label:'Total',body:'12 blocks x (2.36M + 4.72M) = 85M. Add embeddings: 85M + 39.4M = about 124M. The output head reuses the token table, so it adds nothing.'},
-      ],takeaway:'Two matrix slabs per block plus the embedding table account for essentially the whole model.'},
-      {kind:'numeric',prompt:'Use the same recipe.',questions:[
-        {label:'attention projection parameters in ONE block, in millions',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M.'},
-        {label:'token embedding table, in millions',answer:38.6,tolerance:0.4,reveal:'50,257 x 768 = 38.6M — nearly a third of the model.'},
+      {kind:'mcq',prompt:'A 12-block model with width 768 uses weight tying. Where do most parameters live?',options:['In the repeated per-block projections (attention + FFN)','In the final softmax','In the tokenizer','In the position table alone'],answer:0,explain:'12 blocks of attention and FFN projections total about 85M versus 39M for embeddings.',nudge:'Which component is repeated 12 times?'},
+      {kind:'numeric',prompt:'Quick parameter retrieval.',questions:[
+        {label:'4 attention projections, each 768x768, per block (millions)',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M. Recall from the parameter-counts lesson.'},
       ]},
     ],
   },

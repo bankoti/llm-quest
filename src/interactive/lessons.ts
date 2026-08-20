@@ -478,7 +478,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
         title: 'Memory is the constraint',
         lines: [
           'A 7B model at fp32 needs 28 GB just for weights — before activations or the KV-cache. Fitting inference on commodity hardware requires reducing precision, and that trade-off is now well understood.',
-          'The KV-cache stores computed key and value tensors across tokens. Without it, each new token requires a full recomputation over the entire context. With it, generation is O(1) per new token instead of O(T²).',
+          'The KV-cache stores computed key and value tensors across tokens. Without it, each new token requires a full recomputation over the entire context. With it, attention for one new token is O(T) instead of recomputing the full O(T²) prefix; the new query still scans all cached keys.',
         ],
         cta: 'Show me precision',
       },
@@ -499,7 +499,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
           'Heads split the K and V tensors; they do not multiply how many new tokens need computing.',
           'Zero new pairs would mean the new token never enters the cache — the next step could not attend to it.',
         ],
-        explain: 'The cache holds all previously computed K and V tensors. When a new token arrives, the model computes new K and V only for that token, appends them, and attends over the full cached sequence. Cost is O(1) per new token, not O(T).',
+        explain: 'The cache holds all previously computed K and V tensors. When a new token arrives, the model computes new K and V only for that token, appends them, and attends over the full cached sequence. Projection reuse is O(1) new K/V pairs per layer, but attention over the cached sequence remains O(T) per new token.',
         nudge: 'The point of a cache is to not recompute what you already have.',
       },
       {

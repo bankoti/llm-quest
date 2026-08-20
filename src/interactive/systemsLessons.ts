@@ -30,7 +30,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
         'Cache memory also grows O(T): 2 × layers × KV heads × context length × head dimension × bytes per value. “O(T)” means proportional to context length T.',
       ],cta:'Watch reuse and growth'},
       {kind:'widget',widget:GenerationPlay},
-      {kind:'mcq',prompt:'What does the KV cache avoid?',options:['Recomputing prior tokens’ key and value projections','Comparing the new query with prior keys','Storing any context information','Running transformer layers for the new token'],answer:0,explain:'Previous projections are reused. The new query still attends across cached history.',nudge:'Cache means reuse, not zero work.'},
+      {kind:'mcq',prompt:'What does the KV cache avoid?',options:['Recomputing prior tokens\' key and value projections','Comparing the new query with prior keys','Storing any context information','Running transformer layers for the new token'],answer:0,explain:'Previous projections are reused. The new query still attends across cached history.',nudge:'Cache means reuse, not zero work.'},
       {kind:'worked',title:'Count the cache entries',prompt:'A 12-layer model appends one new token.',stages:[
         {label:'Per layer',body:'Store one new key vector and one new value vector: 2 tensors.'},{label:'Across layers',body:'2×12 = 24 new per-token K/V tensors.'},{label:'Across context',body:'Every generated token adds another set, so memory grows linearly with token count.'},
       ],takeaway:'One new token appends K and V at every layer; old cache entries remain.'},
@@ -49,7 +49,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
       {kind:'widget',widget:PrecisionPlay},
       {kind:'numeric',prompt:'Estimate weight memory.',questions:[{label:'13B parameters at 4 bits each',answer:6.5,tolerance:0.1,unit:'GB',reveal:'4 bits = 0.5 bytes. 13B×0.5≈6.5 GB before runtime overhead.'}]},
       {kind:'mcq',prompt:'What is the central quantization trade-off?',options:['Lower memory and bandwidth in exchange for approximation error','More parameters in exchange for shorter context','Fewer tokens in exchange for larger vocabulary','Exact arithmetic in exchange for slower tokenization'],answer:0,explain:'Reduced precision compresses numeric representation and may slightly change model outputs.',nudge:'What changes when many real values map to fewer representable levels?'},
-      {kind:'predict',prompt:'Two runtimes load the same 4-bit model.',questions:[{label:'speed comparison',options:['It depends on hardware and kernel support','They must be exactly 8× faster','The model cannot run on GPUs'],answer:0,reveal:'Compression reduces storage; execution speed depends on whether the platform efficiently supports that format.'}]},
+      {kind:'predict',prompt:'Two runtimes load the same 4-bit model.',questions:[{label:'speed comparison',options:['It depends on hardware and kernel support','They must be exactly 8× faster','The model cannot run on GPUs'],answer:0,reveal:'Compression reduces storage; execution speed depends on whether the platform efficiently supports that format.'},{label:'memory comparison',options:['Both use approximately the same weight memory','One must use more memory than the other','4-bit weights expand to 16-bit in memory'],answer:0,reveal:'The same 4-bit weights occupy the same storage regardless of runtime; memory is determined by precision, not kernel.'}]},
     ],
   },
 
@@ -101,6 +101,24 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
         {label:'First accepted',body:'Probability 0.8.'},{label:'First two',body:'Probability 0.8²=0.64.'},{label:'Continue',body:'Expected accepted count is 0.8+0.64+0.512+0.4096≈2.36.'},{label:'Add correction token',body:'The target also supplies a token, giving about 3.36 emitted tokens per target pass.'},
       ],takeaway:'Acceptance rate controls speedup; a poorly matched draft provides little benefit.'},
       {kind:'mcq',prompt:'When can majority voting hurt?',options:['When individual attempts are below 50% reliable or share the same systematic error','Whenever the number of samples is odd','Only when decoding is greedy','Never'],answer:0,explain:'Voting amplifies the dominant signal, whether that signal is correct or systematically wrong.',nudge:'More copies of the same bias do not create truth.'},
+    ],
+  },
+
+  {
+    slug:'systems-capstone',title:'Scaling and Serving Checkpoint',emoji:'🏆',blurb:'Connect scaling laws, caching, precision, routing, and decoding tricks.',minutes:8,
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['speculative-decoding','grouped-query-attention','mixture-of-experts'],outcomes:['Choose precision for a deployment constraint','Diagnose a KV-cache bottleneck','Distinguish stored and active parameters'],concepts:['system integration','deployment trade-offs','bottleneck diagnosis'],
+    steps:[
+      {kind:'concept',title:'Every serving choice is a named trade-off',lines:['Scaling laws guide how to spend a training budget. Precision and quantization trade accuracy for memory. GQA trades head diversity for cache size. MoE trades routing complexity for capacity without proportional compute. Speculative decoding trades draft-model overhead for fewer sequential target passes.','This checkpoint introduces no new mechanism. It asks you to retrieve and connect earlier ideas under new scenarios.'],cta:'Start the checkpoint'},
+      {kind:'mcq',prompt:'A 70B model must serve on a single 80 GB GPU. What is the first bottleneck?',options:['Weight memory exceeds capacity at full precision','The vocabulary is too large','Attention is constant-time','The KV cache is always empty'],answer:0,explain:'70B at fp16 = 140 GB, exceeding 80 GB. Quantization to 4-bit brings it to about 35 GB.',nudge:'Multiply parameters by bytes per weight.'},
+      {kind:'mcq',prompt:'Long conversations slow down. KV cache grows linearly. Which architectural choice directly reduces cache size?',options:['Grouped-query attention with fewer KV heads','More transformer blocks','A larger vocabulary','Higher temperature'],answer:0,explain:'GQA reduces the per-layer KV-head count, directly shrinking cache memory.',nudge:'Which design shares KV heads?'},
+      {kind:'predict',prompt:'A deployment uses an MoE model with 8 experts, top-2 routing.',questions:[
+        {label:'fraction of expert parameters active per token',options:['1/4','All','1/8'],answer:0,reveal:'2 of 8 experts are routed, so 2/8 = 1/4 of expert parameters are active.'},
+        {label:'memory required for weights',options:['Proportional to total (all 8 experts stored)','Proportional to active only','Zero because experts are virtual'],answer:0,reveal:'All expert weights must reside in memory even though only a subset runs per token.'},
+      ]},
+      {kind:'numeric',prompt:'Quick deployment math.',questions:[
+        {label:'13B params at 4 bits: weight memory in GB',answer:6.5,tolerance:0.2,reveal:'4 bits = 0.5 bytes. 13B x 0.5 = 6.5 GB.'},
+        {label:'D\u224820N tokens for 7B params, in billions',answer:140,tolerance:0,reveal:'20 x 7 = 140B tokens.'},
+      ]},
     ],
   },
 ]

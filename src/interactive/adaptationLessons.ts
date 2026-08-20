@@ -53,7 +53,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
         {label:'Hard target',body:'[1,0,0] says dog and airplane are equally wrong.'},{label:'Soft target',body:'[0.7,0.25,0.05] says dog is a much more plausible confusion than airplane.'},{label:'Student signal',body:'Matching the teacher transfers that similarity structure.'},
       ],takeaway:'Soft targets teach relative plausibility, not just correctness.'},
       {kind:'mcq',prompt:'Why are soft teacher targets useful?',options:['They give learning signal about relationships among alternatives','They remove the need for training data','They make the student larger','They guarantee identical behavior'],answer:0,explain:'Non-zero probabilities on alternatives convey how the teacher organizes the output space.',nudge:'What information is lost when every wrong answer becomes zero?'},
-      {kind:'predict',prompt:'The teacher is confidently wrong on a biased example.',questions:[{label:'risk to the student',options:['The student can inherit the teacher’s error or bias','The student automatically corrects it','Soft targets become one-hot'],answer:0,reveal:'Distillation transfers teacher behavior, including mistakes, unless data or objectives correct them.'}]},
+      {kind:'predict',prompt:'The teacher is confidently wrong on a biased example.',questions:[{label:'risk to the student',options:['The student can inherit the teacher’s error or bias','The student automatically corrects it','Soft targets become one-hot'],answer:0,reveal:'Distillation transfers teacher behavior, including mistakes, unless data or objectives correct them.'},{label:'best safeguard',options:['Evaluate the student on independent data and targeted slices','Assume a smaller model removes bias','Drop all soft targets'],answer:0,reveal:'Independent evaluation reveals which teacher errors transferred.'}]},
     ],
   },
 
@@ -96,12 +96,12 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'calibration',title:'Confidence and Calibration',emoji:'🎚️',blurb:'Separate correctness, probability, and confident-sounding language.',minutes:6,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['softmax-probabilities','direct-preference-optimization'],outcomes:['Define calibration','Interpret a reliability gap','Explain why stated confidence can mislead'],concepts:['calibration','confidence bin','reliability','stated confidence','expected calibration error'],
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['softmax-probabilities'],outcomes:['Define calibration','Interpret a reliability gap','Explain why stated confidence can mislead'],concepts:['calibration','confidence bin','reliability','stated confidence','expected calibration error'],
     steps:[
       {kind:'concept',title:'80% confidence should mean 80% correct',lines:[
         'A system is calibrated when predictions made with 80% confidence are correct about 80% of the time across many cases. Calibration is a group-level reliability property, not proof that one answer is right.',
         'Models can be accurate but overconfident, or less accurate but honestly uncertain. Expected calibration error (ECE) summarizes gaps between confidence bins and accuracy: it is the weighted average absolute gap across bins, where each bin is weighted by the fraction of predictions it contains. A perfectly calibrated system has ECE of zero.',
-        'Spoken phrases such as “I am certain” are generated text, not a guaranteed readout of internal probability. Preference training may reward confident tone even when factual accuracy does not improve.',
+        'Spoken phrases such as “I am certain” are generated text, not a guaranteed readout of internal probability. After the RLHF and DPO lessons, you can trace why preference training may reward confident tone even when factual accuracy does not improve.',
       ],cta:'Inspect reliability'},
       {kind:'widget',widget:CalibrationPlay},
       {kind:'worked',title:'Read one confidence bin',prompt:'Among 100 answers labeled 80% confident, 60 are correct.',stages:[
@@ -109,6 +109,24 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
       ],takeaway:'Calibration compares claimed probability with long-run correctness.'},
       {kind:'numeric',prompt:'Compute the absolute calibration gap.',questions:[{label:'80% confidence, 60% accuracy',answer:20,tolerance:0,unit:'percentage points',reveal:'|80−60| = 20 percentage points.'}]},
       {kind:'mcq',prompt:'A model says “I am completely certain.” What can you safely conclude?',options:['Nothing about correctness without measured calibration evidence','The answer must be correct','Its top token probability is exactly 1','RLHF was not used'],answer:0,explain:'Confident wording is behavior. Reliability must be measured across outcomes.',nudge:'Separate generated tone from empirical accuracy.'},
+    ],
+  },
+
+  {
+    slug:'adaptation-capstone',title:'Adaptation Checkpoint',emoji:'🏅',blurb:'Retrieve and connect fine-tuning, preference learning, and calibration.',minutes:8,
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['direct-preference-optimization','calibration','lora'],outcomes:['Choose between SFT, LoRA, RLHF, and DPO for a requirement','Diagnose calibration and forgetting risks','Trace a preference learning pipeline'],concepts:['adaptation choice','pipeline integration','risk diagnosis'],
+    steps:[
+      {kind:'concept',title:'Match the mechanism to the need',lines:['Fine-tuning shapes behavior; LoRA does so with fewer trainable parameters; RLHF and DPO shape preferences from comparisons; calibration measures whether stated confidence tracks accuracy.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them under pressure makes knowledge usable.'],cta:'Start the checkpoint'},
+      {kind:'mcq',prompt:'A model must adopt a concise JSON output format. Which approach fits best?',options:['Supervised fine-tuning on format examples','RLHF with vague preference pairs','Quantization','Increasing temperature'],answer:0,explain:'A stable output format is a behavior pattern best taught from demonstrations.',nudge:'Is this a behavior or a preference?'},
+      {kind:'mcq',prompt:'You need multiple style variants sharing one base model in production. Best mechanism?',options:['Separate LoRA adapters per variant','Full fine-tuning for each variant','Raise temperature per variant','One distilled student per variant'],answer:0,explain:'LoRA adapters are small, can share a frozen base, and switch quickly.',nudge:'What keeps memory low while serving many variants?'},
+      {kind:'predict',prompt:'A model trained with RLHF says "I am absolutely certain" about a wrong answer.',questions:[
+        {label:'most likely explanation',options:['Preference training rewarded confident tone independent of accuracy','The model verified the fact at inference time','Softmax guarantees correctness'],answer:0,reveal:'RLHF can decouple stated confidence from actual reliability.'},
+        {label:'best mitigation',options:['Measure calibration and add uncertainty signals','Remove all fine-tuning','Disable softmax'],answer:0,reveal:'Calibration measurement detects the gap; techniques like verbalized uncertainty or retrieval can reduce it.'},
+      ]},
+      {kind:'numeric',prompt:'LoRA arithmetic.',questions:[
+        {label:'W is 2048x2048. Rank-16 adapter: total A+B parameters',answer:65536,tolerance:0,reveal:'A is 16x2048=32768, B is 2048x16=32768. Total 65,536.'},
+        {label:'ratio of adapter params to full W params (percent, 1 decimal)',answer:1.6,tolerance:0.1,reveal:'65536 / (2048x2048) = 65536/4194304 = 0.0156 = 1.6%.'},
+      ]},
     ],
   },
 ]

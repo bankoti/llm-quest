@@ -5,9 +5,9 @@ import { ProgressState } from '@/engine/progress'
 import { isAdminMode } from '@/engine/admin'
 import clsx from 'clsx'
 
-interface Props { progress: ProgressState }
+interface Props { progress: ProgressState; recommendedId?: string }
 
-export function WorldMap({ progress }: Props) {
+export function WorldMap({ progress, recommendedId }: Props) {
   const navigate = useNavigate()
   const admin = isAdminMode()
 
@@ -97,13 +97,16 @@ export function WorldMap({ progress }: Props) {
                     {/* Level node */}
                     <motion.button
                       onClick={() => !isLocked && navigate(`/level/${level.id}`)}
+                       disabled={isLocked}
+                       aria-label={`${level.title}: ${isComplete ? 'complete' : isLocked ? 'locked' : level.id === recommendedId ? 'recommended next' : 'available'}`}
                       whileHover={!isLocked ? { scale: 1.08 } : {}}
                       whileTap={!isLocked ? { scale: 0.95 } : {}}
                       className={clsx(
                         'relative flex items-center justify-center rounded-full font-mono font-bold text-sm transition-colors',
                         isBoss ? 'w-14 h-14 text-base' : 'w-10 h-10',
                         isLocked && 'cursor-not-allowed opacity-40',
-                        !isLocked && !isComplete && 'cursor-pointer ring-2 ring-offset-2 ring-offset-gray-950',
+                        !isLocked && !isComplete && 'cursor-pointer',
+                         level.id === recommendedId && 'ring-2 ring-offset-2 ring-offset-gray-950',
                         isComplete && 'cursor-pointer',
                       )}
                       style={{

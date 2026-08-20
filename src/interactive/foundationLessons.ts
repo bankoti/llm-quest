@@ -49,7 +49,8 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
       {
         kind: 'predict', prompt: 'Use B for batch, T for token positions, and C for features. Predict the shape.',
         questions: [
-          { label: '8 sequences × 16 positions × 64 features', options: ['(8, 16, 64)', '(16, 8, 64)', '(8, 64, 16)'], answer: 0, reveal: 'Batch first, positions second, features last: (B, T, C) = (8, 16, 64).' },
+          { label: '8 sequences × 16 positions × 64 features', options: ['(16, 8, 64)', '(8, 16, 64)', '(8, 64, 16)'], answer: 1, reveal: 'Batch first, positions second, features last: (B, T, C) = (8, 16, 64).' },
+          { label: 'one sequence × 12 positions × 32 features', options: ['(12, 32)', '(1, 32, 12)', '(1, 12, 32)'], answer: 2, reveal: 'A batch of one still keeps its batch axis: (1, 12, 32).' },
         ],
       },
     ],
@@ -188,7 +189,8 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict', prompt: 'Predict the stronger match to q = [1, 1].', questions: [
-          { label: 'candidate with larger dot product', options: ['a = [0.8, 0.8]', 'b = [1, -1]', 'they tie'], answer: 0, reveal: 'q·a = 1.6; q·b = 0. The matching signs in a reinforce each other.' },
+          { label: 'candidate with larger dot product', options: ['b = [1, -1]', 'they tie', 'a = [0.8, 0.8]'], answer: 2, reveal: 'q·a = 1.6; q·b = 0. The matching signs in a reinforce each other.' },
+          { label: 'q = [1, -1]; stronger match', options: ['they tie', 'a = [0.5, 0.5]', 'b = [1, -1]'], answer: 2, reveal: 'q·a = 0 while q·b = 2. Alignment, not vector length alone, drives the match.' },
         ],
       },
     ],
@@ -408,7 +410,8 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict', prompt: 'The logits stay fixed. Increase temperature from 1 to 2.', questions: [
-          { label: 'distribution shape', options: ['Flatter: probability spreads across more tokens', 'Sharper: the top token dominates more', 'Unchanged'], answer: 0, reveal: 'Dividing by a larger T pulls logits closer before softmax, so probabilities become more similar.' },
+          { label: 'distribution shape', options: ['Sharper: the top token dominates more', 'Flatter: probability spreads across more tokens', 'Unchanged'], answer: 1, reveal: 'Dividing by a larger T pulls logits closer before softmax, so probabilities become more similar.' },
+          { label: 'argmax token after increasing temperature', options: ['Usually unchanged because logit order is preserved', 'Always becomes the second token', 'Becomes random before sampling'], answer: 0, reveal: 'Temperature changes concentration but preserves logit ordering for positive T.' },
         ],
       },
     ],
@@ -451,7 +454,8 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
       },
       {
         kind: 'predict', prompt: 'A generated token has just been selected.', questions: [
-          { label: 'what happens next?', options: ['Append it to context and run another forward pass', 'Decode the entire answer immediately', 'Retrain the model on the token', 'Reset the context'], answer: 0, reveal: 'Autoregressive generation extends the context one selected token at a time.' },
+          { label: 'what happens next?', options: ['Decode the entire answer immediately', 'Append it to context and run another forward pass', 'Retrain the model on the token', 'Reset the context'], answer: 1, reveal: 'Autoregressive generation extends the context one selected token at a time.' },
+          { label: 'what changes between those forward passes?', options: ['The model weights', 'The vocabulary', 'The context grows by the chosen token'], answer: 2, reveal: 'Inference keeps weights fixed; only the token context grows.' },
         ],
       },
     ],

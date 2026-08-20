@@ -1,224 +1,39 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { SITE } from '@/config/site'
-import { COURSES, MAX_XP, getRank } from '@/data/curriculum'
-import { loadProgress, getProgressSummary } from '@/engine/progress'
+import { COURSES, FRONTIER_LEVELS, GATED_LEVELS, MAX_XP, PRODUCTION_LEVELS, getRank } from '@/data/curriculum'
+import { getCompletionSummary, loadProgress } from '@/engine/progress'
 import { getDefense, loadReview } from '@/engine/review'
 import { renderShareCard } from '@/engine/shareCard'
+import { downloadLearningData, resetAllLearningData } from '@/engine/storage'
 
-// Deterministic completion code: verifiable by recomputing on this page.
-// Honest scope: this is an integrity check, not a cryptographic credential —
-// real verification needs a backend (the Supabase upgrade path).
-function completionCode(name: string, completed: number, xp: number): string {
-  const input = name.trim().toLowerCase() + '|' + completed + '|' + xp
-  let h = 0x811c9dc5
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i)
-    h = Math.imul(h, 0x01000193) >>> 0
-  }
-  return h.toString(36).toUpperCase().padStart(7, '0')
-}
+function completionCode(name:string,label:string,completed:number,xp:number):string{const input=`${name.trim().toLowerCase()}|${label}|${completed}|${xp}`;let h=0x811c9dc5;for(let i=0;i<input.length;i++){h^=input.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(36).toUpperCase().padStart(7,'0')}
+const NAME_KEY='llmquest_name'
 
-const NAME_KEY = 'llmquest_name'
+export function CertPage(){
+  const [name,setName]=useState(()=>{try{return localStorage.getItem(NAME_KEY)??''}catch{return''}})
+  const progress=loadProgress(), review=loadReview(), completion=getCompletionSummary(progress), rank=getRank(progress.totalXp)
+  const credential=completion.full.done?{label:'Full LLM Engineering',...completion.full,levels:GATED_LEVELS}:completion.production.done?{label:'Production AI Engineering',...completion.production,levels:PRODUCTION_LEVELS}:completion.frontier.done?{label:'Frontier Model Training',...completion.frontier,levels:FRONTIER_LEVELS}:null
+  const completedGated=GATED_LEVELS.filter(l=>progress.levels[l.id]?.status==='complete').length
+  const percent=Math.round(completedGated/GATED_LEVELS.length*100)
+  const dates=(credential?.levels??GATED_LEVELS).map(l=>progress.levels[l.id]?.completedAt).filter((x):x is number=>x!==undefined)
+  const finishedOn=dates.length?new Date(Math.max(...dates)).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}):''
+  const retained=Object.values(review.cards).filter(c=>c.box>=2).length
+  function saveName(v:string){setName(v);try{localStorage.setItem(NAME_KEY,v)}catch{}}
+  const [cardUrl,setCardUrl]=useState('')
+  useEffect(()=>{let cancelled=false;renderShareCard({name:name.trim(),rankTitle:rank.title,rankColor:rank.color,xp:progress.totalXp,completed:credential?.completed??completedGated,total:credential?.total??GATED_LEVELS.length,done:Boolean(credential),code:credential?completionCode(name,credential.label,credential.completed,progress.totalXp):'',siteName:SITE.name,tagline:credential?.label??SITE.tagline,domain:SITE.domain}).then(u=>{if(!cancelled)setCardUrl(u)}).catch(()=>{});return()=>{cancelled=true}},[name,completedGated,progress.totalXp,credential?.label])
 
-export function CertPage() {
-  const navigate = useNavigate()
-  const [name, setName] = useState(() => {
-    try { return localStorage.getItem(NAME_KEY) ?? '' } catch { return '' }
-  })
-  const progress = loadProgress()
-  const review = loadReview()
-  const { completed, total, percent } = getProgressSummary(progress)
-  const rank = getRank(progress.totalXp)
-  const done = completed === total
+  return <div className="min-h-screen bg-gray-950 text-white"><header className="border-b border-gray-800 px-5 sm:px-6 py-4 flex flex-wrap items-center gap-4 print:hidden"><Link to="/map" className="text-gray-500 hover:text-white text-sm font-mono">← Map</Link><h1 className="font-bold text-lg text-violet-500">Certificates & Transcript</h1><div className="ml-auto flex gap-2"><button onClick={downloadLearningData} className="nav-chip">Export progress</button>{credential&&<button onClick={()=>window.print()} className="nav-chip">Print / PDF</button>}</div></header>
+  <div className="max-w-2xl mx-auto px-5 sm:px-6 py-8">
+    <section className="mb-8 print:hidden"><label htmlFor="cert-name" className="block text-xs font-mono text-gray-500 mb-2">Name as it should appear on a certificate</label><input id="cert-name" value={name} onChange={e=>saveName(e.target.value)} placeholder="Ada Lovelace" className="w-full max-w-sm px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700 focus:border-violet-500 text-sm"/></section>
 
-  const completionDates = Object.values(progress.levels)
-    .map(l => l.completedAt)
-    .filter((t): t is number => t !== undefined)
-  const finishedOn = completionDates.length > 0
-    ? new Date(Math.max(...completionDates)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : ''
+    {credential&&name.trim()?<section className="rounded-2xl border-2 border-violet-600 p-8 sm:p-10 text-center mb-10 bg-gray-900/70 print:bg-white print:text-black"><p className="text-xs font-mono uppercase tracking-widest text-violet-400 mb-6">{SITE.name} · Certificate of Completion</p><h2 className="text-3xl font-bold">{name.trim()}</h2><p className="text-gray-400 print:text-gray-700 text-sm mt-2 mb-6">completed the<br/><strong className="text-gray-200 print:text-black">{credential.label} specialization</strong></p><div className="flex flex-wrap justify-center gap-8 text-sm font-mono mb-6"><div><p className="text-gray-500">Levels</p><p className="font-bold">{credential.completed}/{credential.total}</p></div><div><p className="text-gray-500">XP</p><p className="font-bold text-yellow-300 print:text-black">{progress.totalXp.toLocaleString()}</p></div><div><p className="text-gray-500">Date</p><p className="font-bold">{finishedOn}</p></div></div><p className="text-xs font-mono text-gray-600">Completion code: {completionCode(name,credential.label,credential.completed,progress.totalXp)} · {SITE.domain}</p></section>
+    :<section className="rounded-2xl border border-gray-800 bg-gray-900/40 p-7 mb-10"><h2 className="text-lg font-semibold">Specialization progress</h2><p className="text-sm text-gray-500 mt-1">Complete either route to earn a certificate. Course 0 is optional.</p><div className="mt-5 space-y-4">{[{name:'Production AI Engineering',x:completion.production},{name:'Frontier Model Training',x:completion.frontier},{name:'Full LLM Engineering',x:completion.full}].map(({name,x})=><div key={name}><div className="flex justify-between text-xs font-mono"><span>{name}</span><span className={x.done?'text-emerald-400':'text-gray-500'}>{x.completed}/{x.total}{x.done?' complete':''}</span></div><div role="progressbar" aria-label={`${name}: ${x.completed} of ${x.total}`} aria-valuemin={0} aria-valuemax={x.total} aria-valuenow={x.completed} className="h-2 rounded-full bg-gray-800 mt-2 overflow-hidden"><div className="h-full bg-violet-600" style={{width:`${Math.round(x.completed/x.total*100)}%`}}/></div></div>)}</div>{!name.trim()&&credential&&<p className="text-amber-300 text-sm mt-4">Enter your name above to issue the certificate.</p>}</section>}
 
-  const reviewCards = Object.values(review.cards)
-  const retained = reviewCards.filter(c => c.box >= 2).length
+    {cardUrl&&<section className="mb-10 print:hidden"><h2 className="section-label">Share card</h2><img src={cardUrl} alt={`${SITE.name} learning progress card`} className="w-full rounded-xl border border-gray-800 mb-3"/><a href={cardUrl} download="zeroone-card.png" className="nav-chip inline-block">Download PNG</a></section>}
 
-  function saveName(v: string) {
-    setName(v)
-    try { localStorage.setItem(NAME_KEY, v) } catch {}
-  }
+    <section><h2 className="section-label">Mastery transcript</h2><div className="grid gap-2">{COURSES.map(c=>{const done=c.levels.filter(l=>progress.levels[l.id]?.status==='complete').length;const xp=c.levels.reduce((n,l)=>n+(progress.levels[l.id]?.xpEarned??0),0);const d=getDefense(c.id);return <div key={c.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-800 bg-gray-900/40 print:bg-white"><span className="text-xs font-mono font-semibold w-8" style={{color:c.accent}}>C{c.id}</span><div className="flex-1"><p className="text-sm">{c.title}</p><p className="text-xs text-gray-500 font-mono">{done}/{c.levels.length} levels · {xp.toLocaleString()} XP{d?` · defense ${d.bestPct}%`:''}</p></div><span>{done===c.levels.length?(d&&d.bestPct>=80?'🛡️':'✓'):done>0?'▶':'—'}</span></div>})}</div><p className="text-xs font-mono text-gray-600 mt-5">{progress.totalXp.toLocaleString()} / {MAX_XP.toLocaleString()} available XP{review.xpFromReview?` · +${review.xpFromReview} review XP`:''}{retained?` · ${retained} cards in 7+ day retention`:''}</p></section>
 
-  // Share card: rendered client-side to a PNG data URL; re-renders when
-  // the name or progress changes. Available at any progress level.
-  const [cardUrl, setCardUrl] = useState<string>('')
-  useEffect(() => {
-    let cancelled = false
-    renderShareCard({
-      name: name.trim(),
-      rankTitle: rank.title,
-      rankColor: rank.color,
-      xp: progress.totalXp,
-      completed, total, done,
-      code: done ? completionCode(name, completed, progress.totalXp) : '',
-      siteName: SITE.name,
-      tagline: SITE.tagline,
-      domain: SITE.domain,
-    }).then(url => { if (!cancelled) setCardUrl(url) })
-      .catch(() => { /* canvas unavailable: section simply stays hidden */ })
-    return () => { cancelled = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [name, completed, progress.totalXp, done])
-
-  return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header (hidden when printing) */}
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center gap-6 print:hidden">
-        <button
-          onClick={() => navigate('/map')}
-          className="text-gray-500 hover:text-white transition-colors text-sm font-mono"
-        >
-          ← Map
-        </button>
-        <h1 className="font-bold text-lg" style={{ color: '#7c3aed' }}>Certificate & Transcript</h1>
-        {done && (
-          <button
-            onClick={() => window.print()}
-            className="ml-auto px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-500
-                       text-sm font-mono text-gray-300 transition-colors"
-          >
-            🖨 Print / save PDF
-          </button>
-        )}
-      </div>
-
-      <div className="max-w-2xl mx-auto px-6 py-8">
-        {/* Name (needed for the certificate) */}
-        <div className="mb-8 print:hidden">
-          <label className="block text-xs font-mono text-gray-500 mb-2">
-            Name as it should appear on the certificate
-          </label>
-          <input
-            value={name}
-            onChange={e => saveName(e.target.value)}
-            placeholder="Ada Lovelace"
-            className="w-full max-w-sm px-4 py-2.5 rounded-lg bg-gray-900 border border-gray-700
-                       focus:border-violet-500 focus:outline-none text-sm"
-          />
-        </div>
-
-        {/* Certificate */}
-        {done && name.trim() ? (
-          <div
-            className="rounded-2xl border-2 p-10 text-center mb-10 bg-gray-900/70 print:bg-white print:text-black"
-            style={{ borderColor: '#7c3aed' }}
-          >
-            <div className="text-xs font-mono uppercase tracking-widest text-violet-400 mb-6">
-              {SITE.name} · Certificate of Completion
-            </div>
-            <div className="text-3xl font-bold mb-2">{name.trim()}</div>
-            <p className="text-gray-400 print:text-gray-700 text-sm mb-6 leading-relaxed">
-              completed all {total} levels of<br />
-              <span className="text-gray-200 print:text-black font-semibold">{SITE.tagline}</span>
-            </p>
-            <div className="flex items-center justify-center gap-8 text-sm font-mono mb-6">
-              <div>
-                <div className="text-gray-500">XP</div>
-                <div className="text-yellow-300 print:text-black font-bold">{progress.totalXp.toLocaleString()}</div>
-              </div>
-              <div>
-                <div className="text-gray-500">Rank</div>
-                <div style={{ color: rank.color }} className="font-bold">{rank.title}</div>
-              </div>
-              <div>
-                <div className="text-gray-500">Date</div>
-                <div className="text-gray-200 print:text-black font-bold">{finishedOn}</div>
-              </div>
-            </div>
-            <div className="text-xs font-mono text-gray-600">
-              Completion code: {completionCode(name, completed, progress.totalXp)} · {SITE.domain}
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-8 text-center mb-10">
-            <div className="text-4xl mb-3">📜</div>
-            <h2 className="text-lg font-semibold mb-1">Certificate locks in at 100%</h2>
-            <p className="text-gray-500 text-sm font-mono">
-              {completed}/{total} levels · {percent}% complete
-              {!name.trim() && completed === total ? ' · enter your name above' : ''}
-            </p>
-            <div className="mt-4 h-2 rounded-full bg-gray-800 overflow-hidden max-w-sm mx-auto">
-              <div
-                className="h-full rounded-full transition-all"
-                style={{ width: percent + '%', background: '#7c3aed' }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Share card */}
-        {cardUrl && (
-          <div className="mb-10 print:hidden">
-            <h2 className="text-sm font-mono uppercase tracking-widest text-gray-500 mb-4">
-              Share card
-            </h2>
-            <img
-              src={cardUrl}
-              alt="ZeroOne progress share card"
-              className="w-full max-w-xl rounded-xl border border-gray-800 mb-3"
-            />
-            <a
-              href={cardUrl}
-              download="zeroone-card.png"
-              className="inline-block px-4 py-2 rounded-lg border border-gray-700 hover:border-gray-500
-                         text-sm font-mono text-gray-300 transition-colors"
-            >
-              ⬇ Download PNG
-            </a>
-            <span className="ml-3 text-xs font-mono text-gray-600">
-              1200×630 · sized for LinkedIn / X posts
-            </span>
-          </div>
-        )}
-
-        {/* Mastery transcript */}
-        <h2 className="text-sm font-mono uppercase tracking-widest text-gray-500 mb-4">
-          Mastery transcript
-        </h2>
-        <div className="grid gap-2 mb-8">
-          {COURSES.map(c => {
-            const levels = c.levels.map(l => progress.levels[l.id])
-            const lvlDone = levels.filter(l => l?.status === 'complete').length
-            const xpEarned = levels.reduce((s, l) => s + (l?.xpEarned ?? 0), 0)
-            const d = getDefense(c.id)
-            return (
-              <div
-                key={c.id}
-                className="flex items-center gap-4 p-4 rounded-xl border border-gray-800 bg-gray-900/40 print:bg-white"
-              >
-                <span className="text-xs font-mono font-semibold w-8" style={{ color: c.accent }}>
-                  C{c.id}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-gray-200 print:text-black">{c.title}</div>
-                  <div className="text-xs text-gray-500 font-mono mt-0.5">
-                    {lvlDone}/{c.levels.length} levels · {xpEarned.toLocaleString()} XP
-                    {d ? ' · defense ' + d.bestPct + '%' : ''}
-                  </div>
-                </div>
-                <span className="text-lg">
-                  {lvlDone === c.levels.length ? (d && d.bestPct >= 80 ? '🛡️' : '✅') : lvlDone > 0 ? '▶️' : '—'}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Retention line — the honest differentiator */}
-        <div className="text-xs font-mono text-gray-600 mb-8">
-          {progress.totalXp.toLocaleString()} / {MAX_XP.toLocaleString()} course XP
-          {review.xpFromReview > 0 ? ' · +' + review.xpFromReview.toLocaleString() + ' XP from spaced review' : ''}
-          {retained > 0 ? ' · ' + retained + ' concepts in long-term retention (7+ day box)' : ''}
-        </div>
-      </div>
-    </div>
-  )
+    <section className="mt-14 pt-6 border-t border-gray-900 print:hidden"><h2 className="text-sm font-semibold text-gray-300">Local learning data</h2><p className="text-xs text-gray-600 mt-1 mb-4">Export a backup before restarting. Reset clears coding progress, concept lessons, review history, warm-ups, drafts, and certificate name.</p><div className="flex gap-3"><button onClick={downloadLearningData} className="nav-chip">Export backup</button><button onClick={()=>{if(confirm('Restart from scratch? This clears ALL ZeroOne progress and drafts in this browser.')){resetAllLearningData();location.href=import.meta.env.BASE_URL}}} className="px-3 py-2 rounded-lg border border-red-900 text-red-400 hover:bg-red-950/30 text-xs font-mono">Restart from scratch</button></div></section>
+  </div></div>
 }

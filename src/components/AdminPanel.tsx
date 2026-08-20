@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { COURSES } from '@/data/curriculum'
-import { loadProgress, resetProgress, ProgressState } from '@/engine/progress'
+import { loadProgress, ProgressState } from '@/engine/progress'
+import { resetAllLearningData } from '@/engine/storage'
 import { exitAdminMode, makeGrantLink, unlockAllLevels } from '@/engine/admin'
 
 interface Props { onProgressChange: (p: ProgressState) => void }
@@ -47,13 +48,13 @@ export function AdminPanel({ onProgressChange }: Props) {
         <button
           onClick={() => {
             if (confirm('Reset ALL progress in this browser?')) {
-              resetProgress()
+              resetAllLearningData()
               onProgressChange(loadProgress())
             }
           }}
           className="text-xs font-mono px-3 py-1.5 rounded-lg bg-red-900/30 hover:bg-red-900/50 text-red-300 border border-red-800/40"
         >
-          Reset progress
+          Reset all learning data
         </button>
       </div>
 

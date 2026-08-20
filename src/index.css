@@ -63,3 +63,22 @@
 .lesson-prose .callout-tip strong     { color: #6ee7b7; }
 .lesson-prose .callout-warning { border-color: #f59e0b; background: rgba(245, 158, 11, 0.09); }
 .lesson-prose .callout-warning strong { color: #fcd34d; }
+
+/* Keyboard and motion accessibility are global guarantees, not per-component opt-ins. */
+:focus-visible { outline: 2px solid #8b5cf6; outline-offset: 3px; }
+.skip-link {
+  position: fixed; z-index: 100; top: 0.75rem; left: 0.75rem;
+  transform: translateY(-200%); padding: 0.6rem 0.9rem; border-radius: 0.5rem;
+  background: #7c3aed; color: white; font: 600 0.875rem/1 JetBrains Mono, monospace;
+}
+.skip-link:focus { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+@layer components {
+  .nav-chip { @apply text-xs font-mono px-3 py-2 rounded-lg border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white transition-colors; }
+}
+@layer components { .section-label { @apply text-sm font-mono uppercase tracking-widest text-gray-500 mb-4; } }
+@media (pointer: coarse) {
+  button { min-width: 44px; min-height: 44px; }
+}

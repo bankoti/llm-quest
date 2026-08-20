@@ -3,9 +3,9 @@
 // retrieval practice and spacing; this file implements both.
 // Storage: localStorage, same upgrade path as progress.ts.
 
-import { REVIEW_QUESTIONS, ReviewQuestion } from '@/data/review'
-import { COURSES, getLevel } from '@/data/curriculum'
-import { loadProgress, saveProgress, touchStreak } from './progress'
+import { REVIEW_QUESTIONS, ReviewQuestion } from "@/data/review"
+import { COURSES, getLevel } from "@/data/curriculum"
+import { loadProgress, saveProgress, touchStreak } from "./progress"
 
 export interface CardState {
   box: number      // Leitner box index into INTERVAL_DAYS
@@ -25,7 +25,7 @@ export interface ReviewState {
   defenses: Record<number, DefenseState>    // keyed by course id
 }
 
-const KEY = 'llmquest_review_v1'
+const KEY = "llmquest_review_v1"
 const DAY = 24 * 60 * 60 * 1000
 const INTERVAL_DAYS = [1, 3, 7, 21, 60]
 
@@ -33,6 +33,7 @@ export const REVIEW_XP = 10          // per correct first answer
 export const SESSION_CAP = 12        // max cards per daily session
 export const DEFENSE_BONUS_XP = 250  // one-time, per course
 export const DEFENSE_PASS_PCT = 80
+export const RETRY_GAP = 3           // show missed card again after this many intervening cards
 
 function defaultState(): ReviewState {
   return { cards: {}, xpFromReview: 0, defenses: {} }
@@ -60,7 +61,7 @@ export function dueQuestions(now = Date.now()): ReviewQuestion[] {
 
   for (const q of REVIEW_QUESTIONS) {
     const lvl = progress.levels[q.levelId]
-    if (lvl?.status !== 'complete') continue
+    if (lvl?.status !== "complete") continue
     let card = state.cards[q.id]
     if (!card) {
       card = { box: 0, due: (lvl.completedAt ?? now) + INTERVAL_DAYS[0] * DAY, seen: 0, right: 0 }
@@ -86,11 +87,10 @@ export function dueCount(now = Date.now()): number {
   return dueQuestions(now).length
 }
 
-// Record the first answer of a session: correct moves the card up a box,
-// wrong sends it back to box 0 and requeues it in 10 minutes — a missed card
-// should be retrieved again while the correction is fresh, not tomorrow.
-// Correct answers earn XP and keep the streak alive.
-export function answerCard(questionId: string, correct: boolean, now = Date.now()): void {
+// Record a first-attempt miss: schedule in-session retry (reappear after
+// RETRY_GAP intervening cards). On second miss, schedule tomorrow.
+// Returns the scheduling decision to inform the UI queue manager.
+export function answerCard(questionId: string, correct: boolean, now = Date.now()): "retry" | "tomorrow" | "promoted" {
   const state = loadReview()
   const card = state.cards[questionId] ?? { box: 0, due: now, seen: 0, right: 0 }
   card.seen += 1
@@ -98,29 +98,44 @@ export function answerCard(questionId: string, correct: boolean, now = Date.now(
     card.right += 1
     card.box = Math.min(card.box + 1, INTERVAL_DAYS.length - 1)
     card.due = now + INTERVAL_DAYS[card.box] * DAY
+    state.cards[questionId] = card
+    state.xpFromReview += REVIEW_XP
+    saveReview(state)
+    const progress = loadProgress()
+    progress.totalXp += REVIEW_XP
+    touchStreak(progress)
+    saveProgress(progress)
+    return "promoted"
+  }
+
+  // Wrong answer: check if this is a repeated miss (box already 0 from prior miss).
+  const isRepeatMiss = card.box === 0 && card.seen > 1
+  card.box = 0
+  if (isRepeatMiss) {
+    card.due = now + INTERVAL_DAYS[0] * DAY
   } else {
-    card.box = 0
-    card.due = now + 10 * 60 * 1000
+    // Keep due in the past so it stays "due" but the UI manages the retry queue.
+    card.due = now
   }
   state.cards[questionId] = card
-  if (correct) state.xpFromReview += REVIEW_XP
   saveReview(state)
 
   const progress = loadProgress()
-  if (correct) progress.totalXp += REVIEW_XP
   touchStreak(progress)
   saveProgress(progress)
+
+  return isRepeatMiss ? "tomorrow" : "retry"
 }
 
 // ─── Boss defense ────────────────────────────────────────────────────────────
-// After finishing a course, defend it: answer that course's full question set.
+// After finishing a course, defend it: answer that course full question set.
 // Score >= DEFENSE_PASS_PCT earns a one-time XP bonus. Retries always allowed.
 
 export function defenseAvailable(courseId: number): boolean {
   const progress = loadProgress()
   const course = COURSES.find(c => c.id === courseId)
   if (!course) return false
-  return course.levels.every(l => progress.levels[l.id]?.status === 'complete')
+  return course.levels.every(l => progress.levels[l.id]?.status === "complete")
 }
 
 export function courseQuestions(courseId: number): ReviewQuestion[] {

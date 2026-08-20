@@ -1,11 +1,11 @@
 // PracticePage: /interactive/practice
 // Weakest-first replay of every check you missed, across all lessons.
-// A miss is cleared when you answer it first-try here; the rest stay queued.
+// Uses spacing metadata: oldest-due-first. Does NOT clear on non-first-try.
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { INTERACTIVE_LESSONS } from './curriculum'
-import { loadTrack, stars, clearMiss } from './types'
+import { loadTrack, stars, clearMiss, spacingSortKey, recordPractice } from './types'
 import type { InteractiveLesson, McqStep, PredictStep, NumericStep } from './types'
 import { StepMcq, StepPredict, StepNumeric } from './InteractiveLessonPage'
 
@@ -13,9 +13,10 @@ interface PracticeItem {
   lesson: InteractiveLesson
   stepIdx: number
   step: McqStep | PredictStep | NumericStep
+  spacingKey: string
 }
 
-// weakest lesson first (fewest stars), then track order; step order within a lesson
+// weakest lesson first (fewest stars), then oldest-due-first via spacing metadata
 function buildQueue(): PracticeItem[] {
   const track = loadTrack()
   const order = [...INTERACTIVE_LESSONS].sort(
@@ -26,10 +27,16 @@ function buildQueue(): PracticeItem[] {
     const missed = track[lesson.slug]?.missed ?? []
     for (const stepIdx of [...missed].sort((a, b) => a - b)) {
       const step = lesson.steps[stepIdx]
-      if (step && (step.kind === 'mcq' || step.kind === 'predict' || step.kind === 'numeric')) q.push({ lesson, stepIdx, step })
+      if (step && (step.kind === 'mcq' || step.kind === 'predict' || step.kind === 'numeric')) {
+        const spacingKey = `${lesson.slug}:${stepIdx}`
+        q.push({ lesson, stepIdx, step, spacingKey })
+      }
     }
   }
-  return q
+  // Only surface items whose spacing interval has elapsed, then oldest first.
+  const now = Date.now()
+  return q.filter(item => { const due = spacingSortKey(item.spacingKey); return due === 0 || due <= now })
+    .sort((a, b) => spacingSortKey(a.spacingKey) - spacingSortKey(b.spacingKey))
 }
 
 export function PracticePage() {
@@ -40,9 +47,24 @@ export function PracticePage() {
   const total = queue.length
   const done = pos >= total
 
-  const onStepDone = (ft: boolean) => {
+  // Unified handler for MCQ (ft, sureFirst?) and predict/numeric (allFirst, earned?, possible?)
+  const onStepDone = (ft: boolean, _sureOrEarned?: boolean | number, _possible?: number) => {
     const item = queue[pos]
-    if (ft) {
+    let wasFirstTry: boolean
+    if (typeof _sureOrEarned === 'number') {
+      // predict/numeric: all questions correct on first try?
+      const earned = _sureOrEarned
+      const possible = _possible ?? 1
+      wasFirstTry = earned === possible
+    } else {
+      wasFirstTry = ft
+    }
+
+    // Record spacing metadata regardless
+    recordPractice(item.spacingKey, wasFirstTry)
+
+    // Only clear from missed list on first-try success
+    if (wasFirstTry) {
       clearMiss(item.lesson.slug, item.stepIdx)
       setCleared(n => n + 1)
     }
@@ -97,7 +119,7 @@ export function PracticePage() {
               from {queue[pos].lesson.emoji} {queue[pos].lesson.title}
             </p>
             {queue[pos].step.kind === 'mcq'
-              ? <StepMcq step={queue[pos].step as McqStep} onDone={onStepDone} />
+              ? <StepMcq step={queue[pos].step as McqStep} onDone={onStepDone} showConfidence={false} />
               : queue[pos].step.kind === 'numeric'
                 ? <StepNumeric step={queue[pos].step as NumericStep} onDone={onStepDone} />
                 : <StepPredict step={queue[pos].step as PredictStep} onDone={onStepDone} />}

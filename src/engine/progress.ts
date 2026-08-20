@@ -1,13 +1,16 @@
-// Progress state — stored in localStorage, no backend needed for v1.
-// Upgrade path: swap localStorage calls for Supabase calls in one file.
-
+// Progress state stored locally. Course prerequisites form a graph: after C3,
+// learners may continue into production engineering (C4-C8) or frontier
+// training (C9). Course 0 is an always-open optional toolkit.
 import { beacon } from './beacon'
-import { ALL_LEVELS, getRank } from '@/data/curriculum'
+import {
+  ALL_LEVELS, COURSES, FRONTIER_LEVELS, GATED_LEVELS, PRODUCTION_LEVELS,
+  getCourse, getLevel, getRank,
+} from '@/data/curriculum'
 
 export interface LevelState {
   status: 'locked' | 'unlocked' | 'complete'
   xpEarned: number
-  completedAt?: number  // epoch ms
+  completedAt?: number
   attempts: number
 }
 
@@ -15,55 +18,68 @@ export interface ProgressState {
   levels: Record<string, LevelState>
   totalXp: number
   streakDays: number
-  lastActiveDate: string  // YYYY-MM-DD
+  lastActiveDate: string
 }
 
 const KEY = 'llmquest_progress_v1'
 
-// Course 0 is an open reference course: every level is always unlocked and
-// completing it is never required to progress. The linear unlock chain runs
-// over the gated (non-course-0) levels only.
-const isFree = (l: { courseId: number }) => l.courseId === 0
-const GATED_LEVELS = ALL_LEVELS.filter(l => !isFree(l))
+export function localDateKey(d = new Date()): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10)
+function isComplete(state: ProgressState, levelId: string): boolean {
+  return state.levels[levelId]?.status === 'complete'
+}
+
+export function isCourseComplete(state: ProgressState, courseId: number): boolean {
+  const course = COURSES.find(c => c.id === courseId)
+  return Boolean(course && course.levels.every(l => isComplete(state, l.id)))
+}
+
+export function isCourseAvailable(state: ProgressState, courseId: number): boolean {
+  const course = COURSES.find(c => c.id === courseId)
+  if (!course) return false
+  return course.id === 0 || course.prerequisite === null || isCourseComplete(state, course.prerequisite)
+}
+
+// Unlock only the next incomplete level in every currently available course.
+// Existing explicit grants/admin unlocks are preserved because this only opens,
+// never re-locks, records.
+function unlockEligible(state: ProgressState): ProgressState {
+  for (const course of COURSES) {
+    if (course.id === 0) {
+      for (const level of course.levels) {
+        if (state.levels[level.id]?.status === 'locked') state.levels[level.id].status = 'unlocked'
+      }
+      continue
+    }
+    if (!isCourseAvailable(state, course.id)) continue
+    const next = course.levels.find(l => !isComplete(state, l.id))
+    if (next && state.levels[next.id]?.status === 'locked') state.levels[next.id].status = 'unlocked'
+  }
+  return state
 }
 
 function defaultState(): ProgressState {
   const levels: Record<string, LevelState> = {}
-  ALL_LEVELS.forEach(level => {
-    const first = GATED_LEVELS[0]?.id === level.id
-    levels[level.id] = {
-      status: isFree(level) || first ? 'unlocked' : 'locked',
-      xpEarned: 0,
-      attempts: 0,
-    }
-  })
-  return { levels, totalXp: 0, streakDays: 0, lastActiveDate: today() }
+  for (const level of ALL_LEVELS) {
+    levels[level.id] = { status: level.courseId === 0 ? 'unlocked' : 'locked', xpEarned: 0, attempts: 0 }
+  }
+  return unlockEligible({ levels, totalXp: 0, streakDays: 0, lastActiveDate: '' })
 }
 
-// Backfill entries for levels added after the user first saved progress
-// (e.g. debug levels). A new level is unlocked if the level before it in
-// ALL_LEVELS order is already complete, otherwise locked.
 function migrate(state: ProgressState): ProgressState {
-  ALL_LEVELS.forEach(level => {
-    if (state.levels[level.id]) return
-    let unlocked: boolean
-    if (isFree(level)) {
-      unlocked = true
-    } else {
-      const gi = GATED_LEVELS.findIndex(l => l.id === level.id)
-      const prev = gi > 0 ? state.levels[GATED_LEVELS[gi - 1].id] : undefined
-      unlocked = gi === 0 || prev?.status === 'complete'
-    }
-    state.levels[level.id] = {
-      status: unlocked ? 'unlocked' : 'locked',
-      xpEarned: 0,
-      attempts: 0,
-    }
-  })
-  return state
+  state.levels ??= {}
+  state.totalXp ??= 0
+  state.streakDays ??= 0
+  state.lastActiveDate ??= ''
+  for (const level of ALL_LEVELS) {
+    state.levels[level.id] ??= { status: level.courseId === 0 ? 'unlocked' : 'locked', xpEarned: 0, attempts: 0 }
+  }
+  return unlockEligible(state)
 }
 
 export function loadProgress(): ProgressState {
@@ -78,26 +94,23 @@ export function saveProgress(state: ProgressState): void {
   localStorage.setItem(KEY, JSON.stringify(state))
 }
 
-// Any learning activity counts toward the streak — passing a level or
-// clearing review cards. Exported so the review engine can share it.
 export function touchStreak(state: ProgressState): void {
-  const t = today()
-  const prev = state.lastActiveDate
-  if (prev === t) return
-  const prevDate = new Date(prev)
-  prevDate.setDate(prevDate.getDate() + 1)
-  const yesterday = prevDate.toISOString().slice(0, 10)
-  state.streakDays = t === yesterday ? state.streakDays + 1 : 1
-  state.lastActiveDate = t
+  const today = localDateKey()
+  if (state.lastActiveDate === today) {
+    if (state.streakDays < 1) state.streakDays = 1
+    return
+  }
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  state.streakDays = state.lastActiveDate === localDateKey(yesterday) ? Math.max(1, state.streakDays + 1) : 1
+  state.lastActiveDate = today
 }
 
-// xpMultiplier < 1 when paid hints were used (see Arena hint ladder).
 export function completeLevel(levelId: string, xpMultiplier = 1): ProgressState {
   const state = loadProgress()
-  const level = ALL_LEVELS.find(l => l.id === levelId)
+  const level = getLevel(levelId)
   if (!level) return state
 
-  // Replaying an already-complete level never re-awards XP.
   if (state.levels[levelId]?.status === 'complete') {
     touchStreak(state)
     saveProgress(state)
@@ -105,24 +118,10 @@ export function completeLevel(levelId: string, xpMultiplier = 1): ProgressState 
   }
 
   const earned = Math.round(level.xp * xpMultiplier)
-  state.levels[levelId] = {
-    ...state.levels[levelId],
-    status: 'complete',
-    xpEarned: earned,
-    completedAt: Date.now(),
-  }
+  state.levels[levelId] = { ...state.levels[levelId], status: 'complete', xpEarned: earned, completedAt: Date.now() }
   state.totalXp += earned
-
-  // Unlock next level in the gated chain (course 0 gates nothing)
-  const idx = GATED_LEVELS.findIndex(l => l.id === levelId)
-  if (idx >= 0 && idx + 1 < GATED_LEVELS.length) {
-    const nextId = GATED_LEVELS[idx + 1].id
-    if (state.levels[nextId]?.status === 'locked') {
-      state.levels[nextId].status = 'unlocked'
-    }
-  }
-
   touchStreak(state)
+  unlockEligible(state)
   saveProgress(state)
   beacon('level_complete', levelId)
   return state
@@ -136,8 +135,43 @@ export function incrementAttempts(levelId: string): void {
   }
 }
 
+export function nextRecommendedLevel(state: ProgressState) {
+  // Continue the production path by default. If it is complete, offer the
+  // frontier specialization. Toolkit levels remain optional references.
+  return PRODUCTION_LEVELS.find(l => state.levels[l.id]?.status === 'unlocked')
+    ?? FRONTIER_LEVELS.find(l => state.levels[l.id]?.status === 'unlocked')
+    ?? GATED_LEVELS.find(l => state.levels[l.id]?.status === 'unlocked')
+}
+
+export function requiredPredecessor(state: ProgressState, levelId: string) {
+  const level = getLevel(levelId)
+  if (!level || level.courseId === 0) return undefined
+  const course = getCourse(level.courseId)
+  const idx = course.levels.findIndex(l => l.id === levelId)
+  if (idx > 0) return course.levels[idx - 1]
+  if (course.prerequisite !== null && !isCourseComplete(state, course.prerequisite)) {
+    const prereq = getCourse(course.prerequisite)
+    return prereq.levels.find(l => state.levels[l.id]?.status !== 'complete') ?? prereq.levels[prereq.levels.length - 1]
+  }
+  return undefined
+}
+
+export interface CompletionSummary {
+  production: { completed: number; total: number; done: boolean }
+  frontier: { completed: number; total: number; done: boolean }
+  full: { completed: number; total: number; done: boolean }
+}
+
+export function getCompletionSummary(state: ProgressState): CompletionSummary {
+  const summarize = (levels: typeof ALL_LEVELS) => {
+    const completed = levels.filter(l => isComplete(state, l.id)).length
+    return { completed, total: levels.length, done: completed === levels.length }
+  }
+  return { production: summarize(PRODUCTION_LEVELS), frontier: summarize(FRONTIER_LEVELS), full: summarize(GATED_LEVELS) }
+}
+
 export function getProgressSummary(state: ProgressState) {
-  const completed = Object.values(state.levels).filter(l => l.status === 'complete').length
+  const completed = ALL_LEVELS.filter(l => state.levels[l.id]?.status === 'complete').length
   const total = ALL_LEVELS.length
   const rank = getRank(state.totalXp)
   return { completed, total, percent: Math.round((completed / total) * 100), rank }

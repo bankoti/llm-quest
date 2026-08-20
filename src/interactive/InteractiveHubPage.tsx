@@ -45,7 +45,7 @@ export function InteractiveHubPage() {
         <div className="mb-2"><Link to="/map" className="text-gray-500 hover:text-gray-300 text-sm">← Map</Link></div>
         <p className="text-xs font-mono uppercase tracking-[0.2em] text-violet-400 mb-2">Build the mental model, one dependency at a time</p>
         <h1 className="text-3xl font-bold mb-2">Interactive Course</h1>
-        <p className="text-gray-400 mb-4 max-w-2xl">Start with ordinary numbers and text. Each lesson introduces one small mechanism, works through it, then asks you to use it. No ML background assumed.</p>
+        <p className="text-gray-400 mb-4 max-w-2xl">Start with ordinary numbers and text. Each lesson introduces one small mechanism, works through it, then asks you to use it. No ML background assumed.</p><p className="text-sm text-sky-300/80 mb-4">Concept-course stars and practice are separate from coding XP and certificates. Use the Guided Route from the home page when you want them connected.</p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-5 text-sm font-mono text-gray-500">
           <span>{completed}/{INTERACTIVE_LESSONS.length} lessons</span>
           <span>{totalStars}/{INTERACTIVE_LESSONS.length * 3} stars</span>

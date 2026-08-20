@@ -278,8 +278,13 @@ export const COURSES: Course[] = [
   },
 ]
 
-// Flat list of all levels in order
+// Flat lists. Course 0 is an optional toolkit; the two gated routes branch
+// after Course 3 into production engineering (C4-C8) and frontier training (C9).
 export const ALL_LEVELS: Level[] = COURSES.flatMap(c => c.levels)
+export const TOOLKIT_LEVELS = COURSES.find(c => c.id === 0)?.levels ?? []
+export const GATED_LEVELS = ALL_LEVELS.filter(l => l.courseId !== 0)
+export const PRODUCTION_LEVELS = COURSES.filter(c => c.id >= 1 && c.id <= 8).flatMap(c => c.levels)
+export const FRONTIER_LEVELS = COURSES.filter(c => [1, 2, 3, 9].includes(c.id)).flatMap(c => c.levels)
 
 // Total XP possible
 export const MAX_XP = ALL_LEVELS.reduce((sum, l) => sum + l.xp, 0)

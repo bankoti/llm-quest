@@ -7,6 +7,7 @@ import { INTERACTIVE_LESSONS, WARMUPS, unmetPrerequisites } from './curriculum'
 import { scoredCount, saveLesson, stars as calcStars, loadTrack } from './types'
 import type { Step, PredictQuestion, NumericQuestion } from './types'
 import { getLevel } from '@/data/curriculum'
+import { loadProgress, nextRecommendedLevel } from '@/engine/progress'
 import { beacon } from '@/engine/beacon'
 
 // ── atoms ─────────────────────────────────────────────────────────────────────
@@ -94,23 +95,44 @@ function StepWorked({ step, onDone }: { step: Extract<Step, { kind: 'worked' }>;
 // Confidence lock-in: the learner stages an option, then commits as
 // "sure" or "not sure" BEFORE the reveal. Calibration (sure-but-wrong) is
 // summarized at the finale. Only the first commit counts for scoring.
-export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>; onDone: (firstTry: boolean, sureFirst?: boolean) => void }) {
+// showConfidence: default true; set false in DailyMix/Practice to skip the two-step commit.
+export function StepMcq({ step, onDone, showConfidence = true }: {
+  step: Extract<Step, { kind: 'mcq' }>
+  onDone: (firstTry: boolean, sureFirst?: boolean) => void
+  showConfidence?: boolean
+}) {
   const [staged, setStaged] = useState<number | null>(null)
   const [picked, setPicked] = useState<number | null>(null)
   const [wrongOnes, setWrongOnes] = useState<number[]>([])
   const [firstSure, setFirstSure] = useState<boolean | null>(null)
+  const [committed, setCommitted] = useState(false) // prevents double-click advancing
   const solved = picked === step.answer
   const order = useMemo(() => shuffledIndices(step.options.length), [step])
 
   const stage = (i: number) => {
-    if (solved || wrongOnes.includes(i)) return
-    setStaged(i)
+    if (solved || wrongOnes.includes(i) || committed) return
+    if (!showConfidence) {
+      // No confidence step: commit directly
+      setCommitted(true)
+      setPicked(i)
+      if (i !== step.answer) {
+        setWrongOnes(w => (w.includes(i) ? w : [...w, i]))
+        // Allow retry after wrong
+        setTimeout(() => setCommitted(false), 0)
+      }
+    } else {
+      setStaged(i)
+    }
   }
   const commit = (sure: boolean) => {
-    if (staged === null) return
+    if (staged === null || committed) return
     if (firstSure === null) setFirstSure(sure)
+    setCommitted(true)
     setPicked(staged)
-    if (staged !== step.answer) setWrongOnes(w => (w.includes(staged) ? w : [...w, staged]))
+    if (staged !== step.answer) {
+      setWrongOnes(w => (w.includes(staged) ? w : [...w, staged]))
+      setTimeout(() => setCommitted(false), 0)
+    }
     setStaged(null)
   }
   const wrongWhy = picked !== null && !solved
@@ -142,7 +164,7 @@ export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>
         })}
       </div>
       <AnimatePresence>
-        {staged !== null && !solved && (
+        {showConfidence && staged !== null && !solved && (
           <motion.div key={'c' + staged} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             className="mt-4 flex items-center gap-3">
             <span className="text-sm text-gray-400">Lock it in:</span>
@@ -158,7 +180,7 @@ export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>
         )}
         {wrongWhy && staged === null && (
           <motion.p key={'n' + picked} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="mt-4 text-sm text-amber-300">{wrongWhy} Try again, no penalty.</motion.p>
+            className="mt-4 text-sm text-amber-300">{wrongWhy} First attempt recorded — try again.</motion.p>
         )}
         {solved && (
           <motion.div key="ok" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
@@ -174,9 +196,22 @@ export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>
 
 function PredictQ({ q, onDone }: { q: PredictQuestion; onDone: (firstTry: boolean) => void }) {
   const [pick, setPick] = useState<number | null>(null)
-  const [missed, setMissed] = useState(false)
+  const [wrongOnes, setWrongOnes] = useState<Set<number>>(new Set())
+  const [awaiting, setAwaiting] = useState(false) // waiting for explicit Continue
   const done = pick === q.answer
   const order = useMemo(() => shuffledIndices(q.options.length), [q])
+
+  const handlePick = (i: number) => {
+    if (done || awaiting || wrongOnes.has(i)) return
+    setPick(i)
+    if (i !== q.answer) {
+      setWrongOnes(prev => new Set(prev).add(i))
+    } else {
+      // Correct: show reveal, wait for Continue
+      setAwaiting(true)
+    }
+  }
+
   return (
     <div className="mb-5">
       <p className="font-mono text-sm text-gray-200 mb-2">{q.label} <span className="text-gray-500">→ ?</span></p>
@@ -185,16 +220,11 @@ function PredictQ({ q, onDone }: { q: PredictQuestion; onDone: (firstTry: boolea
           const o = q.options[i]
           const isPick = pick === i
           const isRight = isPick && i === q.answer
-          const isWrong = isPick && i !== q.answer
+          const isWrong = wrongOnes.has(i)
           return (
             <button key={i}
-              disabled={done}
-              onClick={() => {
-                if (done) return
-                if (i !== q.answer) setMissed(true)
-                else onDone(!missed && pick === null)
-                setPick(i)
-              }}
+              disabled={done || isWrong}
+              onClick={() => handlePick(i)}
               className={`px-3 py-2 rounded-lg font-mono text-xs border
                 ${isRight ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300'
                 : isWrong ? 'bg-red-900/20 border-red-800 text-red-300'
@@ -204,20 +234,34 @@ function PredictQ({ q, onDone }: { q: PredictQuestion; onDone: (firstTry: boolea
           )
         })}
       </div>
-      {pick !== null && !done && <p className="mt-2 text-xs text-amber-300">{q.whys?.[pick] ?? q.nudge ?? 'Not quite. Re-check the rule and try again.'}</p>}
-      {done && <p className="mt-2 text-xs text-gray-400">{q.reveal}</p>}
+      {pick !== null && !done && !awaiting && (
+        <p className="mt-2 text-xs text-amber-300">{q.whys?.[pick] ?? q.nudge ?? 'Not quite. Re-check the rule and try again.'}</p>
+      )}
+      {awaiting && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <p className="mt-2 text-xs text-gray-400">{q.reveal}</p>
+          <button onClick={() => { setAwaiting(false); onDone(wrongOnes.size === 0) }}
+            className="mt-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold">
+            Continue
+          </button>
+        </motion.div>
+      )}
     </div>
   )
 }
 
-export function StepPredict({ step, onDone }: { step: Extract<Step, { kind: 'predict' }>; onDone: (firstTryAll: boolean) => void }) {
+// StepPredict passes earned/possible so parent can score individual questions
+export function StepPredict({ step, onDone }: {
+  step: Extract<Step, { kind: 'predict' }>
+  onDone: (firstTry: boolean, earned?: number, possible?: number) => void
+}) {
   const [current, setCurrent] = useState(0)
-  const [allFirstTry, setAllFirstTry] = useState(true)
+  const [earned, setEarned] = useState(0)
   const total = step.questions.length
   const complete = current >= total
 
   const onQDone = (ft: boolean) => {
-    if (!ft) setAllFirstTry(false)
+    if (ft) setEarned(n => n + 1)
     setCurrent(n => n + 1)
   }
   return (
@@ -230,7 +274,11 @@ export function StepPredict({ step, onDone }: { step: Extract<Step, { kind: 'pre
           <PredictQ key={current} q={step.questions[current]} onDone={onQDone} />
         </>
       )}
-      {complete && <ContinueBtn onClick={() => onDone(allFirstTry)} />}
+      {complete && <ContinueBtn onClick={() => {
+        const finalEarned = earned
+        const allFirst = finalEarned === total
+        onDone(allFirst, finalEarned, total)
+      }} />}
     </div>
   )
 }
@@ -241,6 +289,7 @@ function NumericQ({ q, onDone }: { q: NumericQuestion; onDone: (firstTry: boolea
   const [val, setVal] = useState('')
   const [attempts, setAttempts] = useState(0)
   const [state, setState] = useState<'open' | 'right' | 'revealed'>('open')
+  const [awaiting, setAwaiting] = useState(false) // explicit Continue gate
   const tol = q.tolerance ?? Math.abs(q.answer) * 0.01
 
   const check = () => {
@@ -248,7 +297,7 @@ function NumericQ({ q, onDone }: { q: NumericQuestion; onDone: (firstTry: boolea
     if (!isFinite(n)) return
     if (Math.abs(n - q.answer) <= tol) {
       setState('right')
-      onDone(attempts === 0)
+      setAwaiting(true)
     } else {
       setAttempts(a => a + 1)
     }
@@ -256,7 +305,11 @@ function NumericQ({ q, onDone }: { q: NumericQuestion; onDone: (firstTry: boolea
   const reveal = () => {
     setState('revealed')
     setVal(String(q.answer))
-    onDone(false)
+    setAwaiting(true)
+  }
+  const handleContinue = () => {
+    setAwaiting(false)
+    onDone(state === 'right' && attempts === 0)
   }
   const settled = state !== 'open'
   return (
@@ -284,18 +337,31 @@ function NumericQ({ q, onDone }: { q: NumericQuestion; onDone: (firstTry: boolea
           {attempts >= 2 && <>{' '}<button onClick={reveal} className="underline text-amber-200">Show the answer</button></>}
         </p>
       )}
-      {settled && <p className="mt-2 text-xs text-gray-400">{q.reveal}</p>}
+      {settled && awaiting && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <p className="mt-2 text-xs text-gray-400">{q.reveal}</p>
+          <button onClick={handleContinue}
+            className="mt-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold">
+            Continue
+          </button>
+        </motion.div>
+      )}
+      {settled && !awaiting && <p className="mt-2 text-xs text-gray-400">{q.reveal}</p>}
     </div>
   )
 }
 
-export function StepNumeric({ step, onDone }: { step: Extract<Step, { kind: 'numeric' }>; onDone: (firstTryAll: boolean) => void }) {
+// StepNumeric passes earned/possible so parent can score individual questions
+export function StepNumeric({ step, onDone }: {
+  step: Extract<Step, { kind: 'numeric' }>
+  onDone: (firstTry: boolean, earned?: number, possible?: number) => void
+}) {
   const [current, setCurrent] = useState(0)
-  const [allFirstTry, setAllFirstTry] = useState(true)
+  const [earned, setEarned] = useState(0)
   const total = step.questions.length
   const complete = current >= total
   const onQDone = (ft: boolean) => {
-    if (!ft) setAllFirstTry(false)
+    if (ft) setEarned(n => n + 1)
     setCurrent(n => n + 1)
   }
   return (
@@ -308,7 +374,11 @@ export function StepNumeric({ step, onDone }: { step: Extract<Step, { kind: 'num
           <NumericQ key={current} q={step.questions[current]} onDone={onQDone} />
         </>
       )}
-      {complete && <ContinueBtn onClick={() => onDone(allFirstTry)} />}
+      {complete && <ContinueBtn onClick={() => {
+        const finalEarned = earned
+        const allFirst = finalEarned === total
+        onDone(allFirst, finalEarned, total)
+      }} />}
     </div>
   )
 }
@@ -316,22 +386,51 @@ export function StepNumeric({ step, onDone }: { step: Extract<Step, { kind: 'num
 // ── finale card ───────────────────────────────────────────────────────────────
 
 // first main-track level whose warm-up is this lesson and which the learner
-// has not completed yet — the "now apply it" transfer link
+// has not completed yet — must be unlocked to be actionable
 function applyTarget(slug: string): { id: string; title: string } | undefined {
   let raw: Record<string, { status?: string }> = {}
   try { raw = JSON.parse(localStorage.getItem('llmquest_progress_v1') ?? '{}')?.levels ?? {} } catch {}
   const ids = Object.keys(WARMUPS).filter(id => WARMUPS[id] === slug)
-  const open = ids.find(id => raw[id]?.status !== 'complete') ?? ids[0]
-  if (!open) return undefined
-  const lvl = getLevel(open)
-  return lvl ? { id: lvl.id, title: lvl.title } : undefined
+  // find an unlocked, incomplete target
+  const unlocked = ids.find(id => raw[id]?.status === 'unlocked')
+  if (unlocked) {
+    const lvl = getLevel(unlocked)
+    return lvl ? { id: lvl.id, title: lvl.title } : undefined
+  }
+  // no unlocked target — find earliest unlocked prerequisite to show as CTA
+  // (don't link to a locked level)
+  return undefined
+}
+
+// Find the next lesson the learner should do, skipping locked ones
+function nextReadyLesson(currentSlug: string, completedSlugs: Set<string>): { slug: string; title: string; emoji: string; blurb: string } | undefined {
+  const idx = INTERACTIVE_LESSONS.findIndex(l => l.slug === currentSlug)
+  if (idx < 0) return undefined
+  for (let i = idx + 1; i < INTERACTIVE_LESSONS.length; i++) {
+    const candidate = INTERACTIVE_LESSONS[i]
+    const unmet = unmetPrerequisites(candidate.slug, completedSlugs)
+    if (unmet.length === 0) {
+      return { slug: candidate.slug, title: candidate.title, emoji: candidate.emoji, blurb: candidate.blurb }
+    }
+  }
+  return undefined
+}
+
+// If this concept maps only to locked coding targets, lead the learner to
+// the actual next unlocked coding challenge instead of an unrelated concept.
+function codingPrerequisiteTarget(): { id: string; title: string } | undefined {
+  const next = nextRecommendedLevel(loadProgress())
+  return next ? { id: next.id, title: next.title } : undefined
 }
 
 function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }: { lessonSlug: string; firstTries: number; scored: number; missedCount: number; sure: number; sureWrong: number }) {
   const s = scored === 0 || firstTries / scored >= 0.99 ? 3 : firstTries / scored >= 0.6 ? 2 : 1
   const apply = applyTarget(lessonSlug)
-  const lessonIdx = INTERACTIVE_LESSONS.findIndex(l => l.slug === lessonSlug)
-  const nextLesson = lessonIdx >= 0 ? INTERACTIVE_LESSONS[lessonIdx + 1] : undefined
+  const completedSlugs = new Set(Object.keys(loadTrack()).filter(k => loadTrack()[k]?.completedAt))
+  // add current lesson since it just completed
+  completedSlugs.add(lessonSlug)
+  const nextLesson = nextReadyLesson(lessonSlug, completedSlugs)
+  const prereqCta = !apply ? codingPrerequisiteTarget() : undefined
   return (
     <div className="w-full max-w-lg text-center">
       <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', bounce: 0.5 }}>
@@ -363,6 +462,13 @@ function Finale({ lessonSlug, firstTries, scored, missedCount, sure, sureWrong }
           className="mt-3 block px-6 py-4 rounded-xl bg-emerald-700/30 border border-emerald-600 hover:bg-emerald-700/50 text-left">
           <span className="block text-xs text-emerald-400 mb-1">Apply it in code — graded challenge</span>
           <span className="block font-semibold text-emerald-200">{apply.title} →</span>
+        </Link>
+      )}
+      {!apply && prereqCta && (
+        <Link to={`/level/${prereqCta.id}`}
+          className="mt-3 block px-6 py-4 rounded-xl bg-sky-700/30 border border-sky-600 hover:bg-sky-700/50 text-left">
+          <span className="block text-xs text-sky-400 mb-1">Continue the coding path first</span>
+          <span className="block font-semibold text-sky-200">{prereqCta.title} →</span>
         </Link>
       )}
       <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
@@ -415,11 +521,10 @@ function LessonPlayer({ slug }: { slug?: string }) {
 
   const scored = lesson ? scoredCount(lesson) : 0
 
-  // ftDelta/missStep are passed explicitly so the final step's result is included
-  // in the saved record (state updates would not be visible to this closure yet)
-  const next = useCallback((ftDelta = 0, missStep: number | null = null, sureDelta = 0, sureWrongDelta = 0) => {
+  // next accepts earned/possible for multi-question steps (predict/numeric)
+  const next = useCallback((earnedDelta = 0, possibleDelta = 1, missStep: number | null = null, sureDelta = 0, sureWrongDelta = 0) => {
     if (!lesson) return
-    const ft = firstTries + ftDelta
+    const ft = firstTries + earnedDelta
     const ms = missStep === null ? missed : [...missed, missStep]
     const su = sure + sureDelta
     const sw = sureWrong + sureWrongDelta
@@ -436,10 +541,25 @@ function LessonPlayer({ slug }: { slug?: string }) {
     }
   }, [step, lesson, firstTries, missed, scored, sure, sureWrong])
 
-  const scored_step = useCallback((ft: boolean, sureFirst?: boolean) => {
-    if (ft) setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns })
-    else setStreak(0)
-    next(ft ? 1 : 0, ft ? null : step, sureFirst ? 1 : 0, sureFirst && !ft ? 1 : 0)
+  // scored_step handles MCQ (1 question) and predict/numeric (multi-question)
+  const scored_step = useCallback((ft: boolean, sureFirst?: boolean | number, possibleOrEarned?: number) => {
+    // Overloaded signatures:
+    // MCQ: (firstTry: boolean, sureFirst?: boolean)
+    // Predict/Numeric: (allFirst: boolean, earned?: number, possible?: number)
+    if (typeof sureFirst === 'number') {
+      // predict/numeric path: sureFirst is actually 'earned', possibleOrEarned is 'possible'
+      const earned = sureFirst
+      const possible = possibleOrEarned ?? 1
+      if (earned > 0) setStreak(s => { const ns = s + earned; setBestStreak(b => Math.max(b, ns)); return ns })
+      if (earned < possible) setStreak(0)
+      next(earned, possible, earned < possible ? step : null, 0, 0)
+    } else {
+      // MCQ path
+      const sureVal = sureFirst ?? false
+      if (ft) setStreak(s => { const ns = s + 1; setBestStreak(b => Math.max(b, ns)); return ns })
+      else setStreak(0)
+      next(ft ? 1 : 0, 1, ft ? null : step, sureVal ? 1 : 0, sureVal && !ft ? 1 : 0)
+    }
   }, [next, step])
 
   if (!lesson) return (
@@ -491,12 +611,12 @@ function LessonPlayer({ slug }: { slug?: string }) {
             className="w-full flex justify-center">
             {(() => {
               const s = lesson.steps[step]
-              if (s.kind === 'concept') return <StepConcept step={s} onDone={() => next()} />
-              if (s.kind === 'worked') return <StepWorked step={s} onDone={() => next()} />
+              if (s.kind === 'concept') return <StepConcept step={s} onDone={() => next(0, 0)} />
+              if (s.kind === 'worked') return <StepWorked step={s} onDone={() => next(0, 0)} />
               if (s.kind === 'mcq') return <StepMcq step={s} onDone={scored_step} />
               if (s.kind === 'predict') return <StepPredict step={s} onDone={scored_step} />
               if (s.kind === 'numeric') return <StepNumeric step={s} onDone={scored_step} />
-              if (s.kind === 'widget') return <s.widget onDone={() => next()} />
+              if (s.kind === 'widget') return <s.widget onDone={() => next(0, 0)} />
               return null
             })()}
           </motion.div>

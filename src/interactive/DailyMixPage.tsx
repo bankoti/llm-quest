@@ -61,6 +61,7 @@ export function DailyMixPage() {
   const [queue] = useState(buildMix)
   const [pos, setPos] = useState(0)
   const [right, setRight] = useState(0)
+  const [possible, setPossible] = useState(0)
 
   const total = queue.length
   const done = total > 0 && pos >= total
@@ -69,8 +70,16 @@ export function DailyMixPage() {
     if (done) recordMixDay() // idempotent per calendar day
   }, [done])
 
-  const onStepDone = (ft: boolean) => {
-    if (ft) setRight(n => n + 1)
+  // Unified handler: MCQ passes (ft, sureFirst?), predict/numeric passes (allFirst, earned?, possible?)
+  const onStepDone = (ft: boolean, _sureOrEarned?: boolean | number, _possible?: number) => {
+    if (typeof _sureOrEarned === 'number') {
+      // predict/numeric: earned is _sureOrEarned
+      setRight(n => n + _sureOrEarned)
+      setPossible(n => n + (_possible ?? 1))
+    } else {
+      if (ft) setRight(n => n + 1)
+      setPossible(n => n + 1)
+    }
     setPos(p => p + 1)
   }
 
@@ -104,9 +113,9 @@ export function DailyMixPage() {
           <motion.div key="done" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.25 }}
             className="w-full max-w-lg text-center">
             <motion.p initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={{ type: 'spring', bounce: 0.5 }}
-              className="text-5xl mb-3">{right === total ? '🌟' : '🥣'}</motion.p>
+              className="text-5xl mb-3">{right === possible ? '🌟' : '🥣'}</motion.p>
             <h2 className="text-2xl font-bold text-white mb-2">Mix complete</h2>
-            <p className="text-gray-300 mb-1">{right} of {total} first try. Today's mix is banked.</p>
+            <p className="text-gray-300 mb-1">{right} of {possible} questions first try. Today's mix is banked.</p>
             <p className="text-sky-300 text-sm mb-2">Mixing topics feels harder than reviewing one lesson — that difficulty is what makes it stick.</p>
             <div className="mt-8">
               <Link to="/interactive" className="px-6 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold">
@@ -121,7 +130,7 @@ export function DailyMixPage() {
               from {queue[pos].lesson.emoji} {queue[pos].lesson.title}
             </p>
             {queue[pos].step.kind === 'mcq'
-              ? <StepMcq step={queue[pos].step as McqStep} onDone={onStepDone} />
+              ? <StepMcq step={queue[pos].step as McqStep} onDone={onStepDone} showConfidence={false} />
               : queue[pos].step.kind === 'numeric'
                 ? <StepNumeric step={queue[pos].step as NumericStep} onDone={onStepDone} />
                 : <StepPredict step={queue[pos].step as PredictStep} onDone={onStepDone} />}

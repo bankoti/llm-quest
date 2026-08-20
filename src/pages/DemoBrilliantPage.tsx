@@ -87,7 +87,7 @@ function Mcq({ prompt, code, options, answer, explain, nudge, onDone }: McqProps
       <AnimatePresence>
         {picked !== null && !solved && (
           <motion.p key={'n' + picked} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="mt-4 text-sm text-amber-300">{nudge} Try again, no penalty.</motion.p>
+            className="mt-4 text-sm text-amber-300">{nudge} Your first attempt is recorded; try again.</motion.p>
         )}
         {solved && (
           <motion.div key="ok" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4">

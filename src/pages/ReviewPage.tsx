@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState, useCallback, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { COURSES } from '@/data/curriculum'
@@ -6,8 +6,9 @@ import { ReviewQuestion } from '@/data/review'
 import {
   dueQuestions, answerCard, courseQuestions, defenseAvailable, getDefense,
   recordDefense, REVIEW_XP, SESSION_CAP, DEFENSE_BONUS_XP, DEFENSE_PASS_PCT,
+  RETRY_GAP,
 } from '@/engine/review'
-import { loadProgress, ProgressState } from '@/engine/progress'
+import { loadProgress, nextRecommendedLevel, ProgressState } from '@/engine/progress'
 import { XPBar } from '@/components/Progress/XPBar'
 import { StreakBadge } from '@/components/Progress/StreakBadge'
 
@@ -97,11 +98,51 @@ function TabButton({ active, onClick, children }: {
 function DailySession({ onAnswered }: { onAnswered: () => void }) {
   const navigate = useNavigate()
   // Snapshot the due set once per session so answering does not reshuffle it.
-  const cards = useMemo(() => dueQuestions().slice(0, SESSION_CAP), [])
+  const initialCards = useMemo(() => dueQuestions().slice(0, SESSION_CAP), [])
+  // Queue tracks the full order including retries inserted after RETRY_GAP.
+  const [queue, setQueue] = useState<ReviewQuestion[]>(initialCards)
   const [idx, setIdx] = useState(0)
   const [correct, setCorrect] = useState(0)
+  const [sinceLastRetry, setSinceLastRetry] = useState(0)
+  // Pending retries: cards missed once, waiting for RETRY_GAP intervening cards.
+  const [retryPool, setRetryPool] = useState<{ card: ReviewQuestion; gap: number }[]>([])
 
-  if (cards.length === 0) {
+  const advance = useCallback((wasCorrect: boolean, currentCard: ReviewQuestion) => {
+    const result = answerCard(currentCard.id, wasCorrect)
+    if (wasCorrect) setCorrect(c => c + 1)
+    onAnswered()
+
+    // Manage retry queue
+    let newRetryPool = [...retryPool]
+    let newQueue = [...queue]
+    const newSince = sinceLastRetry + 1
+
+    if (result === 'retry') {
+      // First miss: insert after RETRY_GAP intervening cards
+      newRetryPool.push({ card: currentCard, gap: 0 })
+    }
+
+    // Age all pending retries and inject those that have waited long enough
+    const stillWaiting: { card: ReviewQuestion; gap: number }[] = []
+    for (const entry of newRetryPool) {
+      const aged = result === 'retry' && entry.card.id === currentCard.id
+        ? { ...entry, gap: 0 } // just added
+        : { ...entry, gap: entry.gap + 1 }
+      if (aged.gap >= RETRY_GAP) {
+        // Insert this card right after current position
+        newQueue = [...newQueue.slice(0, idx + 1 + stillWaiting.length), aged.card, ...newQueue.slice(idx + 1 + stillWaiting.length)]
+      } else {
+        stillWaiting.push(aged)
+      }
+    }
+
+    setRetryPool(stillWaiting)
+    setQueue(newQueue)
+    setSinceLastRetry(newSince)
+    setIdx(i => i + 1)
+  }, [queue, idx, retryPool, sinceLastRetry, onAnswered])
+
+  if (initialCards.length === 0) {
     return (
       <div className="text-center py-16">
         <div className="text-5xl mb-4">✨</div>
@@ -121,23 +162,34 @@ function DailySession({ onAnswered }: { onAnswered: () => void }) {
     )
   }
 
-  if (idx >= cards.length) {
+  if (idx >= queue.length) {
+    const next = nextRecommendedLevel(loadProgress())
     return (
       <div className="text-center py-16">
         <div className="text-5xl mb-4">🧠</div>
         <h2 className="text-xl font-semibold mb-2">Review complete</h2>
         <p className="text-gray-400 text-sm mb-1">
-          {correct}/{cards.length} correct · +{correct * REVIEW_XP} XP
+          {correct}/{initialCards.length} correct · +{correct * REVIEW_XP} XP
         </p>
         <p className="text-gray-600 text-xs font-mono mb-6">
-          Correct cards moved up a box. Missed cards return tomorrow.
+          Correct cards moved up a box. Missed cards reappear next session.
         </p>
-        <button
-          onClick={() => navigate('/map')}
-          className="px-6 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 font-mono text-sm"
-        >
-          Done →
-        </button>
+        <div className="flex gap-3 justify-center flex-wrap">
+          <button
+            onClick={() => navigate('/map')}
+            className="px-6 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 font-mono text-sm"
+          >
+            Done →
+          </button>
+          {next && (
+            <button
+              onClick={() => navigate(`/level/${next.id}`)}
+              className="px-6 py-2.5 rounded-lg border border-violet-500/50 hover:bg-violet-600/20 font-mono text-sm text-violet-200"
+            >
+              Continue: {next.title} →
+            </button>
+          )}
+        </div>
       </div>
     )
   }
@@ -145,18 +197,13 @@ function DailySession({ onAnswered }: { onAnswered: () => void }) {
   return (
     <div>
       <div className="text-xs font-mono text-gray-600 mb-4">
-        Card {idx + 1} of {cards.length}
+        Card {idx + 1} of {queue.length}
       </div>
       <QuizCard
-        key={cards[idx].id}
-        question={cards[idx]}
+        key={queue[idx].id + '-' + idx}
+        question={queue[idx]}
         xpPerCorrect={REVIEW_XP}
-        onNext={wasCorrect => {
-          answerCard(cards[idx].id, wasCorrect)
-          if (wasCorrect) setCorrect(c => c + 1)
-          setIdx(i => i + 1)
-          onAnswered()
-        }}
+        onNext={wasCorrect => advance(wasCorrect, queue[idx])}
       />
     </div>
   )

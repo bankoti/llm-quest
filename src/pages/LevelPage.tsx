@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { getLevel, getCourse, ALL_LEVELS } from '@/data/curriculum'
-import { loadProgress, completeLevel, ProgressState } from '@/engine/progress'
+import { getLevel, getCourse } from '@/data/curriculum'
+import { loadProgress, completeLevel, nextRecommendedLevel, requiredPredecessor, ProgressState } from '@/engine/progress'
 import { beacon } from '@/engine/beacon'
 import { LessonPanel } from '@/components/Lesson/LessonPanel'
 import { lazy, Suspense } from 'react'
@@ -13,7 +13,7 @@ import { SplitPane } from '@/components/SplitPane'
 import { isAdminMode } from '@/engine/admin'
 import { HINTS } from '@/data/hints'
 import { hintXpMultiplier } from '@/components/Arena/xpUtils'
-import { WARMUPS } from '@/interactive/curriculum'
+import { WARMUPS, warmupDone } from '@/interactive/warmups'
 
 interface Props { onProgressChange: (p: ProgressState) => void }
 
@@ -28,6 +28,8 @@ export function LevelPage({ onProgressChange }: Props) {
   const [progress, setProgress]       = useState(loadProgress)
   const [passed, setPassed]           = useState(false)
   const [earnedXp, setEarnedXp]       = useState(0)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const returnFocusRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (!level) return
@@ -62,16 +64,25 @@ export function LevelPage({ onProgressChange }: Props) {
   // Escape dismisses the pass overlay and stays on the level.
   useEffect(() => {
     if (!passed) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPassed(false) }
+    returnFocusRef.current = document.activeElement as HTMLElement
+    requestAnimationFrame(() => dialogRef.current?.querySelector<HTMLElement>('button')?.focus())
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPassed(false)
+      if (e.key === 'Tab' && dialogRef.current) {
+        const items = [...dialogRef.current.querySelectorAll<HTMLElement>('button,a[href],[tabindex]:not([tabindex="-1"])')]
+        if (!items.length) return
+        const first = items[0], last = items[items.length - 1]
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    return () => { window.removeEventListener('keydown', onKey); returnFocusRef.current?.focus() }
   }, [passed])
 
   function goNext() {
-    if (!level) return
-    const idx = ALL_LEVELS.findIndex(l => l.id === level.id)
-    const next = ALL_LEVELS[idx + 1]
-    if (next) navigate(`/level/${next.id}`)
+    const next = nextRecommendedLevel(loadProgress())
+    if (next) navigate(WARMUPS[next.id] && !warmupDone(next.id) ? `/warmup/${next.id}` : `/level/${next.id}`)
     else navigate('/map')
   }
 
@@ -85,14 +96,14 @@ export function LevelPage({ onProgressChange }: Props) {
 
   const levelState = progress.levels[level.id]
   if (levelState?.status === 'locked' && !isAdminMode()) {
+    const prerequisite = requiredPredecessor(progress, level.id)
     return (
       <div className="flex items-center justify-center h-screen text-gray-500 font-mono">
         <div className="text-center">
           <div className="text-4xl mb-4">🔒</div>
-          <div>Complete previous levels to unlock this one.</div>
-          <button onClick={() => navigate('/map')} className="mt-4 text-violet-400 text-sm underline">
-            Back to map
-          </button>
+          <div>Complete the prerequisite before opening this challenge.</div>
+          {prerequisite && <button onClick={() => navigate(`/level/${prerequisite.id}`)} className="mt-5 block mx-auto px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm">Complete {prerequisite.title} →</button>}
+          <button onClick={() => navigate('/map')} className="mt-4 text-gray-400 text-sm underline">Back to map</button>
         </div>
       </div>
     )
@@ -102,7 +113,7 @@ export function LevelPage({ onProgressChange }: Props) {
     <div className="flex flex-col h-screen bg-gray-950 text-white overflow-hidden">
       {/* Top bar */}
       <div
-        className="flex items-center gap-4 px-6 py-3 border-b border-gray-800"
+        className="flex items-center gap-3 sm:gap-4 px-3 sm:px-6 py-3 border-b border-gray-800 overflow-x-auto"
         style={{ borderTopColor: course.accent, borderTopWidth: 2 }}
       >
         <button
@@ -122,13 +133,13 @@ export function LevelPage({ onProgressChange }: Props) {
         </div>
         {WARMUPS[level.id] && (
           <a
-            href={`${import.meta.env.BASE_URL}interactive/${WARMUPS[level.id]}`}
+            href={`${import.meta.env.BASE_URL}warmup/${level.id}`}
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             className="text-xs font-mono text-violet-400 hover:text-violet-200 transition-colors shrink-0"
-            title="3-minute interactive warm-up for this level (new tab)"
+            title="Standalone 3–5 minute concept warm-up (new tab)"
           >
-            ⚡ Warm-up
+            {warmupDone(level.id) ? '✓ Warm-up' : '⚡ Warm-up'}
           </a>
         )}
         {/* Opens in a new tab so in-progress code in the Arena stays put. */}
@@ -141,10 +152,10 @@ export function LevelPage({ onProgressChange }: Props) {
         >
           📖 Syntax
         </a>
-        <div className="w-40 shrink-0">
+        <div className="w-40 shrink-0 hidden lg:block">
           <XPBar xp={progress.totalXp} animated={false} />
         </div>
-        <span className="text-xs font-mono text-gray-500 shrink-0">~{level.estimateMinutes}min</span>
+        <span className="text-xs font-mono text-gray-500 shrink-0 hidden sm:inline">~{level.estimateMinutes}min</span>
         {levelState?.status === 'complete' && (
           <button
             onClick={goNext}
@@ -190,10 +201,12 @@ export function LevelPage({ onProgressChange }: Props) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="absolute inset-0 bg-black/80 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
           onClick={() => setPassed(false)}
         >
           <motion.div
+            ref={dialogRef}
+            role="dialog" aria-modal="true" aria-labelledby="level-complete-title"
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 240, damping: 20 }}
@@ -202,11 +215,11 @@ export function LevelPage({ onProgressChange }: Props) {
             onClick={e => e.stopPropagation()}
           >
             <div className="text-5xl mb-3">{level.type === 'boss' ? '🏆' : '⭐'}</div>
-            <h2 className="text-2xl font-bold text-white mb-1">{level.title}</h2>
+            <h2 id="level-complete-title" className="text-2xl font-bold text-white mb-1">{level.title}</h2>
             <p className="text-gray-400 text-sm mb-4">Level complete</p>
             <div className="flex items-center justify-center gap-2 mb-6">
               <span className="text-yellow-400 text-2xl">+</span>
-              <span className="text-yellow-300 font-bold text-2xl">{earnedXp} XP</span>
+              <span className="text-yellow-300 font-bold text-2xl">{earnedXp > 0 ? `${earnedXp} XP` : 'XP already earned'}</span>
             </div>
             <XPBar xp={progress.totalXp} />
             <button

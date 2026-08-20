@@ -7,7 +7,7 @@ export const SITE = {
   domain: 'bankoti.github.io/llm-quest',  // swap when a custom domain lands
   tagline: 'LLM Engineering from First Principles',
   description:
-    'Ten courses. 64 levels. Build a GPT from scratch, then ship a production AI system — all in code.',
+    'Build a GPT from scratch, understand modern model mechanics, then ship a production AI system — from first principles.',
   repoUrl: 'https://github.com/bankoti/llm-quest',
   // Funnel beacon endpoint (worker/beacon). Empty string = beacon disabled.
   // After deploying: 'https://zeroone-beacon.<account>.workers.dev/e'
