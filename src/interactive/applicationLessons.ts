@@ -91,8 +91,30 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     ],
   },
   {
+    slug:'token-economics',title:'Token Economics: What a Conversation Costs',emoji:'💸',blurb:'Turn tokens into money, and see why long chats get quadratically expensive.',minutes:8,
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['agent-reliability'],outcomes:['Price a request from token counts','Explain input-output price asymmetry','Explain why conversation cost grows with history'],concepts:['input tokens','output tokens','price asymmetry','context resend','fixed overhead'],
+    steps:[
+      {kind:'concept',title:'You pay per token, twice',lines:[
+        'APIs price input (prompt) tokens and output (completion) tokens separately, and output usually costs several times more per token: each generated token needs its own forward pass, while the whole prompt is processed in one parallel pass.',
+        'Chat APIs are stateless: every turn resends the entire history as fresh input. Context you keep around is not stored for free — it is re-billed on every request.',
+        'So conversation cost grows roughly quadratically with turns: turn N resends everything from turns 1 through N-1. System prompts and tool schemas are fixed overhead paid on every single call.',
+      ],cta:'Price a request'},
+      {kind:'worked',title:'Price one call, by hand',prompt:'Input costs $3 per million tokens, output $15 per million. A request sends 20,000 tokens and receives 1,000.',stages:[
+        {label:'Input cost',body:'20,000 x $3 / 1,000,000 = $0.060.'},
+        {label:'Output cost',body:'1,000 x $15 / 1,000,000 = $0.015.'},
+        {label:'Read it',body:'The prompt is 20x the size of the reply but costs only 4x as much — yet it still dominates the bill. Large context, not long answers, is what you pay for.'},
+      ],takeaway:'Cost = input tokens x input rate + output tokens x output rate. Context size drives the bill.'},
+      {kind:'numeric',prompt:'Same rates: $3 per million input tokens, $15 per million output tokens.',questions:[
+        {label:'50,000 tokens in, 2,000 out: total cost in cents',answer:18,tolerance:0.5,reveal:'Input 15 cents + output 3 cents = 18 cents.'},
+        {label:'a 4,000-token system prompt resent on 250 calls: total resent tokens, in millions',answer:1,tolerance:0.05,reveal:'4,000 x 250 = 1M tokens of pure overhead — $3 at input rates before any real work.'},
+      ]},
+      {kind:'mcq',prompt:'Why does turn 30 of a chat cost more than turn 2, even for an identical question?',options:['The whole history is resent and billed as input on every turn','The model becomes slower as it ages','Output rates rise with each turn','Tokenization changes mid-conversation'],answer:0,explain:'Stateless APIs re-process the full context each request, so accumulated history lands in the input bill.',nudge:'What exactly gets sent to the API at turn 30?'},
+      {kind:'mcq',prompt:'Which change cuts recurring cost most for a long-running agent?',options:['Trim or summarize history and shrink standing instructions','Ask the model politely for shorter answers','Raise the temperature','Rename the tools'],answer:0,explain:'Resent context is the dominant recurring term; compaction and lean system prompts attack it directly.',nudge:'Which cost term is paid on every call, whether or not it is useful?'},
+    ],
+  },
+  {
     slug:'application-capstone',title:'Grounded Assistant Checkpoint',emoji:'🏆',blurb:'Combine retrieval, tools, adaptation, and reliability in one system decision.',minutes:9,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['retrieval-quality','agent-reliability','calibration'],outcomes:['Choose retrieval versus fine-tuning','Design a grounded tool loop','Identify confidence and provenance risks'],concepts:['system integration','grounding','adaptation choice','safe fallback'],
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['retrieval-quality','agent-reliability','token-economics','calibration'],outcomes:['Choose retrieval versus fine-tuning','Design a grounded tool loop','Identify confidence and provenance risks'],concepts:['system integration','grounding','adaptation choice','safe fallback'],
     steps:[
       {kind:'concept',title:'Choose the mechanism that matches the failure',lines:[
         'A production assistant combines several layers. Fine-tuning shapes stable behavior. Retrieval supplies fresh, citable evidence. Tools perform actions or exact computation. Calibration and validation decide when to trust, retry, or escalate.',

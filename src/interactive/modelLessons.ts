@@ -38,12 +38,24 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'Normalize',body:'Softmax turns them into weights that sum to 1, roughly [0.88, 0.12].'},
         {label:'Retrieve values',body:'Output = 0.88×V_A + 0.12×V_B. Values, not keys, are mixed.'},
       ],takeaway:'Attention is soft lookup: query-key matching produces weights used to mix values.'},
-      {kind:'mcq',prompt:'Which vectors form the attention output?',options:['Value vectors, weighted by query-key scores','Key vectors only','Query vectors only','Token IDs'],answer:0,explain:'Queries and keys produce weights; those weights scale values.',nudge:'Match with Q/K; retrieve V.'},
+      {kind:'mcq',prompt:'Which vectors form the attention output?',options:['Value vectors, weighted by query-key scores','Key vectors, weighted by query-value scores','Query vectors, averaged uniformly','Only the single value vector with the highest score'],answer:0,explain:'Queries and keys produce weights; those weights scale values.',nudge:'Match with Q/K; retrieve V.'},
       {kind:'concept',title:'Why scores are scaled before softmax',lines:[
         'Large dot products push softmax toward near-zero gradients, making learning unstable. Scores are divided by the square root of d_k before softmax: softmax(Q @ K.T / sqrt(d_k)) @ V.',
         'This scaling is called scaled dot-product attention. Every attention formula you encounter in papers and code uses it.',
       ],cta:'Compute the divisor'},
       {kind:'numeric',prompt:'Compute the scaling divisor.',questions:[{label:'d_k = 64 → divisor = sqrt(64)',answer:8,tolerance:0,unit:'',reveal:'sqrt(64) = 8. Each score is divided by 8 before softmax.'}]},
+      {kind:'worked',title:'A full attention computation, by hand',prompt:'One query q=[1,0] meets keys k1=[2,0], k2=[0,2] and values v1=[10,0], v2=[0,10]. Here d_k=4, so scores are divided by 2.',stages:[
+        {label:'Raw scores',body:'q dot k1 = 1x2 + 0x0 = 2. q dot k2 = 1x0 + 0x2 = 0.',code:'scores = q @ K.T          # [2, 0]'},
+        {label:'Scale',body:'Divide by sqrt(4) = 2. Scaled scores are [1, 0].',code:'scaled = scores / sqrt(d_k)  # [1, 0]'},
+        {label:'Softmax',body:'e^1 = 2.72 and e^0 = 1. Weights are [2.72/3.72, 1/3.72] = [0.73, 0.27].',code:'w = softmax(scaled)       # [0.73, 0.27]'},
+        {label:'Mix values',body:'0.73x[10,0] + 0.27x[0,10] = [7.3, 2.7]. The query mostly retrieves v1.',code:'out = w @ V               # [7.3, 2.7]'},
+      ],takeaway:'Score, scale, softmax, mix. Every attention head in every transformer runs exactly this arithmetic, just wider.'},
+      {kind:'numeric',prompt:'Your turn. Same keys and values, new query q=[0,1]: k1=[2,0], k2=[0,2], v1=[10,0], v2=[0,10], divide scores by 2.',questions:[
+        {label:'raw score q dot k1',answer:0,tolerance:0,reveal:'0x2 + 1x0 = 0.'},
+        {label:'raw score q dot k2',answer:2,tolerance:0,reveal:'0x0 + 1x2 = 2.'},
+        {label:'softmax weight on k2 after scaling (2 decimals)',answer:0.73,tolerance:0.02,reveal:'Scaled scores are [0, 1]; e^1/(e^0+e^1) = 0.73.'},
+        {label:'first number of the output',answer:2.7,tolerance:0.2,reveal:'0.27x10 + 0.73x0 = 2.7. This query retrieves mostly v2 instead.'},
+      ]},
       {kind:'predict',prompt:'Q, K, and V each have shape (T, D).',questions:[
         {label:'Q @ K.T shape',options:['(T, T)','(T, D)','(D, D)'],answer:0,reveal:'Every query scores every key.'},
         {label:'softmax(scores) @ V shape',options:['(T, D)','(T, T)','(D,)'],answer:0,reveal:'Each position receives one D-number mixture.'},
@@ -64,7 +76,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       {kind:'worked',title:'Read one mask row',prompt:'At position 2 in a four-token sequence, which positions are allowed?',stages:[
         {label:'Include the past',body:'Positions 0 and 1 are known.'},{label:'Include the present',body:'Position 2 may attend to itself.'},{label:'Block the future',body:'Position 3 receives −∞ before softmax.'},
       ],takeaway:'The row is [allowed, allowed, allowed, blocked]; the future receives zero weight.'},
-      {kind:'predict',prompt:'For a length-5 sequence, query is at position 1 (zero-indexed). Unlike the worked example which used position 2 (three allowed), position 1 can attend to positions 0 and 1 only.',questions:[{label:'how many positions may it attend to?',options:['2','1','4','5'],answer:0,reveal:'Positions 0 and 1: the past plus itself — two positions total.'}]},
+      {kind:'predict',prompt:'For a length-5 sequence, query is at position 1 (zero-indexed). Unlike the worked example which used position 2 (three allowed), position 1 can attend to positions 0 and 1 only.',questions:[{label:'how many positions may it attend to?',options:['2 positions','1 position','4 positions','5 positions'],answer:0,reveal:'Positions 0 and 1: the past plus itself — two positions total.'}]},
     ],
   },
   {
@@ -106,11 +118,23 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'Attention moves information between positions. A feed-forward network (FFN) then processes each position independently using learned linear layers and a nonlinear activation, commonly GELU or ReLU. Both suppress small or negative values; without any nonlinearity, stacked linear layers collapse to a single linear map, so depth would add nothing. Attention communicates; the FFN transforms.',
         'A residual connection adds the input back: x + f(x). This preserves an unchanged path and lets later blocks refine rather than replace the representation.',
         'Layer Normalization (LayerNorm) rescales each token representation to zero mean and unit variance. Modern transformers apply it before each sub-layer, called pre-normalization, which stabilizes training compared to the original post-normalization design. The running representation is the residual stream.',
+        'Modern FFNs often use a gated activation called SwiGLU instead of plain ReLU or GELU: one linear projection passes through a smooth nonlinearity and multiplies a second projection, so the network can scale each feature up or down continuously. LLaMA-family and most recent frontier models use it.',
       ],cta:'Trace the block'},
       {kind:'worked',title:'Follow one representation',prompt:'A token representation x enters a pre-normalization block.',stages:[
         {label:'Normalize and attend',body:'Attention gathers relevant information from other positions.'},{label:'First residual',body:'Add attention output back to x.'},{label:'Normalize and transform',body:'The FFN changes features independently per position.'},{label:'Second residual',body:'Add FFN output back. Shape stays (B,T,C).'},
       ],takeaway:'Attention mixes positions; the FFN mixes features; residuals preserve a stable highway.'},
-      {kind:'mcq',prompt:'How do attention and the FFN differ?',options:['Attention exchanges information across positions; the FFN transforms each position independently','The FFN chooses IDs; attention computes loss','Both only normalize','Attention changes batch size'],answer:0,explain:'Their roles are communication across positions and processing within each position.',nudge:'Ask where information can move.'},
+      {kind:'worked',title:'LayerNorm, by hand',prompt:'Normalize the 4-number representation [2, 4, 6, 8].',stages:[
+        {label:'Mean',body:'(2+4+6+8)/4 = 5.'},
+        {label:'Variance',body:'Squared distances from 5 are [9, 1, 1, 9]; their average is 5.'},
+        {label:'Normalize',body:'Each value becomes (x - 5)/sqrt(5). The first entry: (2-5)/2.24 = -1.34.'},
+        {label:'Scale and shift',body:'Learned per-feature parameters then rescale the result, so the network can undo normalization wherever that helps.'},
+      ],takeaway:'LayerNorm is just mean, variance, rescale — computed separately for every token.'},
+      {kind:'numeric',prompt:'Normalize [1, 3, 5, 7] the same way.',questions:[
+        {label:'mean',answer:4,tolerance:0,reveal:'(1+3+5+7)/4 = 4.'},
+        {label:'variance',answer:5,tolerance:0,reveal:'Squared distances [9, 1, 1, 9] average to 5.'},
+        {label:'normalized last entry (2 decimals)',answer:1.34,tolerance:0.02,reveal:'(7-4)/sqrt(5) = 3/2.24 = 1.34.'},
+      ]},
+      {kind:'mcq',prompt:'How do attention and the FFN differ?',options:['Attention exchanges information across positions; the FFN transforms each position independently','The FFN exchanges information across positions; attention transforms each position independently','They are the same operation under different names','Attention transforms features; the FFN moves information between batches'],answer:0,explain:'Their roles are communication across positions and processing within each position.',nudge:'Ask where information can move.'},
       {kind:'mcq',prompt:'Why add x + f(x)?',options:['It preserves a direct path for information and learning signals','It doubles sequence length','It makes all features equal','It removes weights'],answer:0,explain:'The identity path can bypass a transformation when needed.',nudge:'What remains if f(x) is poor?'},
       {kind:'predict',prompt:'Input is (B,T,C); the block preserves hidden width.',questions:[{label:'output shape',options:['(B,T,C)','(B,C,T)','(T,T)','(B,T)'],answer:0,reveal:'Residual additions require matching input and output shapes.'}]},
     ],
@@ -146,6 +170,37 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ],takeaway:'Shift by one. Four known tokens provide three supervised questions.'},
       {kind:'numeric',prompt:'Count next-token targets.',questions:[{label:'targets from 10 tokens',answer:9,tolerance:0,reveal:'The first 9 positions predict the following token.'}]},
       {kind:'mcq',prompt:'When is cross-entropy loss lowest?',options:['When the model gives high probability to the actual target','When every token is equally likely','When the largest logit is negative','When input equals target'],answer:0,explain:'Cross-entropy rewards probability on the known correct token.',nudge:'Loss measures surprise at the answer key.'},
+      {kind:'worked',title:'Put numbers on the loss',prompt:'Cross-entropy at one position is -log p(target), using the natural log.',stages:[
+        {label:'Confident and right',body:'p(target) = 0.9 gives loss -ln(0.9) = 0.11. Almost no surprise.'},
+        {label:'Unsure',body:'p(target) = 0.25 gives loss -ln(0.25) = 1.39.'},
+        {label:'Confident and wrong',body:'p(target) = 0.01 gives loss -ln(0.01) = 4.6. Misplaced confidence is punished hard.'},
+        {label:'Sanity-check a fresh model',body:'Before training, the model should be near-uniform over the vocabulary: p = 1/V, so loss = ln(V). For V = 50,000 that is about 10.8. A very different starting loss usually means a bug.'},
+      ],takeaway:'Loss is -log of the probability given to the right answer; ln(V) is the honest starting point.'},
+      {kind:'numeric',prompt:'Compute both losses (natural log, 2 decimals).',questions:[
+        {label:'p(target) = 0.5, loss',answer:0.69,tolerance:0.02,reveal:'-ln(0.5) = 0.69: exactly one coin flip of surprise.'},
+        {label:'vocabulary of 8, untrained uniform model, expected loss',answer:2.08,tolerance:0.03,reveal:'ln(8) = 2.08. Watch training start here and fall.'},
+      ]},
+    ],
+  },
+  {
+    slug:'training-data',title:'What the Model Is Made Of: Data',emoji:'🌐',blurb:'Follow raw web text into a training mixture, and see why the mixture is the model.',minutes:7,
+    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['training-objective'],outcomes:['Describe the pipeline from crawl to training tokens','Explain filtering and deduplication','Reason about mixture proportions'],concepts:['web crawl','filtering','deduplication','data mixture','training corpus'],
+    steps:[
+      {kind:'concept',title:'From crawl to corpus',lines:[
+        'Pretraining data starts as raw crawled web pages plus curated sources: books, code, encyclopedias, forums. Raw crawl is mostly unusable — boilerplate, spam, duplicated pages, broken encoding.',
+        'A filtering pipeline keeps pages that look like readable prose, drops machine-generated junk, and removes personal data. Deduplication then deletes near-identical documents, because repeated text gets memorized verbatim instead of generalized.',
+        'What survives is weighted into a mixture: so much web, so much code, so much books. The model can only learn patterns that survive this pipeline. A useful mental model: a language model is a lossy compression of its training mixture.',
+      ],cta:'Weigh the mixture'},
+      {kind:'worked',title:'Budget one training run',prompt:'You have a 100B-token budget split 70% web, 20% code, 10% books.',stages:[
+        {label:'Split',body:'70B web tokens, 20B code, 10B books.'},
+        {label:'Read the consequence',body:'The model sees twice as much code as books. Expect stronger code completion than literary style.'},
+        {label:'Change the mixture',body:'The same architecture retrained at 40% code is a different model. Mixture is a first-class design choice, not a detail.'},
+      ],takeaway:'Architecture is the engine; the mixture decides what the engine learns.'},
+      {kind:'mcq',prompt:'Why deduplicate before training?',options:['Repeated documents push the model toward memorizing them verbatim','It makes tokenization reversible','It reduces vocabulary size','GPUs require unique inputs'],answer:0,explain:'Duplicates concentrate probability on specific strings, hurting generalization and enabling regurgitation of training text.',nudge:'What does seeing one page a thousand times teach?'},
+      {kind:'mcq',prompt:'A large model answers questions about a niche topic poorly. Most likely cause?',options:['The topic was rare in, or filtered out of, the training mixture','A broken softmax','A learning rate that was an even number','A context window that is too wide'],answer:0,explain:'Capacity cannot recover patterns the data never carried.',nudge:'Can a model learn what it never saw?'},
+      {kind:'numeric',prompt:'A mixture is 60% web, 30% code, 10% books over 200B tokens.',questions:[
+        {label:'code tokens, in billions',answer:60,tolerance:0,reveal:'0.30 x 200B = 60B.'},
+      ]},
     ],
   },
   {
@@ -224,8 +279,18 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'The model produces a probability distribution. Greedy decoding chooses the highest-probability token every time and is deterministic under identical computation.',
         'Sampling randomly draws according to probabilities. Likely tokens appear more often, but alternatives sometimes appear, producing useful diversity.',
         'Temperature changes the distribution before sampling. A seed may repeat sampling in a fixed environment, but greedy removes the random draw.',
+        'Greedy has a known failure mode: once a phrase becomes likely, taking the argmax every step can lock into a repetition loop, generating the same words again and again. Sampling, or an explicit repetition penalty, breaks the loop.',
       ],cta:'Compare generations'},
       {kind:'widget',widget:GenerationPlay},{kind:'widget',widget:TemperaturePlay},
+      {kind:'worked',title:'Sample a token, by hand',prompt:'A four-token vocabulary has probabilities: the 0.50, cat 0.30, sat 0.15, mat 0.05. A random draw is a number between 0 and 1.',stages:[
+        {label:'Stack the intervals',body:'the owns 0.00-0.50, cat owns 0.50-0.80, sat owns 0.80-0.95, mat owns 0.95-1.00.'},
+        {label:'Draw',body:'The draw is 0.62. It lands in 0.50-0.80, so the sampled token is cat.'},
+        {label:'Draw again',body:'Next cycle the draw is 0.97: mat, despite its 5% probability. Rare tokens really do appear.'},
+      ],takeaway:'Sampling is a roulette wheel whose slot sizes are the probabilities.'},
+      {kind:'numeric',prompt:'Same wheel: the 0.00-0.50, cat 0.50-0.80, sat 0.80-0.95, mat 0.95-1.00. Answer with slot numbers: the=1, cat=2, sat=3, mat=4.',questions:[
+        {label:'a draw of 0.85 lands in slot',answer:3,tolerance:0,reveal:'0.85 falls inside 0.80-0.95: sat.'},
+        {label:'probability of NOT sampling the (2 decimals)',answer:0.5,tolerance:0.01,reveal:'1 - 0.50 = 0.50: half of all draws leave the most likely token behind.'},
+      ]},
       {kind:'mcq',prompt:'A grading tool must return the same completion for the same input. Which strategy?',options:['Greedy decoding','High-temperature sampling','Uniform choice','Sampling every token'],answer:0,explain:'Greedy always selects the argmax and adds no random draw.',nudge:'Which removes randomness?'},
       {kind:'predict',prompt:'Sample five completions at temperature 1.',questions:[{label:'expected result',options:['They may differ because choices are sampled','They must be identical','Only IDs differ'],answer:0,reveal:'Random sampling can introduce variation at every position.'}]},
     ],
@@ -241,7 +306,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ],cta:'Walk a search tree'},
       {kind:'widget',widget:BeamPlay},
       {kind:'worked',title:'Build a nucleus',prompt:'Sorted probabilities are [0.50, 0.25, 0.12, 0.08, 0.05], p=0.90.',stages:[
-        {label:'Accumulate',body:'0.50 → 0.75 → 0.87 → 0.95.'},{label:'Stop',body:'Three total only 0.87, so include the fourth.'},{label:'Sample',body:'Sample among four; exclude the fifth.'},
+        {label:'Accumulate',body:'0.50 → 0.75 → 0.87 → 0.95.'},{label:'Stop',body:'Three tokens reach only 0.87, still short of p=0.90, so include the fourth: 0.95 crosses the threshold.'},{label:'Sample',body:'Sample among four; exclude the fifth.'},
       ],takeaway:'Top-p adapts candidate count to probability concentration.'},
       {kind:'mcq',prompt:'Why can beam search sound generic?',options:['It favors high-probability sequences, often common phrases','It samples uniformly','It deletes low IDs','It raises temperature'],answer:0,explain:'Specific or surprising text often scores lower than safe common wording.',nudge:'What wording is common in training data?'},
       {kind:'predict',prompt:'Raise temperature with top-p=0.9.',questions:[{label:'nucleus size',options:['Usually grows as probability spreads','Always shrinks to one','Cannot change'],answer:0,reveal:'A flatter distribution needs more tokens to reach 90%.'}]},
@@ -279,6 +344,16 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'validation set',options:['guides choices without updating weights','provides final reporting only','is used for every gradient'],answer:0,reveal:'Validation supports selection; test stays untouched for reporting.'},
       ]},
       {kind:'numeric',prompt:'A sequence has 6 known tokens.',questions:[{label:'next-token targets',answer:5,tolerance:0,reveal:'Every token except the first is a target for the preceding context.'}]},
+      {kind:'worked',title:'Count GPT-2 small, by hand',prompt:'Vocabulary V = 50,257, width C = 768, 12 blocks. Where do the famous 124M parameters live?',stages:[
+        {label:'Embeddings',body:'Token table V x C = 50,257 x 768 = 38.6M. The position table 1024 x 768 adds 0.8M.'},
+        {label:'Attention, per block',body:'Q, K, V, and output projections are each C x C: 4 x 768 x 768 = 2.36M.'},
+        {label:'FFN, per block',body:'Expand to 4C and back: 768 x 3072 + 3072 x 768 = 4.72M.'},
+        {label:'Total',body:'12 blocks x (2.36M + 4.72M) = 85M. Add embeddings: 85M + 39.4M = about 124M. The output head reuses the token table, so it adds nothing.'},
+      ],takeaway:'Two matrix slabs per block plus the embedding table account for essentially the whole model.'},
+      {kind:'numeric',prompt:'Use the same recipe.',questions:[
+        {label:'attention projection parameters in ONE block, in millions',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M.'},
+        {label:'token embedding table, in millions',answer:38.6,tolerance:0.4,reveal:'50,257 x 768 = 38.6M — nearly a third of the model.'},
+      ]},
     ],
   },
 ]

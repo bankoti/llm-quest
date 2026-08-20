@@ -126,7 +126,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         stages: [
           { label: 'Check the meeting dimensions', body: 'A ends in 3 and B begins with 3. They match, so multiplication is legal.' },
           { label: 'Consume the shared 3', body: 'The 3 tells us each output cell uses a dot product of length 3.' },
-          { label: 'Keep the outside dimensions', body: 'Keep A’s 4 rows and B’s 2 columns.' },
+          { label: 'Keep the outside dimensions', body: 'Keep A’s 4 rows and B’s 2 columns.', code: 'A @ B    # (4, 3) @ (3, 2) -> (4, 2)' },
         ], takeaway: '(4, 3) @ (3, 2) → (4, 2). Inner dimensions meet; outer dimensions survive.',
       },
       {
@@ -134,6 +134,13 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         options: ['(5, 3) @ (3, 7)', '(5, 3) @ (5, 7)', '(3, 5) @ (7, 3)', '(5, 3) @ (7,)'], answer: 0,
         explain: 'Only 3 meets 3. The result shape is (5, 7).',
         nudge: 'Compare the left matrix’s final dimension with the right matrix’s first dimension.',
+      },
+      {
+        kind: 'numeric', prompt: 'Compute one output cell by hand: row [2, 0, 1] of A meets column [3, 4, 5] of B.',
+        code: 'cell = 2*3 + 0*4 + 1*5',
+        questions: [
+          { label: 'the value of that cell', answer: 11, tolerance: 0, reveal: '6 + 0 + 5 = 11. Every cell of every matmul in a transformer is exactly this: one dot product.' },
+        ],
       },
       {
         kind: 'predict', prompt: 'Apply the inner-meets, outer-survives rule.', questions: [
@@ -388,9 +395,9 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         kind: 'worked', title: 'The guarantees matter more than arithmetic',
         prompt: 'Logits [2, 1, -1] enter softmax.',
         stages: [
-          { label: 'Exponentiate', body: 'Every transformed value is positive. The original order 2 > 1 > -1 is preserved.' },
-          { label: 'Normalize', body: 'Divide each transformed value by their sum.' },
-          { label: 'Read the distribution', body: 'The results are between 0 and 1 and sum to exactly 1. The first token remains most likely.' },
+          { label: 'Exponentiate', body: 'Every transformed value is positive. The original order 2 > 1 > -1 is preserved.', code: 'exp([2, 1, -1]) = [7.39, 2.72, 0.37]' },
+          { label: 'Normalize', body: 'Divide each transformed value by their sum.', code: 'total = 10.48\np = [0.705, 0.260, 0.035]' },
+          { label: 'Read the distribution', body: 'The results are between 0 and 1 and sum to exactly 1. The first token remains most likely.', code: 'sum(p) = 1.0' },
         ], takeaway: 'Softmax changes the scale and constraints, not the ranking of logits.',
       },
       {

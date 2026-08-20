@@ -63,6 +63,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     steps:[
       {kind:'concept',title:'Correct-looking text is not yet preferred behavior',lines:[
         'SFT teaches from demonstrations. Preference learning adds comparisons: for one prompt, a rater chooses response A over response B. A reward model learns to map a prompt-response pair to one scalar preference score.',
+        'Why comparisons instead of more demonstrations? Judging which of two responses is better is easier and cheaper than writing an ideal one, and it captures a signal SFT cannot: among several plausible outputs, which one people actually prefer.',
         'In reinforcement learning, an agent learns from scalar reward signals rather than explicit correct labels. The model\'s current learned token-choice behavior is called a policy. There is no ground-truth answer key, only feedback on whether outcomes were good.',
         'PPO-style RL updates the policy to increase reward. A KL penalty measures how different the updated token distribution is from the SFT reference model and acts as a tether against extreme drift.',
       ],cta:'Order the pipeline'},
@@ -84,6 +85,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
         'DPO reframes preference learning as a supervised objective: directly increase the relative likelihood of chosen responses over rejected ones, anchored against a reference model. No separate reward model is trained and no online RL loop runs.',
         'The reference model acts as a tether. DPO maximizes the log-ratio of chosen probability to rejected probability relative to that same ratio under the reference model, applying a KL-like constraint implicitly.',
         'The strength of this tether is controlled by a temperature parameter β: higher β keeps the updated model closer to the reference model, while lower β allows more deviation toward preferred responses.',
+        'A newer relative, GRPO (group relative policy optimization), returns to the RL loop but drops the separate value network: it samples a group of responses per prompt and scores each against the group average reward. It drives reasoning-focused training such as DeepSeek-R1.',
       ],cta:'Compare the two paths'},
       {kind:'worked',title:'One preference pair through DPO',prompt:'For a prompt, response A is chosen over response B.',stages:[
         {label:'No reward model needed',body:'DPO uses the preference pair directly as a supervised signal.'},{label:'Maximize the ratio',body:'Increase log P(A) relative to log P(B), compared to the reference model\'s ratio.'},{label:'Implicit constraint',body:'The reference model anchors the update, preventing extreme drift without an explicit KL coefficient.'},

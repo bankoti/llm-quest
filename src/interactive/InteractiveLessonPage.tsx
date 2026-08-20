@@ -1,6 +1,6 @@
 // InteractiveLessonPage: the step player for the interactive track.
 // No Pyodide, no progress writes to the main system.
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Link, useParams, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { INTERACTIVE_LESSONS, WARMUPS, unmetPrerequisites } from './curriculum'
@@ -33,6 +33,17 @@ function ContinueBtn({ onClick, label = 'Continue' }: { onClick: () => void; lab
       {label}
     </motion.button>
   )
+}
+
+// Fisher-Yates over option indices: MCQ/predict answers must not be
+// guessable from position (most source files list the answer first).
+function shuffledIndices(n: number): number[] {
+  const a = Array.from({ length: n }, (_, i) => i)
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
 }
 
 // ── step renderers ─────────────────────────────────────────────────────────────
@@ -89,6 +100,7 @@ export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>
   const [wrongOnes, setWrongOnes] = useState<number[]>([])
   const [firstSure, setFirstSure] = useState<boolean | null>(null)
   const solved = picked === step.answer
+  const order = useMemo(() => shuffledIndices(step.options.length), [step])
 
   const stage = (i: number) => {
     if (solved || wrongOnes.includes(i)) return
@@ -109,7 +121,8 @@ export function StepMcq({ step, onDone }: { step: Extract<Step, { kind: 'mcq' }>
       <p className="text-lg text-gray-100 mb-3">{step.prompt}</p>
       {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
       <div className="grid gap-3">
-        {step.options.map((o, i) => {
+        {order.map((i) => {
+          const o = step.options[i]
           const isWrong = wrongOnes.includes(i)
           const isRight = solved && i === step.answer
           const isStaged = staged === i
@@ -163,11 +176,13 @@ function PredictQ({ q, onDone }: { q: PredictQuestion; onDone: (firstTry: boolea
   const [pick, setPick] = useState<number | null>(null)
   const [missed, setMissed] = useState(false)
   const done = pick === q.answer
+  const order = useMemo(() => shuffledIndices(q.options.length), [q])
   return (
     <div className="mb-5">
       <p className="font-mono text-sm text-gray-200 mb-2">{q.label} <span className="text-gray-500">→ ?</span></p>
       <div className="flex flex-wrap gap-2">
-        {q.options.map((o, i) => {
+        {order.map((i) => {
+          const o = q.options[i]
           const isPick = pick === i
           const isRight = isPick && i === q.answer
           const isWrong = isPick && i !== q.answer
