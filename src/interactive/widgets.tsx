@@ -644,7 +644,7 @@ export function RagPlay({ onDone }: WidgetProps) {
 // matrices A (d x r) and B (r x d) -> params = 2 proj x 2 mats x d x r x layers.
 
 const RANKS = [1, 4, 16, 64]
-const loraParams = (r: number) => 2 * 2 * 4096 * r * 32
+const loraParams = (r: number) => 2 * 4096 * r * 4 * 32
 const BASE_PARAMS = 7e9
 
 export function LoraPlay({ onDone }: WidgetProps) {
@@ -655,7 +655,7 @@ export function LoraPlay({ onDone }: WidgetProps) {
   return (
     <div className="w-full max-w-lg">
       <p className="text-lg text-gray-100 mb-1">LoRA freezes all 7B weights and trains two thin matrices per layer instead.</p>
-      <p className="text-sm text-gray-400 mb-4">Pick a rank r. Trainable parameters = 2 proj x (A: d x r + B: r x d) x 32 layers.</p>
+      <p className="text-sm text-gray-400 mb-4">Pick a rank r. Trainable parameters = 4 attention projections x (A: d x r + B: r x d) x 32 layers.</p>
       <div className="flex gap-2 mb-5">
         {RANKS.map(rank => (
           <button key={rank} onClick={() => { setR(rank); setTried(t => new Set(t).add(rank)) }}
@@ -1118,7 +1118,7 @@ const MH_HEADS: { name: string; desc: string; scores: number[][] }[] = [
   },
   {
     name: 'Head C — Previous-token',
-    desc: 'Every token attends mostly to its immediate predecessor — a positional induction pattern.',
+    desc: 'Every token attends mostly to its immediate predecessor — a previous-token head, the building block that induction heads compose with.',
     scores: [
       [0.85, 0.05, 0.04, 0.03, 0.03],
       [0.70, 0.20, 0.04, 0.03, 0.03],
@@ -1480,7 +1480,7 @@ export function EmbeddingArithPlay({ onDone }: WidgetProps) {
       )}
       {showArrow && (
         <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-          <p className="text-sm text-gray-300 mb-3">The arrow lands near "queen" because the model learned that king−man and queen−woman point in roughly the same direction. That direction is the "royalty + male" axis.</p>
+          <p className="text-sm text-gray-300 mb-3">The arrow lands near "queen" because the model learned that king−man and queen−woman point in roughly the same direction. That shared direction is the man-to-woman (gender) direction: subtracting "man" and adding "woman" moves "king" along it.</p>
           <ContinueBtn onClick={onDone} label="Got it, continue" />
         </motion.div>
       )}
