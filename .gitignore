@@ -7,3 +7,5 @@ dist/
 solutions/
 __pycache__/
 *.pyc
+
+smoke-shots/

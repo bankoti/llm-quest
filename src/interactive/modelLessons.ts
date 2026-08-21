@@ -44,15 +44,15 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'This scaling is called scaled dot-product attention. Every attention formula you encounter in papers and code uses it.',
       ],cta:'Compute the divisor'},
       {kind:'numeric',prompt:'Compute the scaling divisor.',questions:[{label:'d_k = 64 → divisor = sqrt(64)',answer:8,tolerance:0,unit:'',reveal:'sqrt(64) = 8. Each score is divided by 8 before softmax.'}]},
-      {kind:'worked',title:'A full attention computation, by hand',prompt:'One query q=[1,0] meets keys k1=[2,0], k2=[0,2] and values v1=[10,0], v2=[0,10]. Here d_k=4, so scores are divided by 2.',stages:[
-        {label:'Raw scores',body:'q dot k1 = 1x2 + 0x0 = 2. q dot k2 = 1x0 + 0x2 = 0.',code:'scores = q @ K.T          # [2, 0]'},
+      {kind:'worked',title:'A full attention computation, by hand',prompt:'One query q=[1,0,0,0] meets keys k1=[2,0,0,0], k2=[0,2,0,0] and values v1=[10,0], v2=[0,10]. Keys have d_k=4 features (the last two are zero here), so scores are divided by sqrt(4)=2.',stages:[
+        {label:'Raw scores',body:'q dot k1 = 1x2 + 0x0 + 0x0 + 0x0 = 2. q dot k2 = 1x0 + 0x2 + 0x0 + 0x0 = 0.',code:'scores = q @ K.T          # [2, 0]'},
         {label:'Scale',body:'Divide by sqrt(4) = 2. Scaled scores are [1, 0].',code:'scaled = scores / sqrt(d_k)  # [1, 0]'},
         {label:'Softmax',body:'e^1 = 2.72 and e^0 = 1. Weights are [2.72/3.72, 1/3.72] = [0.73, 0.27].',code:'w = softmax(scaled)       # [0.73, 0.27]'},
         {label:'Mix values',body:'0.73x[10,0] + 0.27x[0,10] = [7.3, 2.7]. The query mostly retrieves v1.',code:'out = w @ V               # [7.3, 2.7]'},
       ],takeaway:'Score, scale, softmax, mix. Every attention head in every transformer runs exactly this arithmetic, just wider.'},
-      {kind:'numeric',prompt:'Your turn. Same keys and values, new query q=[0,1]: k1=[2,0], k2=[0,2], v1=[10,0], v2=[0,10], divide scores by 2.',questions:[
-        {label:'raw score q dot k1',answer:0,tolerance:0,reveal:'0x2 + 1x0 = 0.'},
-        {label:'raw score q dot k2',answer:2,tolerance:0,reveal:'0x0 + 1x2 = 2.'},
+      {kind:'numeric',prompt:'Your turn. Same keys and values, new query q=[0,1,0,0]: k1=[2,0,0,0], k2=[0,2,0,0], v1=[10,0], v2=[0,10], divide scores by 2.',questions:[
+        {label:'raw score q dot k1',answer:0,tolerance:0,reveal:'0x2 + 1x0 + 0x0 + 0x0 = 0.'},
+        {label:'raw score q dot k2',answer:2,tolerance:0,reveal:'0x0 + 1x2 + 0x0 + 0x0 = 2.'},
         {label:'softmax weight on k2 after scaling (2 decimals)',answer:0.73,tolerance:0.02,reveal:'Scaled scores are [0, 1]; e^1/(e^0+e^1) = 0.73.'},
         {label:'first number of the output',answer:2.7,tolerance:0.2,reveal:'0.27x10 + 0.73x0 = 2.7. This query retrieves mostly v2 instead.'},
       ]},

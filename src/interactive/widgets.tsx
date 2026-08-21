@@ -1576,6 +1576,9 @@ export function AgentPlay({ onDone }: WidgetProps) {
         setPicked(null)
         setRound(r => r + 1)
       }, 1200)
+    } else {
+      // wrong pick: show shake + why text, then unlock so user can retry
+      setTimeout(() => setPicked(null), 1500)
     }
   }
 

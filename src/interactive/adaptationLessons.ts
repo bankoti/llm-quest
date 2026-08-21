@@ -125,7 +125,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
       ]},
       {kind:'numeric',prompt:'LoRA arithmetic.',questions:[
         {label:'W is 2048x2048. Rank-16 adapter: total A+B parameters',answer:65536,tolerance:0,reveal:'A is 16x2048=32768, B is 2048x16=32768. Total 65,536.'},
-        {label:'ratio of adapter params to full W params (percent, 1 decimal)',answer:1.6,tolerance:0.1,reveal:'65536 / (2048x2048) = 65536/4194304 = 0.0156 = 1.6%.'},
+        {label:'ratio of adapter params to full W params (percent, 1 decimal)',answer:1.6,tolerance:0.1,reveal:'65536 / (2048x2048) = 65536/4194304 = 0.015625, so about 1.6%.'},
       ]},
     ],
   },
