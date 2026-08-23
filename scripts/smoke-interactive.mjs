@@ -14,7 +14,7 @@ const PORT = 4173
 const filter = process.argv.includes('--filter') ? process.argv[process.argv.indexOf('--filter') + 1] : null
 
 // ---- extract lesson slugs + numeric answers from source (curriculum order) ----
-const lessonFiles = ['foundationLessons.ts', 'modelLessons.ts', 'adaptationLessons.ts', 'systemsLessons.ts', 'applicationLessons.ts', 'extensionLessons.ts']
+const lessonFiles = ['foundationLessons.ts', 'modelLessons.ts', 'adaptationLessons.ts', 'systemsLessons.ts', 'applicationLessons.ts', 'extensionLessons.ts','papersLessons.ts']
 const lessons = [] // { slug, numericAnswers: [] }
 for (const f of lessonFiles) {
   const src = fs.readFileSync(path.join(root, 'src/interactive', f), 'utf8')

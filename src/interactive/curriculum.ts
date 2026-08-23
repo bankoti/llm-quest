@@ -8,6 +8,7 @@ import { ADAPTATION_LESSONS } from './adaptationLessons'
 import { SYSTEMS_LESSONS } from './systemsLessons'
 import { APPLICATION_LESSONS } from './applicationLessons'
 import { EXTENSION_LESSONS } from './extensionLessons'
+import { PAPERS_LESSONS } from './papersLessons'
 export { WARMUPS } from './warmups'
 
 export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
@@ -17,6 +18,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
   ...SYSTEMS_LESSONS,
   ...APPLICATION_LESSONS,
   ...EXTENSION_LESSONS,
+  ...PAPERS_LESSONS,
 ]
 
 export const LESSON_BY_SLUG = new Map(INTERACTIVE_LESSONS.map(l => [l.slug, l]))

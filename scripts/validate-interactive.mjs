@@ -2,7 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 const root=path.resolve(import.meta.dirname,'..')
-const lessonFiles=['foundationLessons.ts','modelLessons.ts','adaptationLessons.ts','systemsLessons.ts','applicationLessons.ts','extensionLessons.ts'].map(f=>`src/interactive/${f}`)
+const lessonFiles=['foundationLessons.ts','modelLessons.ts','adaptationLessons.ts','systemsLessons.ts','applicationLessons.ts','extensionLessons.ts','papersLessons.ts'].map(f=>`src/interactive/${f}`)
 const source=lessonFiles.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')
 const errors=[]
 const slugs=[...source.matchAll(/\bslug:\s*'([^']+)'/g)].map(m=>m[1]), unique=new Set(slugs)
@@ -20,7 +20,7 @@ for(let i=0;i<starts.length;i++){
 }
 if(new Set(choiceAnswers).size<3)errors.push('choice-answer positions are not distributed across at least 3 source indices')
 const curriculum=fs.readFileSync(path.join(root,'src/interactive/curriculum.ts'),'utf8')
-for(const required of ['...FOUNDATION_LESSONS','...MODEL_LESSONS','...ADAPTATION_LESSONS','...SYSTEMS_LESSONS','...APPLICATION_LESSONS','...EXTENSION_LESSONS'])if(!curriculum.includes(required))errors.push(`curriculum assembly missing ${required}`)
+for(const required of ['...FOUNDATION_LESSONS','...MODEL_LESSONS','...ADAPTATION_LESSONS','...SYSTEMS_LESSONS','...APPLICATION_LESSONS','...EXTENSION_LESSONS','...PAPERS_LESSONS'])if(!curriculum.includes(required))errors.push(`curriculum assembly missing ${required}`)
 const warmups=fs.readFileSync(path.join(root,'src/interactive/warmups.ts'),'utf8')
 const curriculumData=fs.readFileSync(path.join(root,'src/data/curriculum.ts'),'utf8')
 const levelIds=[...curriculumData.matchAll(/\{ id:'(c\d+-(?:l|d)\d+)'/g)].map(m=>m[1])
