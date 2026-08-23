@@ -6,7 +6,7 @@ import {
 } from './widgets'
 
 const MODULE = 'foundations'
-const MODULE_TITLE = 'Foundations: numbers, text, and prediction'
+const MODULE_TITLE = 'Raw Materials: Numbers, Text, and Prediction'
 
 export const FOUNDATION_LESSONS: InteractiveLesson[] = [
   {
@@ -156,7 +156,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     title: 'Dot Products as Similarity',
     emoji: '🧭',
     blurb: 'Turn multiplication into an intuition for matching directions and meaning.',
-    minutes: 6,
+    minutes: 7,
     moduleId: MODULE,
     moduleTitle: MODULE_TITLE,
     prerequisites: ['matmul'],
@@ -180,6 +180,13 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
           { label: 'Score b', body: 'q · b = 1×0 + 0×1 = 0.' },
           { label: 'Rank the candidates', body: 'a points mostly with q, while b is perpendicular. a is the stronger match.' },
         ], takeaway: 'Dot products turn “which direction matches?” into a number that can be ranked.',
+      },
+      {
+        kind: 'numeric', prompt: 'Your turn. Score two candidates for the query q = [2, 1].',
+        questions: [
+          { label: 'q · a for a = [1, 2]', answer: 4, tolerance: 0, reveal: '2×1 + 1×2 = 4. Positive: the directions broadly agree.', hint: 'Multiply matching positions, then add the results.' },
+          { label: 'q · b for b = [1, -2]', answer: 0, tolerance: 0, reveal: '2×1 + 1×(-2) = 0. Perpendicular — no directional agreement, so b is not a match for q.' },
+        ],
       },
       {
         kind: 'mcq', prompt: 'Two unit-length vectors have dot product 0.02. What is the safest interpretation?',

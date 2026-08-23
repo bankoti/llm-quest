@@ -1,7 +1,7 @@
 import type { InteractiveLesson } from './types'
 import { LoraPlay, DistillPlay, RlhfPipelinePlay, RewardHackPlay, CalibrationPlay } from './widgets'
 const MODULE='adaptation'
-const MODULE_TITLE='Post-training and behavior'
+const MODULE_TITLE='Shape Its Behavior: Fine-Tuning and Alignment'
 export const ADAPTATION_LESSONS: InteractiveLesson[] = [
   {
     slug:'finetuning-basics',title:'Fine-Tuning and Forgetting',emoji:'🛠️',blurb:'Adapt a pretrained model to examples without confusing knowledge with behavior.',minutes:7,

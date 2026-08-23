@@ -366,6 +366,7 @@ export function StepNumeric({ step, onDone }: {
   }
   return (
     <div className="w-full max-w-lg">
+      <p className="text-xs font-mono uppercase tracking-widest text-sky-400 mb-2">✏️ Calculate by hand</p>
       <p className="text-lg text-gray-100 mb-3">{step.prompt}</p>
       {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
       {!complete && (
@@ -381,6 +382,80 @@ export function StepNumeric({ step, onDone }: {
       }} />}
     </div>
   )
+}
+
+// ── review mode ────────────────────────────────────────────────────────────────────
+
+// Read-only rendering of an already-answered step for back navigation.
+// Scored steps show the correct answer and explanation; nothing re-scores.
+function ReviewStep({ s }: { s: Step }) {
+  const pre = (code?: string) => code
+    ? <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{code}</pre>
+    : null
+  if (s.kind === 'concept') return (
+    <div>
+      <h2 className="text-2xl font-bold text-white mb-4">{s.title}</h2>
+      {s.lines.map((l, i) => <p key={i} className="text-gray-300 mb-3 leading-relaxed">{l}</p>)}
+      {pre(s.code)}
+    </div>
+  )
+  if (s.kind === 'worked') return (
+    <div>
+      <p className="text-xs font-mono uppercase tracking-widest text-amber-400 mb-2">Worked example</p>
+      <h2 className="text-2xl font-bold text-white mb-3">{s.title}</h2>
+      <p className="text-gray-300 mb-5 leading-relaxed">{s.prompt}</p>
+      <div className="border-l-2 border-gray-800 pl-4 space-y-4">
+        {s.stages.map((stage, i) => (
+          <div key={i}>
+            <p className="text-xs font-mono text-violet-400 mb-1">{i + 1}. {stage.label}</p>
+            <p className="text-sm text-gray-300 leading-relaxed">{stage.body}</p>
+            {stage.code && <pre className="mt-2 bg-gray-900 border border-gray-800 rounded-lg p-3 font-mono text-sm text-sky-300 overflow-x-auto">{stage.code}</pre>}
+          </div>
+        ))}
+      </div>
+      <p className="mt-5 text-sm text-emerald-300 border-l-2 border-emerald-600 pl-3">{s.takeaway}</p>
+    </div>
+  )
+  if (s.kind === 'mcq') return (
+    <div>
+      <p className="text-lg text-gray-100 mb-3">{s.prompt}</p>
+      {pre(s.code)}
+      <div className="grid gap-3">
+        {s.options.map((o, i) => (
+          <div key={i} className={`px-4 py-3 rounded-xl border font-mono text-sm ${i === s.answer ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300' : 'bg-gray-900 border-gray-800 text-gray-500'}`}>{o}</div>
+        ))}
+      </div>
+      <p className="mt-4 text-sm text-gray-300">{s.explain}</p>
+    </div>
+  )
+  if (s.kind === 'predict') return (
+    <div>
+      <p className="text-lg text-gray-100 mb-3">{s.prompt}</p>
+      {pre(s.code)}
+      {s.questions.map((q, i) => (
+        <div key={i} className="mb-4">
+          <p className="font-mono text-sm text-gray-200 mb-1">{q.label}</p>
+          <p className="font-mono text-sm text-emerald-300">{q.options[q.answer]}</p>
+          <p className="text-xs text-gray-400 mt-1">{q.reveal}</p>
+        </div>
+      ))}
+    </div>
+  )
+  if (s.kind === 'numeric') return (
+    <div>
+      <p className="text-xs font-mono uppercase tracking-widest text-sky-400 mb-2">✏️ Calculate by hand</p>
+      <p className="text-lg text-gray-100 mb-3">{s.prompt}</p>
+      {pre(s.code)}
+      {s.questions.map((q, i) => (
+        <div key={i} className="mb-4">
+          <p className="font-mono text-sm text-gray-200 mb-1">{q.label}</p>
+          <p className="font-mono text-sm text-emerald-300">{q.answer}{q.unit ? ` ${q.unit}` : ''}</p>
+          <p className="text-xs text-gray-400 mt-1">{q.reveal}</p>
+        </div>
+      ))}
+    </div>
+  )
+  return <p className="text-gray-400">This step is an interactive widget — resume the lesson to replay it live.</p>
 }
 
 // ── finale card ───────────────────────────────────────────────────────────────
@@ -518,6 +593,10 @@ function LessonPlayer({ slug }: { slug?: string }) {
   const [done, setDone] = useState(false)
   const [sure, setSure] = useState(0)
   const [sureWrong, setSureWrong] = useState(0)
+  // peek: steps navigated back from the frontier; view = step - peek.
+  // Scoring callbacks only exist on the live (frontier) branch, so review
+  // mode can never double-count an answer.
+  const [peek, setPeek] = useState(0)
 
   const scored = lesson ? scoredCount(lesson) : 0
 
@@ -592,10 +671,13 @@ function LessonPlayer({ slug }: { slug?: string }) {
       {/* header */}
       <div className="w-full max-w-lg flex items-center gap-3 mb-10">
         <Link to="/interactive" className="text-gray-500 hover:text-gray-300 text-sm shrink-0">✕</Link>
+        <button aria-label="Previous step" onClick={() => setPeek(p => Math.min(p + 1, step))}
+          disabled={done || step - peek === 0}
+          className="text-gray-500 hover:text-gray-300 disabled:opacity-30 text-sm shrink-0">←</button>
         <div className="flex-1 flex gap-1">
           {Array.from({ length: totalSteps }, (_, i) => (
             <div key={i} className={`h-2 flex-1 rounded-full transition-colors duration-500
-              ${i < step || done ? 'bg-violet-500' : i === step ? 'bg-violet-800' : 'bg-gray-800'}`} />
+              ${peek > 0 && i === step - peek ? 'bg-amber-400' : i < step || done ? 'bg-violet-500' : i === step ? 'bg-violet-800' : 'bg-gray-800'}`} />
           ))}
         </div>
         <span className={`font-mono text-sm shrink-0 ${streak > 0 ? 'text-orange-400' : 'text-gray-600'}`}>🔥 {streak}</span>
@@ -605,6 +687,22 @@ function LessonPlayer({ slug }: { slug?: string }) {
         {done ? (
           <motion.div key="done" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.25 }}>
             <Finale lessonSlug={lesson.slug} firstTries={firstTries} scored={scored} missedCount={missed.length} sure={sure} sureWrong={sureWrong} />
+          </motion.div>
+        ) : peek > 0 ? (
+          <motion.div key={`review-${step - peek}`} initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 40 }} transition={{ duration: 0.25 }}
+            className="w-full flex justify-center">
+            <div className="w-full max-w-lg">
+              <p className="text-xs font-mono uppercase tracking-widest text-amber-500 mb-5">Reviewing step {step - peek + 1} of {totalSteps} — answers shown</p>
+              <ReviewStep s={lesson.steps[step - peek]} />
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <button onClick={() => setPeek(p => Math.min(p + 1, step))} disabled={step - peek === 0}
+                  className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm font-semibold disabled:opacity-40">← Earlier</button>
+                <button onClick={() => setPeek(p => p - 1)}
+                  className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 text-sm font-semibold">Later →</button>
+                <button onClick={() => setPeek(0)}
+                  className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold">Resume lesson</button>
+              </div>
+            </div>
           </motion.div>
         ) : (
           <motion.div key={step} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.25 }}

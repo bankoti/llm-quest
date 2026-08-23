@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { INTERACTIVE_LESSONS, MODULES, unmetPrerequisites } from './curriculum'
+import { INTERACTIVE_LESSONS, MODULES, MODULE_META, unmetPrerequisites } from './curriculum'
 import { loadTrack, stars, scoredCount, computeStreak, mixDoneToday } from './types'
 
 function StreakCalendar({ activeDates }: { activeDates: Set<string> }) {
@@ -28,6 +28,35 @@ function StreakCalendar({ activeDates }: { activeDates: Set<string> }) {
   )
 }
 
+// The assembly line: one chip per core build stage, lit by completion.
+// Makes the "you are building an LLM, left to right" narrative visible.
+function BuildLine({ completedSlugs }: { completedSlugs: Set<string> }) {
+  const stages = MODULES.filter(m => !MODULE_META[m.id]?.optional)
+  return (
+    <div className="mb-8 p-4 rounded-xl bg-gray-900/60 border border-gray-800">
+      <p className="font-mono text-[10px] uppercase tracking-widest text-gray-500 mb-3">The build line — one LLM, assembled left to right</p>
+      <div className="flex flex-wrap items-center gap-y-2">
+        {stages.map((m, i) => {
+          const lessons = INTERACTIVE_LESSONS.filter(l => l.moduleId === m.id)
+          const done = lessons.filter(l => completedSlugs.has(l.slug)).length
+          const full = done === lessons.length
+          const started = done > 0
+          return (
+            <div key={m.id} className="flex items-center">
+              {i > 0 && <span className="mx-1.5 text-gray-700">→</span>}
+              <div className={`px-2.5 py-1.5 rounded-lg border text-center
+                ${full ? 'bg-emerald-900/40 border-emerald-600' : started ? 'bg-violet-900/30 border-violet-600' : 'bg-gray-900 border-gray-800'}`}>
+                <span className={`block text-xs font-semibold leading-tight ${full ? 'text-emerald-300' : started ? 'text-violet-200' : 'text-gray-500'}`}>{MODULE_META[m.id]?.short ?? m.title}</span>
+                <span className={`block font-mono text-[10px] ${full ? 'text-emerald-500' : started ? 'text-violet-400' : 'text-gray-600'}`}>{done}/{lessons.length}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export function InteractiveHubPage() {
   const [track, setTrack] = useState(loadTrack)
   useEffect(() => { setTrack(loadTrack()) }, [])
@@ -45,7 +74,7 @@ export function InteractiveHubPage() {
         <div className="mb-2"><Link to="/map" className="text-gray-500 hover:text-gray-300 text-sm">← Map</Link></div>
         <p className="text-xs font-mono uppercase tracking-[0.2em] text-violet-400 mb-2">Build the mental model, one dependency at a time</p>
         <h1 className="text-3xl font-bold mb-2">Interactive Course</h1>
-        <p className="text-gray-400 mb-4 max-w-2xl">Start with ordinary numbers and text. Each lesson introduces one small mechanism, works through it, then asks you to use it. No ML background assumed.</p><p className="text-sm text-sky-300/80 mb-4">Concept-course stars and practice are separate from coding XP and certificates. Use the Guided Route from the home page when you want them connected.</p>
+        <p className="text-gray-400 mb-4 max-w-2xl">You are going to build a language model end to end: turn text into numbers, assemble a transformer, train it, make it speak, then align it, serve it, and ship products on it. Each lesson adds one part; nothing is used before you have built it.</p><p className="text-sm text-sky-300/80 mb-4">Concept-course stars and practice are separate from coding XP and certificates. Use the Guided Route from the home page when you want them connected.</p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-5 text-sm font-mono text-gray-500">
           <span>{completed}/{INTERACTIVE_LESSONS.length} lessons</span>
           <span>{totalStars}/{INTERACTIVE_LESSONS.length * 3} stars</span>
@@ -54,6 +83,8 @@ export function InteractiveHubPage() {
         </div>
 
         {completed > 0 && <StreakCalendar activeDates={streak.activeDates} />}
+
+        <BuildLine completedSlugs={completedSlugs} />
 
         {next && (
           <Link to={`/interactive/${next.slug}`} className="block p-5 mb-5 rounded-xl bg-violet-700/20 border border-violet-600 hover:bg-violet-700/30">
@@ -73,14 +104,16 @@ export function InteractiveHubPage() {
         </div>
 
         <div className="space-y-10">
-          {MODULES.map((module, moduleIdx) => {
+          {MODULES.map((module) => {
             const lessons = INTERACTIVE_LESSONS.filter(l => l.moduleId === module.id)
             const moduleDone = lessons.filter(l => completedSlugs.has(l.slug)).length
+            const stageNo = MODULES.filter(m => !MODULE_META[m.id]?.optional).findIndex(m => m.id === module.id) + 1
             return <section key={module.id}>
-              <div className="flex items-end justify-between gap-3 mb-3 border-b border-gray-800 pb-2">
-                <div><p className="text-[10px] font-mono uppercase tracking-widest text-gray-600">Module {moduleIdx + 1}</p><h2 className="text-xl font-semibold">{module.title}</h2></div>
+              <div className="flex items-end justify-between gap-3 mb-1 border-b border-gray-800 pb-2">
+                <div><p className="text-[10px] font-mono uppercase tracking-widest text-gray-600">{MODULE_META[module.id]?.optional ? 'Optional' : `Stage ${stageNo}`}</p><h2 className="text-xl font-semibold">{module.title}</h2></div>
                 <span className="text-xs font-mono text-gray-500">{moduleDone}/{lessons.length}</span>
               </div>
+              {MODULE_META[module.id]?.builds && <p className="text-sm text-gray-500 mb-3">{MODULE_META[module.id].builds}</p>}
               <div className="grid gap-3">
                 {lessons.map((lesson, idx) => {
                   const rec = track[lesson.slug]

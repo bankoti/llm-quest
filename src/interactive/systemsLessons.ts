@@ -1,7 +1,7 @@
 import type { InteractiveLesson } from './types'
 import { ScalingPlay, GenerationPlay, PrecisionPlay, MoePlay, SpecDecodePlay } from './widgets'
 const MODULE='systems'
-const MODULE_TITLE='Scaling and serving'
+const MODULE_TITLE='Serve It: Speed, Memory, and Cost'
 export const SYSTEMS_LESSONS: InteractiveLesson[] = [
   {
     slug:'scaling-laws',title:'Scaling Parameters, Data, and Compute',emoji:'🔭',blurb:'Learn the budget trade-off before optimizing inference.',minutes:8,

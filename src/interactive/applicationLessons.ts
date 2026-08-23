@@ -1,7 +1,7 @@
 import type { InteractiveLesson } from './types'
 import { EmbeddingPlay, RagPlay, AgentPlay } from './widgets'
 const MODULE='applications'
-const MODULE_TITLE='Applying models with data and tools'
+const MODULE_TITLE='Put It to Work: Retrieval, Agents, Products'
 export const APPLICATION_LESSONS: InteractiveLesson[] = [
   {
     slug:'semantic-embeddings',title:'Sentence Embeddings and Similarity',emoji:'🗺️',blurb:'Reuse dot products to compare the meaning of whole pieces of text.',minutes:7,

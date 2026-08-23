@@ -1,11 +1,17 @@
 import type { InteractiveLesson } from './types'
 import { AttentionPlay, QkvPlay, CausalMaskPlay, PositionPlay, MultiHeadPlay, BackpropPlay, LrPlay, GenerationPlay, TemperaturePlay, EarlyStopPlay, BeamPlay } from './widgets'
-const MODULE = 'model'
-const MODULE_TITLE = 'How a language model works and learns'
+// One 'model' module split into three build stages so the hub reads as an
+// assembly line: build the transformer, train it, then make it generate.
+const M_ARCH = 'transformer'
+const T_ARCH = 'Assemble the Transformer'
+const M_TRAIN = 'training'
+const T_TRAIN = 'Train the Model'
+const M_GEN = 'generation'
+const T_GEN = 'Make It Speak: Decoding and Sampling'
 export const MODEL_LESSONS: InteractiveLesson[] = [
   {
     slug:'attention-intuition', title:'Attention as Information Routing', emoji:'🔦', blurb:'Start with the problem attention solves before introducing Q, K, or V.', minutes:7,
-    moduleId:MODULE, moduleTitle:MODULE_TITLE, prerequisites:['next-token-prediction'], outcomes:['Explain why tokens need information from other positions','Interpret attention weights as a weighted mixture'], concepts:['contextual representation','attention weight','weighted sum'],
+    moduleId:M_ARCH, moduleTitle:T_ARCH, prerequisites:['next-token-prediction'], outcomes:['Explain why tokens need information from other positions','Interpret attention weights as a weighted mixture'], concepts:['contextual representation','attention weight','weighted sum'],
     steps:[
       {kind:'concept',title:'A token’s meaning depends on its neighbors',lines:[
         'The embedding for a token is the same lookup every time, but its meaning in a sentence is not. “Bank” in “river bank” and “bank loan” must gather different clues from surrounding positions.',
@@ -24,7 +30,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'qkv-attention', title:'Queries, Keys, and Values', emoji:'🔑', blurb:'Give each attention vector one job, then assemble the equation.', minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['attention-intuition','dot-product-similarity','linear-layers'],outcomes:['State the roles of query, key, and value','Trace score, softmax, and weighted sum'],concepts:['query','key','value','attention score'],
+    moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['attention-intuition','dot-product-similarity','linear-layers'],outcomes:['State the roles of query, key, and value','Trace score, softmax, and weighted sum'],concepts:['query','key','value','attention score'],
     steps:[
       {kind:'concept',title:'Match with Q and K; retrieve V',lines:[
         'Every position is projected through three learned linear layers. Its query describes what it seeks. Its key describes what it can match. Its value carries the information it contributes if selected.',
@@ -64,7 +70,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'causal-attention',title:'Why Attention Needs a Causal Mask',emoji:'🚧',blurb:'Understand the training-time leak before seeing the mask that blocks it.',minutes:7,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['qkv-attention'],outcomes:['Explain teacher forcing','Identify future-token leakage','Explain a causal mask'],concepts:['parallel training','teacher forcing','future-token leakage','causal mask'],
+    moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['qkv-attention'],outcomes:['Explain teacher forcing','Identify future-token leakage','Explain a causal mask'],concepts:['parallel training','teacher forcing','future-token leakage','causal mask'],
     steps:[
       {kind:'concept',title:'Training can see the answer unless we hide it',lines:[
         'During generation, future tokens do not exist. During training, the complete known sequence is available, and all positions are processed in parallel for efficiency.',
@@ -81,7 +87,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'position-information',title:'How the Model Knows Order',emoji:'📍',blurb:'Prove that content alone loses order, then add position information.',minutes:6,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['attention-intuition'],outcomes:['Explain why content alone cannot encode order','Describe positional information'],concepts:['permutation','position encoding','word order','RoPE'],
+    moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['attention-intuition'],outcomes:['Explain why content alone cannot encode order','Describe positional information'],concepts:['permutation','position encoding','word order','RoPE'],
     steps:[
       {kind:'concept',title:'A weighted sum does not know where a value sat',lines:[
         'Attention combines token representations with weighted sums. If representations contain only token identity, shuffling the same tokens preserves the same collection of content.',
@@ -95,7 +101,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'multihead-attention',title:'Why Attention Uses Multiple Heads',emoji:'🧠',blurb:'Let several small attention routes preserve different relationships at once.',minutes:7,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['qkv-attention','position-information'],outcomes:['Explain parallel attention heads','Relate hidden size and head dimension'],concepts:['attention head','head dimension','concatenation','output projection'],
+    moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['qkv-attention','position-information'],outcomes:['Explain parallel attention heads','Relate hidden size and head dimension'],concepts:['attention head','head dimension','concatenation','output projection'],
     steps:[
       {kind:'concept',title:'One mixture can blur several jobs',lines:[
         'One attention head creates one routing pattern. A sentence may simultaneously need pronoun resolution, syntax, punctuation, and long-range topic information.',
@@ -112,7 +118,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'transformer-block',title:'Inside One Transformer Block',emoji:'🏗️',blurb:'Assemble attention, a per-position network, residual paths, and normalization.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['multihead-attention','causal-attention'],outcomes:['Trace one transformer block','Separate attention, FFN, residual, and normalization'],concepts:['feed-forward network','activation','residual connection','normalization','residual stream'],
+    moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['multihead-attention','causal-attention'],outcomes:['Trace one transformer block','Separate attention, FFN, residual, and normalization'],concepts:['feed-forward network','activation','residual connection','normalization','residual stream'],
     steps:[
       {kind:'concept',title:'Routing, then processing',lines:[
         'Attention moves information between positions. A feed-forward network (FFN) then processes each position independently using learned linear layers and a nonlinear activation, commonly GELU or ReLU. Both suppress small or negative values; without any nonlinearity, stacked linear layers collapse to a single linear map, so depth would add nothing. Attention communicates; the FFN transforms.',
@@ -140,8 +146,8 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     ],
   },
   {
-    slug:'parameter-counts',title:'Counting Parameters',emoji:'🔢',blurb:'Trace where the numbers in a model headline come from, by hand.',minutes:7,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['transformer-block'],outcomes:['Count embedding parameters','Count per-block parameters','Verify a published total'],concepts:['parameter count','embedding table','projection size','weight sharing'],
+    slug:'parameter-counts',title:'Counting Parameters',emoji:'🔢',blurb:'Trace where the numbers in a model headline come from, by hand.',minutes:8,
+    moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['transformer-block'],outcomes:['Count embedding parameters','Count per-block parameters','Verify a published total'],concepts:['parameter count','embedding table','projection size','weight sharing'],
     steps:[
       {kind:'concept',title:'Two slabs per block plus one table',lines:[
         'A transformer model\'s parameter count comes from a small set of learned matrices. The token embedding table has V rows of width C. A position table, if present, adds context_length times C entries.',
@@ -149,8 +155,13 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'Many models reuse the token embedding table as the output projection (weight tying), adding zero extra parameters for the final logit layer.',
       ],cta:'Count GPT-2 small'},
       {kind:'mcq',prompt:'A 12-block model with width 768 uses weight tying. Where do most parameters live?',options:['In the repeated per-block projections (attention + FFN)','In the final softmax','In the tokenizer','In the position table alone'],answer:0,explain:'12 blocks of attention and FFN projections total about 85M versus 39M for embeddings.',nudge:'Which component is repeated 12 times?'},
+      {kind:'worked',title:'Count one block before you count the model',prompt:'GPT-2 small: width C = 768, FFN expands to 4C. Count one transformer block.',stages:[
+        {label:'Attention projections',body:'Q, K, V, and output are each 768×768. That is 4 × 589,824 ≈ 2.36M parameters.'},
+        {label:'FFN pair',body:'Up-projection 768×3072 and down-projection 3072×768: 2 × 2.36M ≈ 4.72M parameters.'},
+        {label:'Block total',body:'≈ 7.1M per block. Twelve blocks ≈ 85M — already most of the 124M headline before embeddings are counted.'},
+      ],takeaway:'Model totals are not mysterious: a handful of matrix shapes, multiplied out and summed.',cta:'Now count one yourself'},
       {kind:'numeric',prompt:'Quick parameter retrieval.',questions:[
-        {label:'4 attention projections, each 768x768, per block (millions)',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M. Recall from the parameter-counts lesson.'},
+        {label:'4 attention projections, each 768x768, per block (millions)',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M — the worked example\'s arithmetic, recalled cold.'},
       ]},
       {kind:'mcq',prompt:'GPT-2 reuses the embedding table as the output head. What does weight tying save?',options:['An entire V x C matrix of additional parameters','All block parameters','The position table','The FFN weights'],answer:0,explain:'Without tying, a separate (V, C) output matrix would add another 38.6M parameters.',nudge:'Which matrix would otherwise appear twice?'},
       {kind:'predict',prompt:'A new model doubles width to 1536 with the same 12 blocks and vocab.',questions:[
@@ -161,7 +172,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'inference-loop',title:'End-to-End Inference',emoji:'🔁',blurb:'Trace one generated token through the complete model.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['transformer-block'],outcomes:['Trace text through the model','Separate fixed weights from context'],concepts:['inference','model weights','context window','generation loop'],
+    moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['transformer-block'],outcomes:['Trace text through the model','Separate fixed weights from context'],concepts:['inference','model weights','context window','generation loop'],
     steps:[
       {kind:'concept',title:'The full path has two loops',lines:[
         'Inside one forward pass, token IDs become embeddings, pass through transformer blocks, and produce logits. Outside the model, the generation loop chooses a token, appends it, and invokes the next pass.',
@@ -178,7 +189,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'training-objective',title:'How Training Examples Are Built',emoji:'🎯',blurb:'Turn known text into next-token questions and measurable loss.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['inference-loop'],outcomes:['Create shifted input-target pairs','Explain loss','Count targets'],concepts:['training example','input-target shift','loss','cross-entropy intuition','batch'],
+    moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['inference-loop'],outcomes:['Create shifted input-target pairs','Explain loss','Count targets'],concepts:['training example','input-target shift','loss','cross-entropy intuition','batch'],
     steps:[
       {kind:'concept',title:'Known text supplies its own answer key',lines:[
         'Training starts with token sequences from data. At each position, earlier tokens are input and the actual next token is the target. A ten-token sequence provides nine targets.',
@@ -204,7 +215,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'training-data',title:'What the Model Is Made Of: Data',emoji:'🌐',blurb:'Follow raw web text into a training mixture, and see why the mixture is the model.',minutes:7,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['training-objective'],outcomes:['Describe the pipeline from crawl to training tokens','Explain filtering and deduplication','Reason about mixture proportions'],concepts:['web crawl','filtering','deduplication','data mixture','training corpus'],
+    moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['training-objective'],outcomes:['Describe the pipeline from crawl to training tokens','Explain filtering and deduplication','Reason about mixture proportions'],concepts:['web crawl','filtering','deduplication','data mixture','training corpus'],
     steps:[
       {kind:'concept',title:'From crawl to corpus',lines:[
         'Pretraining data starts as raw crawled web pages plus curated sources: books, code, encyclopedias, forums. Raw crawl is mostly unusable — boilerplate, spam, duplicated pages, broken encoding.',
@@ -225,7 +236,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'gradients',title:'Gradients: Which Way Should We Change?',emoji:'🧗',blurb:'Build gradient intuition as a local slope before backpropagation.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['training-objective','training-data'],outcomes:['Describe local sensitivity','Choose update direction','Use gradient magnitude'],concepts:['parameter','gradient','slope','gradient descent'],
+    moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['training-objective','training-data'],outcomes:['Describe local sensitivity','Choose update direction','Use gradient magnitude'],concepts:['parameter','gradient','slope','gradient descent'],
     steps:[
       {kind:'concept',title:'A gradient is a local “what if?”',lines:[
         'Model weights are adjustable numbers, also called parameters. After computing loss, we need to know how a small change to each weight would change that loss.',
@@ -241,7 +252,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'backpropagation',title:'Backpropagation and Residual Paths',emoji:'↩️',blurb:'Trace blame backward without assuming calculus notation.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['gradients','transformer-block'],outcomes:['Explain chained sensitivities','Explain vanishing gradients','Explain residual paths'],concepts:['backpropagation','chain rule intuition','vanishing gradient','residual gradient path'],
+    moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['gradients','transformer-block'],outcomes:['Explain chained sensitivities','Explain vanishing gradients','Explain residual paths'],concepts:['backpropagation','chain rule intuition','vanishing gradient','residual gradient path'],
     steps:[
       {kind:'concept',title:'Every operation passes sensitivity backward',lines:[
         'The forward pass records how values were computed. Backpropagation starts from loss and moves backward, using each operation’s local sensitivity to determine how earlier values contributed.',
@@ -258,7 +269,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'optimizer-loop',title:'The Optimizer Loop',emoji:'⚙️',blurb:'Connect forward, loss, backward, and update into one cycle.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['backpropagation'],outcomes:['Order training phases','Explain learning rate','Explain gradient reset'],concepts:['optimizer','learning rate','zero_grad','gradient accumulation'],
+    moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['backpropagation'],outcomes:['Order training phases','Explain learning rate','Explain gradient reset'],concepts:['optimizer','learning rate','zero_grad','gradient accumulation'],
     steps:[
       {kind:'concept',title:'Four phases repeat',lines:[
         'One training step has four phases: forward pass produces predictions; loss compares them with targets; backward computes gradients; optimizer step updates weights.',
@@ -275,7 +286,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'validation-generalization',title:'Validation and Generalization',emoji:'📉',blurb:'Know whether the model learned a pattern or memorized examples.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['optimizer-loop'],outcomes:['Distinguish data splits','Diagnose overfitting','Choose early stopping'],concepts:['training set','validation set','test set','generalization','overfitting'],
+    moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['optimizer-loop'],outcomes:['Distinguish data splits','Diagnose overfitting','Choose early stopping'],concepts:['training set','validation set','test set','generalization','overfitting'],
     steps:[
       {kind:'concept',title:'Seen examples cannot judge transfer',lines:[
         'Training loss measures examples used to update the model. A flexible model can memorize them, so low training loss alone does not prove useful learning.',
@@ -293,7 +304,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'decoding-basics',title:'Greedy Decoding and Sampling',emoji:'🎲',blurb:'Choose between consistency and variation after prediction.',minutes:7,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['inference-loop'],outcomes:['Distinguish greedy and sampling','Choose by task','Locate randomness'],concepts:['greedy decoding','sampling','random seed','determinism'],
+    moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['inference-loop'],outcomes:['Distinguish greedy and sampling','Choose by task','Locate randomness'],concepts:['greedy decoding','sampling','random seed','determinism'],
     steps:[
       {kind:'concept',title:'Prediction and choice are separate',lines:[
         'The model produces a probability distribution. Greedy decoding chooses the highest-probability token every time and is deterministic under identical computation.',
@@ -317,7 +328,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'decoding-controls',title:'Top-k, Top-p, and Beam Search',emoji:'🌲',blurb:'Add guardrails and search after greedy and sampling are clear.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['decoding-basics'],outcomes:['Explain top-k and top-p','Explain beam search','Choose controls by task'],concepts:['top-k','top-p nucleus','cumulative probability','beam search'],
+    moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['decoding-basics'],outcomes:['Explain top-k and top-p','Explain beam search','Choose controls by task'],concepts:['top-k','top-p nucleus','cumulative probability','beam search'],
     steps:[
       {kind:'concept',title:'Filter choices or search sequences',lines:[
         'Top-k keeps the k highest-probability tokens, then samples. Candidate count stays fixed even when the model is certain or uncertain.',
@@ -334,7 +345,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'llm-in-practice',title:'Prompting, Chat Format, and Failure Modes',emoji:'💬',blurb:'Three ideas every practitioner needs immediately: few-shot prompting, chat structure, and hallucination.',minutes:7,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['next-token-prediction','decoding-controls'],outcomes:['Use few-shot prompting to shape behavior','Describe system/user/assistant turn structure','Name hallucination as a structural failure mode'],concepts:['few-shot prompting','zero-shot','system prompt','chat format','hallucination'],
+    moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['next-token-prediction','decoding-controls'],outcomes:['Use few-shot prompting to shape behavior','Describe system/user/assistant turn structure','Name hallucination as a structural failure mode'],concepts:['few-shot prompting','zero-shot','system prompt','chat format','hallucination'],
     steps:[
       {kind:'concept',title:'What happens before the model runs',lines:[
         'Few-shot prompting places example input-output pairs in the context before the real question. The model observes the pattern and continues it without any weight update. Zero-shot gives only the question; few-shot gives a short demonstration.',
@@ -353,7 +364,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
   },
   {
     slug:'model-capstone',title:'Model Mechanics Checkpoint',emoji:'🏁',blurb:'Retrieve and connect the complete path before applications.',minutes:8,
-    moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['validation-generalization','decoding-controls','llm-in-practice','parameter-counts'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
+    moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['validation-generalization','decoding-controls','llm-in-practice','parameter-counts'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
     steps:[
       {kind:'concept',title:'Two traces, one model',lines:['Inference uses fixed weights to turn context into next-token distributions. Training adds targets, loss, backpropagation, and optimizer updates to change those weights.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them makes knowledge usable.'],cta:'Start the checkpoint'},
       {kind:'mcq',prompt:'Which path describes one inference cycle?',options:['text → IDs → embeddings → blocks → logits → probabilities → token choice','text → loss → gradient → ID','embedding → tokenizer → optimizer → text','probability → update → vocabulary'],answer:0,explain:'That is the forward and decoding path. Loss and gradients belong to training.',nudge:'Start with text and end with a token choice.'},

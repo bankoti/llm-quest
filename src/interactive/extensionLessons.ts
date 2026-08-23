@@ -1,6 +1,6 @@
 import type { InteractiveLesson } from './types'
 const MODULE='frontier'
-const MODULE_TITLE='Frontier extensions'
+const MODULE_TITLE='Beyond the Core: Frontier Extensions'
 
 export const EXTENSION_LESSONS: InteractiveLesson[] = [
   {
