@@ -12,11 +12,11 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
         'SFT is good for behavior: answer format, tone, task procedure, and domain style. It is a poor way to keep changing facts current because knowledge becomes distributed through weights and is difficult to cite or replace.',
         'Updating every weight on a narrow dataset can damage older abilities. This is catastrophic forgetting. Mixing general examples, using a smaller update, or freezing the base model can reduce it.',
       ],cta:'Choose the right adaptation'},
-      {kind:'worked',title:'Fact update or behavior update?',prompt:'A support assistant must use a new response template and also know prices that change weekly.',stages:[
+      {kind:'worked', figure: 'adapt-toolkit',title:'Fact update or behavior update?',prompt:'A support assistant must use a new response template and also know prices that change weekly.',stages:[
         {label:'Separate requirements',body:'Template compliance is behavior; weekly prices are changing facts.'},{label:'Choose SFT for behavior',body:'Fine-tune on examples of the required response structure.'},{label:'Keep facts outside weights',body:'Retrieve current price data at runtime so it remains updateable and citable.'},
       ],takeaway:'Fine-tune how the model behaves; retrieve facts that need freshness and provenance.'},
       {kind:'mcq',prompt:'Which need is the best fit for supervised fine-tuning?',options:['Teaching a stable output format from examples','Updating a price list every hour','Providing exact citations for new policies','Giving the model a larger context window'],answer:0,explain:'SFT changes learned behavior. Rapidly changing, citable facts belong in retrieval or tools.',nudge:'Ask whether the requirement is a reusable behavior or changing information.'},
-      {kind:'mcq',prompt:'After narrow medical fine-tuning, a model loses coding ability. What happened?',options:['Catastrophic forgetting','Top-p collapse','Tokenization drift','Causal leakage'],answer:0,explain:'Updates that improve the new task overwrote parameters useful for older skills.',nudge:'The key symptom is losing an old capability while learning a new one.'},
+      {kind:'mcq', figure: 'fx-catastrophic',prompt:'After narrow medical fine-tuning, a model loses coding ability. What happened?',options:['Catastrophic forgetting','Top-p collapse','Tokenization drift','Causal leakage'],answer:0,explain:'Updates that improve the new task overwrote parameters useful for older skills.',nudge:'The key symptom is losing an old capability while learning a new one.'},
     ],
   },
   {
@@ -28,7 +28,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
         'LoRA freezes the base weight matrix W and learns a small update B@A. A maps the large feature space down to r directions; B maps those directions back up. The rank r controls how many independent update directions the adapter can express.',
         'At deployment, B@A can be added into W for zero extra matrix multiplications, or kept separate so many small adapters share one base model.',
       ],cta:'Choose an adapter rank'},
-      {kind:'worked',title:'Why rank saves parameters',prompt:'W is 4096×4096. Compare a full update with rank r=8.',stages:[
+      {kind:'worked', figure: 'lora-arith',title:'Why rank saves parameters',prompt:'W is 4096×4096. Compare a full update with rank r=8.',stages:[
         {label:'Full update',body:'A full delta needs 4096×4096 ≈ 16.8 million trainable numbers.'},{label:'Factor the update',body:'A has 8×4096 and B has 4096×8: about 65 thousand numbers total.'},{label:'Interpret rank',body:'The adapter can combine 8 learned update directions instead of independently changing every matrix direction.'},
       ],takeaway:'Low rank is a capacity limit on the update, not eight copies of the model.'},
       {kind:'widget',widget:LoraPlay},
@@ -72,7 +72,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
         {label:'Create supervision',body:'The pair records A ≻ B; it does not yet provide a numeric score.'},{label:'Train the reward model',body:'Learn to score A higher than B from many such pairs.'},{label:'Optimize the policy',body:'Run PPO to increase reward while the KL penalty keeps the model close to the SFT baseline.'},
       ],takeaway:'RLHF uses preference data to train a reward model, then optimizes the language model against it.'},
       {kind:'widget',widget:RewardHackPlay},
-      {kind:'mcq',prompt:'What is the KL term doing in PPO-style RLHF?',options:['Penalizing large drift from the reference language model','Deleting low-reward examples','Converting scores to token IDs','Updating the reward model during inference'],answer:0,explain:'KL divergence measures distribution difference. The penalty preserves useful language behavior while optimizing reward.',nudge:'Think of it as a tether to the starting model.'},
+      {kind:'mcq', figure: 'fx-kl-leash',prompt:'What is the KL term doing in PPO-style RLHF?',options:['Penalizing large drift from the reference language model','Deleting low-reward examples','Converting scores to token IDs','Updating the reward model during inference'],answer:0,explain:'KL divergence measures distribution difference. The penalty preserves useful language behavior while optimizing reward.',nudge:'Think of it as a tether to the starting model.'},
       {kind:'mcq',prompt:'Why train a separate reward model rather than optimizing preferences directly?',options:['A reward model can evaluate any new response, enabling online optimization','Reward models use fewer parameters','Direct optimization requires no data','The KL penalty requires it'],answer:0,explain:'A trained reward model generalizes to score novel responses, providing the signal for policy optimization.',nudge:'What does the policy need at each training step?'},
     ],
   },
@@ -87,7 +87,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
         'The strength of this tether is controlled by a temperature parameter β: higher β keeps the updated model closer to the reference model, while lower β allows more deviation toward preferred responses.',
         'A newer relative, GRPO (group relative policy optimization), returns to the RL loop but drops the separate value network: it samples a group of responses per prompt and scores each against the group average reward. It drives reasoning-focused training such as DeepSeek-R1.',
       ],cta:'Compare the two paths'},
-      {kind:'worked',title:'One preference pair through DPO',prompt:'For a prompt, response A is chosen over response B.',stages:[
+      {kind:'worked', figure: 'preference-pair',title:'One preference pair through DPO',prompt:'For a prompt, response A is chosen over response B.',stages:[
         {label:'No reward model needed',body:'DPO uses the preference pair directly as a supervised signal.'},{label:'Maximize the ratio',body:'Increase log P(A) relative to log P(B), compared to the reference model\'s ratio.'},{label:'Implicit constraint',body:'The reference model anchors the update, preventing extreme drift without an explicit KL coefficient.'},
       ],takeaway:'DPO turns preference comparisons into a direct objective — simpler pipeline, same preference data.'},
       {kind:'mcq',prompt:'Which statement describes DPO?',options:['It directly prefers chosen responses over rejected ones without training a separate reward model or running an online RL loop','It requires a trained reward model at inference time','It trains only the tokenizer','It samples uniformly from the reward model'],answer:0,explain:'DPO turns preference comparisons into a direct supervised-style objective relative to a reference model.',nudge:'Which path removes the separate reward-model-and-PPO loop?'},
@@ -118,12 +118,12 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     steps:[
       {kind:'concept',figure:'adapt-toolkit',title:'Match the mechanism to the need',lines:['Fine-tuning shapes behavior; LoRA does so with fewer trainable parameters; RLHF and DPO shape preferences from comparisons; calibration measures whether stated confidence tracks accuracy.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them under pressure makes knowledge usable.'],cta:'Start the checkpoint'},
       {kind:'mcq',prompt:'A model must adopt a concise JSON output format. Which approach fits best?',options:['Supervised fine-tuning on format examples','RLHF with vague preference pairs','Quantization','Increasing temperature'],answer:0,explain:'A stable output format is a behavior pattern best taught from demonstrations.',nudge:'Is this a behavior or a preference?'},
-      {kind:'mcq',prompt:'You need multiple style variants sharing one base model in production. Best mechanism?',options:['Separate LoRA adapters per variant','Full fine-tuning for each variant','Raise temperature per variant','One distilled student per variant'],answer:0,explain:'LoRA adapters are small, can share a frozen base, and switch quickly.',nudge:'What keeps memory low while serving many variants?'},
-      {kind:'predict',prompt:'A model trained with RLHF says "I am absolutely certain" about a wrong answer.',questions:[
+      {kind:'mcq', figure: 'lora-bypass',prompt:'You need multiple style variants sharing one base model in production. Best mechanism?',options:['Separate LoRA adapters per variant','Full fine-tuning for each variant','Raise temperature per variant','One distilled student per variant'],answer:0,explain:'LoRA adapters are small, can share a frozen base, and switch quickly.',nudge:'What keeps memory low while serving many variants?'},
+      {kind:'predict', figure: 'reliability-diagram',prompt:'A model trained with RLHF says "I am absolutely certain" about a wrong answer.',questions:[
         {label:'most likely explanation',options:['Preference training rewarded confident tone independent of accuracy','The model verified the fact at inference time','Softmax guarantees correctness'],answer:0,reveal:'RLHF can decouple stated confidence from actual reliability.'},
         {label:'best mitigation',options:['Measure calibration and add uncertainty signals','Remove all fine-tuning','Disable softmax'],answer:0,reveal:'Calibration measurement detects the gap; techniques like verbalized uncertainty or retrieval can reduce it.'},
       ]},
-      {kind:'numeric',prompt:'LoRA arithmetic.',questions:[
+      {kind:'numeric', figure: 'lora-arith',prompt:'LoRA arithmetic.',questions:[
         {label:'W is 2048x2048. Rank-16 adapter: total A+B parameters',answer:65536,tolerance:0,reveal:'A is 16x2048=32768, B is 2048x16=32768. Total 65,536.'},
         {label:'ratio of adapter params to full W params (percent, 1 decimal)',answer:1.6,tolerance:0.1,reveal:'65536 / (2048x2048) = 65536/4194304 = 0.015625, so about 1.6%.'},
       ]},

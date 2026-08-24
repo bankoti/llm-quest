@@ -3,6 +3,7 @@
 // it is introduced. Dark-theme SVG, no state, safe for the smoke harness.
 import type { ReactElement } from 'react'
 import { FIGURES_EXT } from './figuresExt'
+import { FIGURES_QUIZ } from './figuresQuiz'
 
 export const C = {
   box: '#1f2937', edge: '#4b5563', text: '#d1d5db', dim: '#9ca3af', faint: '#6b7280',
@@ -280,6 +281,7 @@ export const FIGURES: Record<string, () => ReactElement> = {
   'param-slabs': ParamSlabs,
   'inference-loops': InferenceLoops,
   ...FIGURES_EXT,
+  ...FIGURES_QUIZ,
 }
 
 export function Figure({ name }: { name: string }) {

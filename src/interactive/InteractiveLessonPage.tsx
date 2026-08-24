@@ -71,6 +71,7 @@ function StepWorked({ step, onDone }: { step: Extract<Step, { kind: 'worked' }>;
       <p className="text-xs font-mono uppercase tracking-widest text-amber-400 mb-2">Worked example</p>
       <h2 className="text-2xl font-bold text-white mb-3">{step.title}</h2>
       <p className="text-gray-300 mb-5 leading-relaxed">{step.prompt}</p>
+      {step.figure && <Figure name={step.figure} />}
       <div className="border-l-2 border-gray-800 pl-4 space-y-4">
         {step.stages.slice(0, shown).map((stage, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
@@ -189,6 +190,7 @@ export function StepMcq({ step, onDone, showConfidence = true }: {
           <motion.div key="ok" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4">
             <p className="text-sm text-emerald-300 font-semibold">Correct.</p>
             <p className="text-sm text-gray-300 mt-1">{step.explain}</p>
+            {step.figure && <Figure name={step.figure} />}
             <ContinueBtn onClick={() => onDone(wrongOnes.length === 0, firstSure ?? false)} />
           </motion.div>
         )}
@@ -277,11 +279,14 @@ export function StepPredict({ step, onDone }: {
           <PredictQ key={current} q={step.questions[current]} onDone={onQDone} />
         </>
       )}
-      {complete && <ContinueBtn onClick={() => {
-        const finalEarned = earned
-        const allFirst = finalEarned === total
-        onDone(allFirst, finalEarned, total)
-      }} />}
+      {complete && <>
+        {step.figure && <Figure name={step.figure} />}
+        <ContinueBtn onClick={() => {
+          const finalEarned = earned
+          const allFirst = finalEarned === total
+          onDone(allFirst, finalEarned, total)
+        }} />
+      </>}
     </div>
   )
 }
@@ -371,6 +376,7 @@ export function StepNumeric({ step, onDone }: {
     <div className="w-full max-w-lg">
       <p className="text-xs font-mono uppercase tracking-widest text-sky-400 mb-2">✏️ Calculate by hand</p>
       <p className="text-lg text-gray-100 mb-3">{step.prompt}</p>
+      {step.figure && <Figure name={step.figure} />}
       {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
       {!complete && (
         <>
@@ -409,6 +415,7 @@ function ReviewStep({ s }: { s: Step }) {
       <p className="text-xs font-mono uppercase tracking-widest text-amber-400 mb-2">Worked example</p>
       <h2 className="text-2xl font-bold text-white mb-3">{s.title}</h2>
       <p className="text-gray-300 mb-5 leading-relaxed">{s.prompt}</p>
+      {s.figure && <Figure name={s.figure} />}
       <div className="border-l-2 border-gray-800 pl-4 space-y-4">
         {s.stages.map((stage, i) => (
           <div key={i}>
@@ -431,6 +438,7 @@ function ReviewStep({ s }: { s: Step }) {
         ))}
       </div>
       <p className="mt-4 text-sm text-gray-300">{s.explain}</p>
+      {s.figure && <Figure name={s.figure} />}
     </div>
   )
   if (s.kind === 'predict') return (
@@ -444,6 +452,7 @@ function ReviewStep({ s }: { s: Step }) {
           <p className="text-xs text-gray-400 mt-1">{q.reveal}</p>
         </div>
       ))}
+      {s.figure && <Figure name={s.figure} />}
     </div>
   )
   if (s.kind === 'numeric') return (
@@ -451,6 +460,7 @@ function ReviewStep({ s }: { s: Step }) {
       <p className="text-xs font-mono uppercase tracking-widest text-sky-400 mb-2">✏️ Calculate by hand</p>
       <p className="text-lg text-gray-100 mb-3">{s.prompt}</p>
       {pre(s.code)}
+      {s.figure && <Figure name={s.figure} />}
       {s.questions.map((q, i) => (
         <div key={i} className="mb-4">
           <p className="font-mono text-sm text-gray-200 mb-1">{q.label}</p>

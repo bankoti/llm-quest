@@ -13,6 +13,7 @@ const InteractiveHubPage = lazy(() => import('@/interactive/InteractiveHubPage')
 const InteractiveLessonPage = lazy(() => import('@/interactive/InteractiveLessonPage').then(m => ({ default: m.InteractiveLessonPage })))
 const PracticePage = lazy(() => import('@/interactive/PracticePage').then(m => ({ default: m.PracticePage })))
 const DailyMixPage = lazy(() => import('@/interactive/DailyMixPage').then(m => ({ default: m.DailyMixPage })))
+const FigureGalleryPage = lazy(() => import('@/interactive/FigureGalleryPage').then(m => ({ default: m.FigureGalleryPage })))
 const WarmupPage = lazy(() => import('@/interactive/WarmupPage').then(m => ({ default: m.WarmupPage })))
 const DemoBrilliantPage = lazy(() => import('@/pages/DemoBrilliantPage').then(m => ({ default: m.DemoBrilliantPage })))
 
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="/interactive/practice" element={<PracticePage />} />
               <Route path="/interactive/mix" element={<DailyMixPage />} />
               <Route path="/interactive/:slug" element={<InteractiveLessonPage />} />
+              <Route path="/figures" element={<FigureGalleryPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>

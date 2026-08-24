@@ -45,11 +45,11 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'Retrieve values',body:'Output = 0.88×V_A + 0.12×V_B. Values, not keys, are mixed.'},
       ],takeaway:'Attention is soft lookup: query-key matching produces weights used to mix values.'},
       {kind:'mcq',prompt:'Which vectors form the attention output?',options:['Value vectors, weighted by query-key scores','Key vectors, weighted by query-value scores','Query vectors, averaged uniformly','Only the single value vector with the highest score'],answer:0,explain:'Queries and keys produce weights; those weights scale values.',nudge:'Match with Q/K; retrieve V.'},
-      {kind:'concept',title:'Why scores are scaled before softmax',lines:[
+      {kind:'concept', figure: 'fx-scale-softmax',title:'Why scores are scaled before softmax',lines:[
         'Large dot products push softmax toward near-zero gradients, making learning unstable. Scores are divided by the square root of d_k before softmax: softmax(Q @ K.T / sqrt(d_k)) @ V.',
         'This scaling is called scaled dot-product attention. Every attention formula you encounter in papers and code uses it.',
       ],cta:'Compute the divisor'},
-      {kind:'numeric',prompt:'Compute the scaling divisor.',questions:[{label:'d_k = 64 → divisor = sqrt(64)',answer:8,tolerance:0,unit:'',reveal:'sqrt(64) = 8. Each score is divided by 8 before softmax.'}]},
+      {kind:'numeric', figure: 'fx-scale-softmax',prompt:'Compute the scaling divisor.',questions:[{label:'d_k = 64 → divisor = sqrt(64)',answer:8,tolerance:0,unit:'',reveal:'sqrt(64) = 8. Each score is divided by 8 before softmax.'}]},
       {kind:'worked',title:'A full attention computation, by hand',prompt:'One query q=[1,0,0,0] meets keys k1=[2,0,0,0], k2=[0,2,0,0] and values v1=[10,0], v2=[0,10]. Keys have d_k=4 features (the last two are zero here), so scores are divided by sqrt(4)=2.',stages:[
         {label:'Raw scores',body:'q dot k1 = 1x2 + 0x0 + 0x0 + 0x0 = 2. q dot k2 = 1x0 + 0x2 + 0x0 + 0x0 = 0.',code:'scores = q @ K.T          # [2, 0]'},
         {label:'Scale',body:'Divide by sqrt(4) = 2. Scaled scores are [1, 0].',code:'scaled = scores / sqrt(d_k)  # [1, 0]'},
@@ -79,7 +79,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ],cta:'Commit before the demo'},
       {kind:'mcq',prompt:'Why is a causal mask necessary during training?',options:['The full target sequence is present, so positions could copy future answers','It reduces vocabulary size','It assigns token IDs chronologically','It removes padding'],answer:0,explain:'Parallel training exposes the whole sequence. The mask restores the generation-time boundary.',nudge:'Is the answer token already present somewhere in the training tensor?'},
       {kind:'widget',widget:CausalMaskPlay},
-      {kind:'worked',title:'Read one mask row',prompt:'At position 2 in a four-token sequence, which positions are allowed?',stages:[
+      {kind:'worked', figure: 'causal-mask',title:'Read one mask row',prompt:'At position 2 in a four-token sequence, which positions are allowed?',stages:[
         {label:'Include the past',body:'Positions 0 and 1 are known.'},{label:'Include the present',body:'Position 2 may attend to itself.'},{label:'Block the future',body:'Position 3 receives −∞ before softmax.'},
       ],takeaway:'The row is [allowed, allowed, allowed, blocked]; the future receives zero weight.'},
       {kind:'predict',prompt:'Apply the causal mask to each query position in a length-5 sequence.',questions:[{label:'At position 1 (zero-indexed), how many positions may the query attend to?',options:['2 positions','1 position','4 positions','5 positions'],answer:0,reveal:'Positions 0 and 1: the past plus itself — two positions total.'},{label:'At position 4, which positions may the query attend to?',options:['all 5 positions','only position 4','positions 0 through 3 only'],answer:0,reveal:'The final position can use every earlier position plus itself.'}]},
@@ -129,19 +129,19 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       {kind:'worked',title:'Follow one representation',prompt:'A token representation x enters a pre-normalization block.',stages:[
         {label:'Normalize and attend',body:'Attention gathers relevant information from other positions.'},{label:'First residual',body:'Add attention output back to x.'},{label:'Normalize and transform',body:'The FFN changes features independently per position.'},{label:'Second residual',body:'Add FFN output back. Shape stays (B,T,C).'},
       ],takeaway:'Attention mixes positions; the FFN mixes features; residuals preserve a stable highway.'},
-      {kind:'worked',title:'LayerNorm, by hand',prompt:'Normalize the 4-number representation [2, 4, 6, 8].',stages:[
+      {kind:'worked', figure: 'fx-layernorm',title:'LayerNorm, by hand',prompt:'Normalize the 4-number representation [2, 4, 6, 8].',stages:[
         {label:'Mean',body:'(2+4+6+8)/4 = 5.'},
         {label:'Variance',body:'Squared distances from 5 are [9, 1, 1, 9]; their average is 5.'},
         {label:'Normalize',body:'Each value becomes (x - 5)/sqrt(5). The first entry: (2-5)/2.24 = -1.34.'},
         {label:'Scale and shift',body:'Learned per-feature parameters then rescale the result, so the network can undo normalization wherever that helps.'},
       ],takeaway:'LayerNorm is just mean, variance, rescale — computed separately for every token.'},
-      {kind:'numeric',prompt:'Normalize [1, 3, 5, 7] the same way.',questions:[
+      {kind:'numeric', figure: 'fx-layernorm',prompt:'Normalize [1, 3, 5, 7] the same way.',questions:[
         {label:'mean',answer:4,tolerance:0,reveal:'(1+3+5+7)/4 = 4.'},
         {label:'variance',answer:5,tolerance:0,reveal:'Squared distances [9, 1, 1, 9] average to 5.'},
         {label:'normalized last entry (2 decimals)',answer:1.34,tolerance:0.02,reveal:'(7-4)/sqrt(5) = 3/2.24 = 1.34.'},
       ]},
-      {kind:'mcq',prompt:'How do attention and the FFN differ?',options:['Attention exchanges information across positions; the FFN transforms each position independently','The FFN exchanges information across positions; attention transforms each position independently','They are the same operation under different names','Attention transforms features; the FFN moves information between batches'],answer:0,explain:'Their roles are communication across positions and processing within each position.',nudge:'Ask where information can move.'},
-      {kind:'mcq',prompt:'Why add x + f(x)?',options:['It preserves a direct path for information and learning signals','It doubles sequence length','It makes all features equal','It removes weights'],answer:0,explain:'The identity path can bypass a transformation when needed.',nudge:'What remains if f(x) is poor?'},
+      {kind:'mcq', figure: 'transformer-block',prompt:'How do attention and the FFN differ?',options:['Attention exchanges information across positions; the FFN transforms each position independently','The FFN exchanges information across positions; attention transforms each position independently','They are the same operation under different names','Attention transforms features; the FFN moves information between batches'],answer:0,explain:'Their roles are communication across positions and processing within each position.',nudge:'Ask where information can move.'},
+      {kind:'mcq', figure: 'transformer-block',prompt:'Why add x + f(x)?',options:['It preserves a direct path for information and learning signals','It doubles sequence length','It makes all features equal','It removes weights'],answer:0,explain:'The identity path can bypass a transformation when needed.',nudge:'What remains if f(x) is poor?'},
       {kind:'predict',prompt:'Input is (B,T,C); the block preserves hidden width.',questions:[{label:'output shape',options:['(B,T,C)','(B,C,T)','(T,T)','(B,T)'],answer:0,reveal:'Residual additions require matching input and output shapes.'},{label:'if the FFN output shape mismatched x',options:['The residual addition x + f(x) would fail','Training would be faster','Vocabulary size would change'],answer:0,reveal:'Addition requires identical shapes; a dimension mismatch is a runtime error.'}]},
     ],
   },
@@ -154,7 +154,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'Inside each block, attention uses four C-by-C projections (Q, K, V, output). The FFN typically expands to 4C and returns: two matrices of size C times 4C. LayerNorm adds a tiny fraction.',
         'Many models reuse the token embedding table as the output projection (weight tying), adding zero extra parameters for the final logit layer.',
       ],cta:'Count GPT-2 small'},
-      {kind:'mcq',prompt:'A 12-block model with width 768 uses weight tying. Where do most parameters live?',options:['In the repeated per-block projections (attention + FFN)','In the final softmax','In the tokenizer','In the position table alone'],answer:0,explain:'12 blocks of attention and FFN projections total about 85M versus 39M for embeddings.',nudge:'Which component is repeated 12 times?'},
+      {kind:'mcq', figure: 'param-slabs',prompt:'A 12-block model with width 768 uses weight tying. Where do most parameters live?',options:['In the repeated per-block projections (attention + FFN)','In the final softmax','In the tokenizer','In the position table alone'],answer:0,explain:'12 blocks of attention and FFN projections total about 85M versus 39M for embeddings.',nudge:'Which component is repeated 12 times?'},
       {kind:'worked',title:'Count one block before you count the model',prompt:'GPT-2 small: width C = 768, FFN expands to 4C. Count one transformer block.',stages:[
         {label:'Attention projections',body:'Q, K, V, and output are each 768×768. That is 4 × 589,824 ≈ 2.36M parameters.'},
         {label:'FFN pair',body:'Up-projection 768×3072 and down-projection 3072×768: 2 × 2.36M ≈ 4.72M parameters.'},
@@ -163,7 +163,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       {kind:'numeric',prompt:'Quick parameter retrieval.',questions:[
         {label:'4 attention projections, each 768x768, per block (millions)',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M — the worked example\'s arithmetic, recalled cold.'},
       ]},
-      {kind:'mcq',prompt:'GPT-2 reuses the embedding table as the output head. What does weight tying save?',options:['An entire V x C matrix of additional parameters','All block parameters','The position table','The FFN weights'],answer:0,explain:'Without tying, a separate (V, C) output matrix would add another 38.6M parameters.',nudge:'Which matrix would otherwise appear twice?'},
+      {kind:'mcq', figure: 'fx-weight-tying',prompt:'GPT-2 reuses the embedding table as the output head. What does weight tying save?',options:['An entire V x C matrix of additional parameters','All block parameters','The position table','The FFN weights'],answer:0,explain:'Without tying, a separate (V, C) output matrix would add another 38.6M parameters.',nudge:'Which matrix would otherwise appear twice?'},
       {kind:'predict',prompt:'A new model doubles width to 1536 with the same 12 blocks and vocab.',questions:[
         {label:'per-block parameter change',options:['Roughly quadruples (C squared appears in projections)','Doubles','Stays the same'],answer:0,reveal:'Attention projections are C x C, so doubling C quadruples each projection.'},
         {label:'embedding table change',options:['Doubles (V stays, C doubles)','Quadruples','Unchanged'],answer:0,reveal:'The embedding table is V x C; doubling C doubles it linearly.'},
@@ -183,8 +183,8 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'Encode',body:'Tokenizer maps text to IDs.'},{label:'Represent',body:'Embeddings and positions create vectors.'},{label:'Transform',body:'Blocks build contextual hidden states.'},{label:'Score and choose',body:'The final state produces logits, probabilities, and a choice.'},{label:'Repeat',body:'Append the token and run again.'},
       ],takeaway:'The network predicts one distribution per cycle; the outer loop builds the sequence.'},
       {kind:'widget',widget:GenerationPlay},
-      {kind:'mcq',prompt:'What changes from one generated token to the next?',options:['Context grows; model weights stay fixed','The model retrains','Vocabulary changes','Tokenizer learns merges'],answer:0,explain:'Inference reuses fixed parameters. Only context and temporary activations change.',nudge:'Training changes weights; inference uses them.'},
-      {kind:'predict',prompt:'Compare repeated decoding runs under two selection strategies.',questions:[{label:'With greedy decoding and identical computation, what is the result?',options:['The same sequence','A random sequence','Different IDs but same text'],answer:0,reveal:'Greedy chooses the same argmax at each step.'},{label:'With temperature-1 sampling instead, what can happen?',options:['Results may differ across runs','Results must still match','The model retrains between runs'],answer:0,reveal:'Sampling introduces randomness; different draws can yield different sequences.'}]},
+      {kind:'mcq', figure: 'inference-loops',prompt:'What changes from one generated token to the next?',options:['Context grows; model weights stay fixed','The model retrains','Vocabulary changes','Tokenizer learns merges'],answer:0,explain:'Inference reuses fixed parameters. Only context and temporary activations change.',nudge:'Training changes weights; inference uses them.'},
+      {kind:'predict', figure: 'decode-tree',prompt:'Compare repeated decoding runs under two selection strategies.',questions:[{label:'With greedy decoding and identical computation, what is the result?',options:['The same sequence','A random sequence','Different IDs but same text'],answer:0,reveal:'Greedy chooses the same argmax at each step.'},{label:'With temperature-1 sampling instead, what can happen?',options:['Results may differ across runs','Results must still match','The model retrains between runs'],answer:0,reveal:'Sampling introduces randomness; different draws can yield different sequences.'}]},
     ],
   },
   {
@@ -196,18 +196,18 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'The model assigns probability to every possible next token. Loss measures how poor those probabilities were. Cross-entropy is low when the true target has high probability and high when it has low probability.',
         'A batch groups many sequences so predictions can be computed together. Position losses are usually averaged into one batch loss before updates.',
       ],cta:'Build the answer key'},
-      {kind:'worked',title:'Shift one sequence',prompt:'Tokens are [BOS, cats, sleep, EOS].',stages:[
+      {kind:'worked', figure: 'fx-shift-targets',title:'Shift one sequence',prompt:'Tokens are [BOS, cats, sleep, EOS].',stages:[
         {label:'Build input',body:'Input = [BOS, cats, sleep].'},{label:'Build targets',body:'Targets = [cats, sleep, EOS].'},{label:'Align',body:'BOS predicts cats; cats predicts sleep; sleep predicts EOS.'},
       ],takeaway:'Shift by one. Four known tokens provide three supervised questions.'},
-      {kind:'numeric',prompt:'Count next-token targets.',questions:[{label:'targets from 10 tokens',answer:9,tolerance:0,reveal:'The first 9 positions predict the following token.'}]},
+      {kind:'numeric', figure: 'fx-shift-targets',prompt:'Count next-token targets.',questions:[{label:'targets from 10 tokens',answer:9,tolerance:0,reveal:'The first 9 positions predict the following token.'}]},
       {kind:'mcq',prompt:'When is cross-entropy loss lowest?',options:['When the model gives high probability to the actual target','When every token is equally likely','When the largest logit is negative','When input equals target'],answer:0,explain:'Cross-entropy rewards probability on the known correct token.',nudge:'Loss measures surprise at the answer key.'},
-      {kind:'worked',title:'Put numbers on the loss',prompt:'Cross-entropy at one position is -log p(target), using the natural log.',stages:[
+      {kind:'worked', figure: 'fx-surprise-loss',title:'Put numbers on the loss',prompt:'Cross-entropy at one position is -log p(target), using the natural log.',stages:[
         {label:'Confident and right',body:'p(target) = 0.9 gives loss -ln(0.9) = 0.11. Almost no surprise.'},
         {label:'Unsure',body:'p(target) = 0.25 gives loss -ln(0.25) = 1.39.'},
         {label:'Confident and wrong',body:'p(target) = 0.01 gives loss -ln(0.01) = 4.6. Misplaced confidence is punished hard.'},
         {label:'Sanity-check a fresh model',body:'Before training, the model should be near-uniform over the vocabulary: p = 1/V, so loss = ln(V). For V = 50,000 that is about 10.8. A very different starting loss usually means a bug.'},
       ],takeaway:'Loss is -log of the probability given to the right answer; ln(V) is the honest starting point.'},
-      {kind:'numeric',prompt:'Compute both losses (natural log, 2 decimals).',questions:[
+      {kind:'numeric', figure: 'fx-surprise-loss',prompt:'Compute both losses (natural log, 2 decimals).',questions:[
         {label:'p(target) = 0.5, loss',answer:0.69,tolerance:0.02,reveal:'-ln(0.5) = 0.69: exactly one coin flip of surprise.'},
         {label:'vocabulary of 8, untrained uniform model, expected loss',answer:2.08,tolerance:0.03,reveal:'ln(8) = 2.08. Watch training start here and fall.'},
       ]},
@@ -227,7 +227,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         {label:'Read the consequence',body:'The model sees twice as much code as books. Expect stronger code completion than literary style.'},
         {label:'Change the mixture',body:'The same architecture retrained at 40% code is a different model. Mixture is a first-class design choice, not a detail.'},
       ],takeaway:'Architecture is the engine; the mixture decides what the engine learns.'},
-      {kind:'mcq',prompt:'Why deduplicate before training?',options:['Repeated documents push the model toward memorizing them verbatim','It makes tokenization reversible','It reduces vocabulary size','GPUs require unique inputs'],answer:0,explain:'Duplicates concentrate probability on specific strings, hurting generalization and enabling regurgitation of training text.',nudge:'What does seeing one page a thousand times teach?'},
+      {kind:'mcq', figure: 'data-funnel',prompt:'Why deduplicate before training?',options:['Repeated documents push the model toward memorizing them verbatim','It makes tokenization reversible','It reduces vocabulary size','GPUs require unique inputs'],answer:0,explain:'Duplicates concentrate probability on specific strings, hurting generalization and enabling regurgitation of training text.',nudge:'What does seeing one page a thousand times teach?'},
       {kind:'mcq',prompt:'A large model answers questions about a niche topic poorly. Most likely cause?',options:['The topic was rare in, or filtered out of, the training mixture','A broken softmax','A learning rate that was an even number','A context window that is too wide'],answer:0,explain:'Capacity cannot recover patterns the data never carried.',nudge:'Can a model learn what it never saw?'},
       {kind:'numeric',prompt:'A mixture is 60% web, 30% code, 10% books over 200B tokens.',questions:[
         {label:'code tokens, in billions',answer:60,tolerance:0,reveal:'0.30 x 200B = 60B.'},
@@ -243,10 +243,10 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'A gradient is that local sensitivity. A positive gradient means increasing the weight raises loss, so gradient descent moves downward. A negative gradient means increasing the weight reduces loss, so the update moves upward.',
         'Gradient magnitude indicates sensitivity. It is a local guide, not a guarantee about far-away values.',
       ],cta:'Follow the slope'},
-      {kind:'worked',title:'Move opposite the gradient',prompt:'Weight w=2.0 has gradient +0.5. Learning rate is 0.1.',stages:[
+      {kind:'worked', figure: 'fx-grad-step',title:'Move opposite the gradient',prompt:'Weight w=2.0 has gradient +0.5. Learning rate is 0.1.',stages:[
         {label:'Read sign',body:'Positive gradient: increasing w raises loss.'},{label:'Compute step',body:'0.1×0.5 = 0.05.'},{label:'Move downhill',body:'w_new = 2.0−0.05 = 1.95.'},
       ],takeaway:'weight ← weight − learning_rate × gradient.'},
-      {kind:'mcq',prompt:'A weight has gradient −2. Which way does gradient descent move it?',options:['Upward, because subtracting a negative increases it','Downward because every update subtracts','It does not move','Sign is irrelevant'],answer:0,explain:'w − lr×(−2) is larger than w.',nudge:'Subtracting a negative does what?'},
+      {kind:'mcq', figure: 'fx-grad-step',prompt:'A weight has gradient −2. Which way does gradient descent move it?',options:['Upward, because subtracting a negative increases it','Downward because every update subtracts','It does not move','Sign is irrelevant'],answer:0,explain:'w − lr×(−2) is larger than w.',nudge:'Subtracting a negative does what?'},
       {kind:'numeric',prompt:'Apply one update.',questions:[{label:'w=3, gradient=4, lr=0.25 → new w',answer:2,tolerance:0,reveal:'3−0.25×4=2.'}]},
     ],
   },
@@ -263,8 +263,8 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       {kind:'worked',title:'Compare a chain with a shortcut',prompt:'Three transformations each pass back half the signal.',stages:[
         {label:'Plain chain',body:'1×0.5×0.5×0.5 = 0.125.'},{label:'Residual path',body:'The shortcut contributes a path with multiplier 1.'},{label:'Interpret',body:'Earlier layers receive a stronger signal.'},
       ],takeaway:'Residuals preserve information forward and learning signal backward.'},
-      {kind:'mcq',prompt:'What causes a vanishing gradient?',options:['Repeated multiplication by values below 1 shrinks the signal','Too few IDs','Probabilities sum to 1','Several examples in a batch'],answer:0,explain:'Small sensitivities compound multiplicatively.',nudge:'Think multiplication, not addition.'},
-      {kind:'numeric',prompt:'Three stages each pass back 0.5.',questions:[{label:'signal from initial 1',answer:0.125,tolerance:0.001,reveal:'1×0.5³=0.125.'}]},
+      {kind:'mcq', figure: 'backprop-chain',prompt:'What causes a vanishing gradient?',options:['Repeated multiplication by values below 1 shrinks the signal','Too few IDs','Probabilities sum to 1','Several examples in a batch'],answer:0,explain:'Small sensitivities compound multiplicatively.',nudge:'Think multiplication, not addition.'},
+      {kind:'numeric', figure: 'backprop-chain',prompt:'Three stages each pass back 0.5.',questions:[{label:'signal from initial 1',answer:0.125,tolerance:0.001,reveal:'1×0.5³=0.125.'}]},
     ],
   },
   {
@@ -276,7 +276,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'Learning rate scales every update. Too small means barely visible movement. Too large can overshoot and make loss oscillate or diverge. In practice, training schedules warm up the learning rate from near-zero over the first few hundred steps, then decay it following a cosine curve or stepped schedule, rather than holding it fixed throughout.',
         'Many frameworks add new gradients into existing buffers. Resetting prevents accidental accumulation across batches.',
       ],cta:'Tune the step'},
-      {kind:'worked',title:'One complete step',prompt:'A batch is ready.',stages:[
+      {kind:'worked', figure: 'train-cycle',title:'One complete step',prompt:'A batch is ready.',stages:[
         {label:'Reset',body:'Clear old gradient buffers.'},{label:'Forward and loss',body:'Run the batch and measure error.'},{label:'Backward',body:'Compute gradients.'},{label:'Step',body:'Update weights.'},
       ],takeaway:'Reset → forward → loss → backward → step.'},
       {kind:'mcq',prompt:'Loss stays almost flat from the beginning. What should you check first?',options:['Whether learning rate is zero or too small','Whether batch size is odd','Whether IDs are alphabetical','Whether probabilities are negative'],answer:0,explain:'Tiny updates produce a flat curve. Too-large rates more often spike.',nudge:'Flat suggests movement is too small.'},
@@ -294,7 +294,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'A test set stays untouched until final evaluation. Choosing models based on test results leaks information and makes the reported result optimistic.',
         'Dropout is a common regularization technique: during training, a random fraction of activations is zeroed, preventing the model from relying on any single feature path. It is disabled at inference time.',
       ],cta:'Diagnose before the demo'},
-      {kind:'mcq',prompt:'Training loss falls while validation loss rises. What is happening?',options:['The model is overfitting training examples','The model is necessarily underfit','The tokenizer changed','The test set is improving'],answer:0,explain:'Performance on seen data improves while transfer to unseen data worsens.',nudge:'Compare seen and unseen examples.'},
+      {kind:'mcq', figure: 'train-val-curves',prompt:'Training loss falls while validation loss rises. What is happening?',options:['The model is overfitting training examples','The model is necessarily underfit','The tokenizer changed','The test set is improving'],answer:0,explain:'Performance on seen data improves while transfer to unseen data worsens.',nudge:'Compare seen and unseen examples.'},
       {kind:'widget',widget:EarlyStopPlay},
       {kind:'worked',title:'Use each split for one job',prompt:'Choose when to stop and then report quality.',stages:[
         {label:'Train',body:'Use training data for gradients.'},{label:'Select',body:'Use validation data for stopping and settings.'},{label:'Report',body:'Use untouched test data after choices are fixed.'},
@@ -313,12 +313,12 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'Greedy has a known failure mode: once a phrase becomes likely, taking the argmax every step can lock into a repetition loop, generating the same words again and again. Sampling, or an explicit repetition penalty, breaks the loop.',
       ],cta:'Compare generations'},
       {kind:'widget',widget:GenerationPlay},{kind:'widget',widget:TemperaturePlay},
-      {kind:'worked',title:'Sample a token, by hand',prompt:'A four-token vocabulary has probabilities: the 0.50, cat 0.30, sat 0.15, mat 0.05. A random draw is a number between 0 and 1.',stages:[
+      {kind:'worked', figure: 'fx-roulette',title:'Sample a token, by hand',prompt:'A four-token vocabulary has probabilities: the 0.50, cat 0.30, sat 0.15, mat 0.05. A random draw is a number between 0 and 1.',stages:[
         {label:'Stack the intervals',body:'the owns 0.00-0.50, cat owns 0.50-0.80, sat owns 0.80-0.95, mat owns 0.95-1.00.'},
         {label:'Draw',body:'The draw is 0.62. It lands in 0.50-0.80, so the sampled token is cat.'},
         {label:'Draw again',body:'Next cycle the draw is 0.97: mat, despite its 5% probability. Rare tokens really do appear.'},
       ],takeaway:'Sampling is a roulette wheel whose slot sizes are the probabilities.'},
-      {kind:'numeric',prompt:'Same wheel: the 0.00-0.50, cat 0.50-0.80, sat 0.80-0.95, mat 0.95-1.00. Answer with slot numbers: the=1, cat=2, sat=3, mat=4.',questions:[
+      {kind:'numeric', figure: 'fx-roulette',prompt:'Same wheel: the 0.00-0.50, cat 0.50-0.80, sat 0.80-0.95, mat 0.95-1.00. Answer with slot numbers: the=1, cat=2, sat=3, mat=4.',questions:[
         {label:'a draw of 0.85 lands in slot',answer:3,tolerance:0,reveal:'0.85 falls inside 0.80-0.95: sat.'},
         {label:'probability of NOT sampling the (2 decimals)',answer:0.5,tolerance:0.01,reveal:'1 - 0.50 = 0.50: half of all draws leave the most likely token behind.'},
       ]},
@@ -336,11 +336,11 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
         'Beam search keeps several whole partial sequences and expands promising ones. It is deterministic but often favors generic wording in open-ended generation.',
       ],cta:'Walk a search tree'},
       {kind:'widget',widget:BeamPlay},
-      {kind:'worked',title:'Build a nucleus',prompt:'Sorted probabilities are [0.50, 0.25, 0.12, 0.08, 0.05], p=0.90.',stages:[
+      {kind:'worked', figure: 'fx-nucleus',title:'Build a nucleus',prompt:'Sorted probabilities are [0.50, 0.25, 0.12, 0.08, 0.05], p=0.90.',stages:[
         {label:'Accumulate',body:'0.50 → 0.75 → 0.87 → 0.95.'},{label:'Stop',body:'Three tokens reach only 0.87, still short of p=0.90, so include the fourth: 0.95 crosses the threshold.'},{label:'Sample',body:'Sample among four; exclude the fifth.'},
       ],takeaway:'Top-p adapts candidate count to probability concentration.'},
       {kind:'mcq',prompt:'Why can beam search sound generic?',options:['It favors high-probability sequences, often common phrases','It samples uniformly','It deletes low IDs','It raises temperature'],answer:0,explain:'Specific or surprising text often scores lower than safe common wording.',nudge:'What wording is common in training data?'},
-      {kind:'predict',prompt:'Predict how temperature changes a top-p=0.9 nucleus.',questions:[{label:'As temperature rises, what usually happens to nucleus size?',options:['Usually grows as probability spreads','Always shrinks to one','Cannot change'],answer:0,reveal:'A flatter distribution needs more tokens to reach 90%.'},{label:'At very low temperature, what usually happens to the nucleus?',options:['Nucleus shrinks because probability concentrates','Nucleus always stays the same size','Top-p is ignored'],answer:0,reveal:'Concentrated probability means fewer tokens are needed to reach the cumulative threshold.'}]},
+      {kind:'predict', figure: 'fx-nucleus',prompt:'Predict how temperature changes a top-p=0.9 nucleus.',questions:[{label:'As temperature rises, what usually happens to nucleus size?',options:['Usually grows as probability spreads','Always shrinks to one','Cannot change'],answer:0,reveal:'A flatter distribution needs more tokens to reach 90%.'},{label:'At very low temperature, what usually happens to the nucleus?',options:['Nucleus shrinks because probability concentrates','Nucleus always stays the same size','Top-p is ignored'],answer:0,reveal:'Concentrated probability means fewer tokens are needed to reach the cumulative threshold.'}]},
     ],
   },
   {
@@ -359,7 +359,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
       ],takeaway:'Few-shot prompting is structured context, not code or weight change.'},
       {kind:'mcq',prompt:'You need a model to answer in a formal tone for all users without modifying weights. Best mechanism?',options:['System prompt setting the required tone','Few-shot with informal examples','Higher temperature','Fine-tuning for every user'],answer:0,explain:'The system prompt is always present in the context and sets persistent instructions.',nudge:'Which mechanism persists across all turns without changing the model?'},
       {kind:'mcq',prompt:'A model confidently states a plausible-sounding but incorrect fact. What is the most accurate description?',options:['Hallucination: the model generated a plausible continuation unsupported by evidence','A tokenization error','A temperature misconfiguration','A gradient that did not converge'],answer:0,explain:'Hallucination is a prediction behavior, not a parameter bug. The model produces confident text even when grounding is absent.',nudge:'Is the output a pattern continuation or a verified fact?'},
-      {kind:'predict',prompt:'Name the prompting strategy from the number of examples provided.',questions:[{label:'A question follows three labeled examples. What is this called?',options:['Three-shot prompting','Zero-shot prompting','Fine-tuning','System prompting'],answer:0,reveal:'The number of examples before the real question names the prompting strategy.'},{label:'The same question is asked directly with no examples. What is this called?',options:['Zero-shot prompting','Impossible without fine-tuning','System prompt injection'],answer:0,reveal:'Zero-shot means no examples precede the real question; the model relies on pretrained patterns.'}]},
+      {kind:'predict', figure: 'shot-taxonomy',prompt:'Name the prompting strategy from the number of examples provided.',questions:[{label:'A question follows three labeled examples. What is this called?',options:['Three-shot prompting','Zero-shot prompting','Fine-tuning','System prompting'],answer:0,reveal:'The number of examples before the real question names the prompting strategy.'},{label:'The same question is asked directly with no examples. What is this called?',options:['Zero-shot prompting','Impossible without fine-tuning','System prompt injection'],answer:0,reveal:'Zero-shot means no examples precede the real question; the model relies on pretrained patterns.'}]},
     ],
   },
   {
@@ -367,15 +367,15 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['validation-generalization','decoding-controls','llm-in-practice','parameter-counts'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
     steps:[
       {kind:'concept',figure:'inference-loops',title:'Two traces, one model',lines:['Inference uses fixed weights to turn context into next-token distributions. Training adds targets, loss, backpropagation, and optimizer updates to change those weights.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them makes knowledge usable.'],cta:'Start the checkpoint'},
-      {kind:'mcq',prompt:'Which path describes one inference cycle?',options:['text → IDs → embeddings → blocks → logits → probabilities → token choice','text → loss → gradient → ID','embedding → tokenizer → optimizer → text','probability → update → vocabulary'],answer:0,explain:'That is the forward and decoding path. Loss and gradients belong to training.',nudge:'Start with text and end with a token choice.'},
-      {kind:'mcq',prompt:'Which event changes model weights?',options:['An optimizer step during training','Appending a generated token','Softmax during inference','Tokenization'],answer:0,explain:'Only a training update changes parameters.',nudge:'Which applies gradients?'},
-      {kind:'predict',prompt:'Retrieve the roles.',questions:[
+      {kind:'mcq', figure: 'inference-loops',prompt:'Which path describes one inference cycle?',options:['text → IDs → embeddings → blocks → logits → probabilities → token choice','text → loss → gradient → ID','embedding → tokenizer → optimizer → text','probability → update → vocabulary'],answer:0,explain:'That is the forward and decoding path. Loss and gradients belong to training.',nudge:'Start with text and end with a token choice.'},
+      {kind:'mcq', figure: 'train-cycle',prompt:'Which event changes model weights?',options:['An optimizer step during training','Appending a generated token','Softmax during inference','Tokenization'],answer:0,explain:'Only a training update changes parameters.',nudge:'Which applies gradients?'},
+      {kind:'predict', figure: 'qkv-flow',prompt:'Retrieve the roles.',questions:[
         {label:'Q and K',options:['produce match scores','carry retrieved content','choose IDs'],answer:0,reveal:'Query-key dot products determine attention weights.'},
         {label:'V',options:['carries content mixed by weights','blocks future positions','computes loss'],answer:0,reveal:'Values are retrieved after matching.'},
         {label:'validation set',options:['guides choices without updating weights','provides final reporting only','is used for every gradient'],answer:0,reveal:'Validation supports selection; test stays untouched for reporting.'},
       ]},
       {kind:'numeric',prompt:'A sequence has 6 known tokens.',questions:[{label:'next-token targets',answer:5,tolerance:0,reveal:'Every token except the first is a target for the preceding context.'}]},
-      {kind:'mcq',prompt:'A 12-block model with width 768 uses weight tying. Where do most parameters live?',options:['In the repeated per-block projections (attention + FFN)','In the final softmax','In the tokenizer','In the position table alone'],answer:0,explain:'12 blocks of attention and FFN projections total about 85M versus 39M for embeddings.',nudge:'Which component is repeated 12 times?'},
+      {kind:'mcq', figure: 'param-slabs',prompt:'A 12-block model with width 768 uses weight tying. Where do most parameters live?',options:['In the repeated per-block projections (attention + FFN)','In the final softmax','In the tokenizer','In the position table alone'],answer:0,explain:'12 blocks of attention and FFN projections total about 85M versus 39M for embeddings.',nudge:'Which component is repeated 12 times?'},
       {kind:'numeric',prompt:'Quick parameter retrieval.',questions:[
         {label:'4 attention projections, each 768x768, per block (millions)',answer:2.36,tolerance:0.05,reveal:'4 x 768 x 768 = 2.36M. Recall from the parameter-counts lesson.'},
       ]},

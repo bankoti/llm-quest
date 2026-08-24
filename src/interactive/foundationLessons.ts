@@ -30,7 +30,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         ], cta: 'Read a shape',
       },
       {
-        kind: 'worked', title: 'Read outside, then inside',
+        kind: 'worked', figure: 'fx-batch-count', title: 'Read outside, then inside',
         prompt: 'Find the shape of a batch containing 2 sequences. Each sequence has 3 token positions. Each position is described by 4 numbers.',
         stages: [
           { label: 'Count the batches', body: 'There are 2 outer groups, so the first axis is 2.' },
@@ -40,7 +40,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         takeaway: 'Shape (2, 3, 4) means 2 sequences × 3 positions × 4 features. It contains 24 values in total.',
       },
       {
-        kind: 'mcq', prompt: 'What is the shape of this matrix?', code: 'x = [[1, 2],\n     [3, 4],\n     [5, 6]]',
+        kind: 'mcq', figure: 'fx-read-shape', prompt: 'What is the shape of this matrix?', code: 'x = [[1, 2],\n     [3, 4],\n     [5, 6]]',
         options: ['(3, 2)', '(2, 3)', '(6,)', '(3, 3)'], answer: 0,
         explain: 'There are 3 outer rows, each with 2 values. Shape is read outside-in: (3, 2).',
         nudge: 'Count outer lists first, then values inside each list.',
@@ -77,7 +77,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
       },
       { kind: 'widget', widget: AxisPlay },
       {
-        kind: 'worked', title: 'Follow the disappearing axis',
+        kind: 'worked', figure: 'fx-axis-collapse', title: 'Follow the disappearing axis',
         prompt: 'M has shape (5, 7). What happens under M.sum(axis=1)?',
         stages: [
           { label: 'Name axis 1', body: 'Axis 1 is the 7 columns inside each row.' },
@@ -86,14 +86,14 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         ], takeaway: 'M.sum(axis=1) has shape (5,). The axis you reduce is the one that disappears.',
       },
       {
-        kind: 'mcq', prompt: 'M has shape (5, 7). What is the shape of M.sum(axis=0)?',
+        kind: 'mcq', figure: 'fx-axis-collapse', prompt: 'M has shape (5, 7). What is the shape of M.sum(axis=0)?',
         options: ['(7,)', '(5,)', '(5, 7)', '(1, 5)'], answer: 0,
         explain: 'Axis 0 is the 5-row direction. Combining those rows leaves one sum per column: 7 values.',
         nudge: 'Remove the named axis and keep the other axis length.',
       },
       { kind: 'widget', widget: SlicePlay },
       {
-        kind: 'mcq', prompt: 'x has shape (2, 3, 4), so it contains 24 values. Which reshape is impossible?',
+        kind: 'mcq', figure: 'fx-reshape-legal', prompt: 'x has shape (2, 3, 4), so it contains 24 values. Which reshape is impossible?',
         options: ['(4, 7)', '(6, 4)', '(24,)', '(2, 12)'], answer: 0,
         explain: '4×7 = 28, so that shape needs four values that do not exist. Every legal reshape multiplies to 24.',
         nudge: 'Multiply the dimensions of each candidate.',
@@ -173,7 +173,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
       },
       { kind: 'widget', widget: DotProductPlay },
       {
-        kind: 'worked', title: 'Similarity without a diagram',
+        kind: 'worked', figure: 'fx-vec-compare', title: 'Similarity without a diagram',
         prompt: 'q = [1, 0]. Compare candidate a = [0.8, 0.2] with candidate b = [0, 1].',
         stages: [
           { label: 'Score a', body: 'q · a = 1×0.8 + 0×0.2 = 0.8.' },
@@ -182,14 +182,14 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         ], takeaway: 'Dot products turn “which direction matches?” into a number that can be ranked.',
       },
       {
-        kind: 'numeric', prompt: 'Your turn. Score two candidates for the query q = [2, 1].',
+        kind: 'numeric', figure: 'fx-vec-compare2', prompt: 'Your turn. Score two candidates for the query q = [2, 1].',
         questions: [
           { label: 'q · a for a = [1, 2]', answer: 4, tolerance: 0, reveal: '2×1 + 1×2 = 4. Positive: the directions broadly agree.', hint: 'Multiply matching positions, then add the results.' },
           { label: 'q · b for b = [1, -2]', answer: 0, tolerance: 0, reveal: '2×1 + 1×(-2) = 0. Perpendicular — no directional agreement, so b is not a match for q.' },
         ],
       },
       {
-        kind: 'mcq', prompt: 'Two unit-length vectors have dot product 0.02. What is the safest interpretation?',
+        kind: 'mcq', figure: 'fx-vec-compare', prompt: 'Two unit-length vectors have dot product 0.02. What is the safest interpretation?',
         options: ['Their directions are almost unrelated', 'They are near-identical', 'They are exact opposites', 'One vector must contain a zero'], answer: 0,
         explain: 'For unit vectors, dot product equals cosine similarity. A value near zero means nearly perpendicular directions.',
         nudge: 'For normalized vectors: 1 means same direction, 0 means sideways, -1 means opposite.',
@@ -284,7 +284,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
       },
       { kind: 'widget', widget: TokenFailPlay },
       {
-        kind: 'mcq', prompt: 'Why can an LLM struggle to count the letters in “strawberry”?',
+        kind: 'mcq', figure: 'fx-strawberry', prompt: 'Why can an LLM struggle to count the letters in “strawberry”?',
         options: ['Several letters may be hidden inside opaque token pieces', 'Attention cannot count anything', 'The vocabulary is too small to represent the word', 'Token IDs are floating-point numbers'], answer: 0,
         explain: 'The model sees token vectors, not a guaranteed one-token-per-letter representation. Spelling the word with separators exposes the characters as separate pieces.',
         nudge: 'Ask what information survived tokenization.',
@@ -416,7 +416,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
         nudge: 'Two requirements of a valid probability distribution: every value must be non-negative, and all values must sum to exactly 1.',
       },
       {
-        kind: 'predict', prompt: 'The logits stay fixed. Increase temperature from 1 to 2.', questions: [
+        kind: 'predict', figure: 'fx-temp-curves', prompt: 'The logits stay fixed. Increase temperature from 1 to 2.', questions: [
           { label: 'distribution shape', options: ['Sharper: the top token dominates more', 'Flatter: probability spreads across more tokens', 'Unchanged'], answer: 1, reveal: 'Dividing by a larger T pulls logits closer before softmax, so probabilities become more similar.' },
           { label: 'argmax token after increasing temperature', options: ['Usually unchanged because logit order is preserved', 'Always becomes the second token', 'Becomes random before sampling'], answer: 0, reveal: 'Temperature changes concentration but preserves logit ordering for positive T.' },
         ],

@@ -41,7 +41,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         takeaway: 'Attention replaces a lossy relay with direct lookup. The 2017 paper showed this was sufficient — recurrence was not needed at all.',
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'backprop-chain',
         prompt: 'What made RNNs hard to train on long sequences?',
         options: [
           'Gradients multiplied across every sequential step, vanishing or exploding before reaching early positions',
@@ -106,7 +106,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         takeaway: 'Cross-attention is how the decoder reads the source at every generation step. Without it, the entire source meaning must fit in one vector.',
       },
       {
-        kind: 'predict',
+        kind: 'predict', figure: 'fx-bidir-vs-causal',
         prompt: 'Encoder and decoder differ in one critical attention property.',
         questions: [
           {
@@ -276,7 +276,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         nudge: 'What would the model learn to ignore if [MASK] were the only signal?',
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'fx-bidir-vs-causal',
         prompt: 'Why does masked language modeling naturally produce bidirectional representations?',
         options: [
           'A masked token in the middle can only be recovered using both left and right context — there is no reason for a causal mask',
@@ -316,7 +316,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         cta: 'Compare the two paradigms',
       },
       {
-        kind: 'predict',
+        kind: 'predict', figure: 'pretrain-finetune',
         prompt: 'BERT fine-tuning vs GPT-3 prompting for a classification task.',
         questions: [
           {
@@ -344,7 +344,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         ],
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'fx-cls-token',
         prompt: 'Why does BERT prepend a [CLS] token to every input?',
         options: [
           'Its final hidden state serves as a pooled sequence representation for classification heads to read',
@@ -396,7 +396,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         takeaway: 'Scale enabled task inference from description. It did not produce reliably steerable behavior — that required a different intervention.',
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'scale-jump',
         prompt: 'What distinguishes an emergent capability from a gradual improvement with scale?',
         options: [
           'It is absent in smaller models and appears above a scale threshold, not predictable by smooth extrapolation from smaller runs',
@@ -593,7 +593,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         takeaway: 'SFT provides format. The reward model provides preference signal. PPO optimizes toward that signal. Each stage builds on the last.',
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'fx-kl-leash',
         prompt: 'Why does InstructGPT use a KL divergence penalty during PPO training?',
         options: [
           'To keep the policy close to the SFT model and prevent reward hacking that destroys language coherence',
@@ -606,7 +606,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         nudge: 'What would the model learn if the only feedback was reward and nothing stopped large drift from the SFT baseline?',
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'fx-size-vs-align',
         prompt: 'Human raters preferred InstructGPT at 1.3B parameters over base GPT-3 at 175B on most tasks. What is the correct interpretation?',
         options: [
           'The training objective — RLHF alignment — matters more than parameter count for instruction-following quality',
@@ -670,7 +670,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         nudge: 'The y-axis on every plot in the paper is the same quantity.',
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'chinchilla-shift',
         prompt: 'Given 10x more compute, how did Kaplan et al. recommend spending it?',
         options: [
           'Split it evenly between more parameters and more data',
@@ -710,7 +710,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         cta: 'Run the compute-optimal numbers yourself',
       },
       {
-        kind: 'worked',
+        kind: 'worked', figure: 'fx-twenty-to-one',
         title: 'Apply the rule to a model you know',
         prompt: 'A 7B-parameter model. What does compute-optimal training look like?',
         stages: [
@@ -722,7 +722,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         cta: 'Your turn with the numbers',
       },
       {
-        kind: 'numeric',
+        kind: 'numeric', figure: 'fx-twenty-to-one',
         prompt: 'Use the Chinchilla rule of thumb: roughly 20 training tokens per parameter.',
         questions: [
           { label: 'Compute-optimal training tokens for a 70B-parameter model, in billions', answer: 1400, tolerance: 60, reveal: '70B params × 20 tokens/param = 1,400B = 1.4T tokens. That is exactly what Chinchilla was trained on.', hint: 'Multiply parameters (in billions) by 20.' },
@@ -781,7 +781,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         takeaway: 'LoRA does not approximate the pretrained weights — it constrains the change to them. W stays exact; only the task-specific delta is compressed.',
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'fx-lora-zero-init',
         prompt: 'Why is B initialized to zero?',
         options: [
           'Zero weights train faster because gradients are larger',
@@ -855,7 +855,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         ],
       },
       {
-        kind: 'mcq',
+        kind: 'mcq', figure: 'fx-lora-merge',
         prompt: 'Why does a merged LoRA model add zero latency at inference, while adapter layers do not?',
         options: [
           'LoRA matrices are small enough to fit in GPU cache',
@@ -919,7 +919,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         nudge: 'The intervention fits in the prompt window.',
       },
       {
-        kind: 'predict',
+        kind: 'predict', figure: 'scale-jump',
         prompt: 'Predict how chain-of-thought behaves away from the headline setting.',
         questions: [
           { label: 'An ~8B model is given the same chain-of-thought exemplars. What happens on GSM8K?', options: ['Little or no gain — it writes fluent chains with broken logic', 'It gains as much as the 540B model', 'It refuses to produce reasoning steps', 'It beats standard prompting by using shorter chains'], answer: 0, reveal: 'Chain-of-thought is the paper\'s flagship emergent ability: below roughly 100B parameters, models imitate the format but not the logic, and accuracy barely moves. The gains appear abruptly with scale.' },
@@ -980,7 +980,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         nudge: 'The follow-up\'s contribution is in its name — zero-shot.',
       },
       {
-        kind: 'predict',
+        kind: 'predict', figure: 'fx-token-compute',
         prompt: 'Apply the compute argument.',
         questions: [
           { label: 'Two prompts for the same hard problem: one demands "answer with a single number only", one allows working. Which gets more computation?', options: ['Both get the same — compute depends on model size only', 'The single-number prompt, because it is more focused', 'The one allowing working — every generated token is another forward pass spent on the problem', 'Neither; compute is fixed at training time'], answer: 2, reveal: 'Per-token compute is roughly fixed, so total compute scales with tokens generated. Forbidding the working caps the model at essentially one forward pass\'s worth of thinking. This framing is why "test-time compute" became a scaling axis of its own.' },

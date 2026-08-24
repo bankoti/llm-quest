@@ -15,6 +15,8 @@ export interface ConceptStep {
 
 export interface McqStep {
   kind: 'mcq'
+  // key into the FIGURES registry; rendered with the explanation after a correct answer
+  figure?: string
   prompt: string
   code?: string
   options: string[]
@@ -38,6 +40,8 @@ export interface PredictQuestion {
 
 export interface PredictStep {
   kind: 'predict'
+  // key into the FIGURES registry; rendered once all questions are answered
+  figure?: string
   prompt: string
   code?: string
   questions: PredictQuestion[]
@@ -56,6 +60,8 @@ export interface NumericQuestion {
 
 export interface NumericStep {
   kind: 'numeric'
+  // key into the FIGURES registry; setup diagram shown with the prompt (must not contain the answer)
+  figure?: string
   prompt: string
   code?: string
   questions: NumericQuestion[]
@@ -72,6 +78,8 @@ export interface WorkedStage {
 
 export interface WorkedStep {
   kind: 'worked'
+  // key into the FIGURES registry; setup diagram shown after the prompt
+  figure?: string
   title: string
   prompt: string
   stages: WorkedStage[]
