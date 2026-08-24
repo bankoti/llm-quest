@@ -15,6 +15,8 @@ const PracticePage = lazy(() => import('@/interactive/PracticePage').then(m => (
 const DailyMixPage = lazy(() => import('@/interactive/DailyMixPage').then(m => ({ default: m.DailyMixPage })))
 const WarmupPage = lazy(() => import('@/interactive/WarmupPage').then(m => ({ default: m.WarmupPage })))
 const DemoBrilliantPage = lazy(() => import('@/pages/DemoBrilliantPage').then(m => ({ default: m.DemoBrilliantPage })))
+const QuantumHubPage = lazy(() => import('@/quantum/QuantumHubPage').then(m => ({ default: m.QuantumHubPage })))
+const QuantumLessonPage = lazy(() => import('@/quantum/QuantumLessonPage').then(m => ({ default: m.QuantumLessonPage })))
 
 function PageLoading() {
   return <div className="min-h-screen bg-gray-950 text-gray-500 grid place-items-center font-mono text-sm" role="status">Loading…</div>
@@ -41,6 +43,8 @@ export default function App() {
               <Route path="/interactive/practice" element={<PracticePage />} />
               <Route path="/interactive/mix" element={<DailyMixPage />} />
               <Route path="/interactive/:slug" element={<InteractiveLessonPage />} />
+              <Route path="/quantum" element={<QuantumHubPage />} />
+              <Route path="/quantum/the-quantum-rules-change" element={<QuantumLessonPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
