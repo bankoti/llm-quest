@@ -20,7 +20,6 @@ export function HomePage({ progress }: Props) {
     <nav aria-label="Primary" className="flex items-center justify-between gap-4 px-5 sm:px-8 py-4 border-b border-gray-800">
       <Link to="/" className="font-bold text-violet-400 text-lg font-mono">{SITE.name}</Link>
       <div className="flex items-center gap-3 sm:gap-5">
-        <Link to="/quantum" className="text-sm font-mono text-cyan-400 hover:text-cyan-300">Quantum Atlas</Link>
         {due > 0 && <Link to="/review" className="text-sm font-mono text-amber-300 hover:text-amber-200">{due} due</Link>}
         <Link to="/map" className="text-sm font-mono text-gray-400 hover:text-white">{hasStarted ? `Progress ${completed}/${total}` : 'Explore map'}</Link>
       </div>
