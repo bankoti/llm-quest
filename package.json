@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "npm run validate:interactive && tsc && vite build",
     "preview": "vite preview",
-    "smoke:quantum": "node scripts/smoke-quantum.mjs",
     "validate:interactive": "node scripts/validate-interactive.mjs"
   },
   "dependencies": {
