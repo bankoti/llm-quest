@@ -13,7 +13,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'attention-intuition', title:'Attention as Information Routing', emoji:'🔦', blurb:'Start with the problem attention solves before introducing Q, K, or V.', minutes:7,
     moduleId:M_ARCH, moduleTitle:T_ARCH, prerequisites:['next-token-prediction'], outcomes:['Explain why tokens need information from other positions','Interpret attention weights as a weighted mixture'], concepts:['contextual representation','attention weight','weighted sum'],
     steps:[
-      {kind:'concept',title:'A token’s meaning depends on its neighbors',lines:[
+      {kind:'concept',figure:'attention-routing',title:'A token’s meaning depends on its neighbors',lines:[
         'The embedding for a token is the same lookup every time, but its meaning in a sentence is not. “Bank” in “river bank” and “bank loan” must gather different clues from surrounding positions.',
         'Attention lets each position build a new representation by mixing information from other positions. It assigns a weight to each available token, then computes a weighted sum of their information vectors.',
         'Weights are non-negative and sum to 1. A weight near 1 means “use this position heavily”; a weight near 0 means “mostly ignore it.” The result is a context-dependent blend.',
@@ -32,7 +32,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'qkv-attention', title:'Queries, Keys, and Values', emoji:'🔑', blurb:'Give each attention vector one job, then assemble the equation.', minutes:8,
     moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['attention-intuition','dot-product-similarity','linear-layers'],outcomes:['State the roles of query, key, and value','Trace score, softmax, and weighted sum'],concepts:['query','key','value','attention score'],
     steps:[
-      {kind:'concept',title:'Match with Q and K; retrieve V',lines:[
+      {kind:'concept',figure:'qkv-flow',title:'Match with Q and K; retrieve V',lines:[
         'Every position is projected through three learned linear layers. Its query describes what it seeks. Its key describes what it can match. Its value carries the information it contributes if selected.',
         'K.T is the transpose of K: if K has shape (T, D), then K.T has shape (D, T), making inner dimensions meet for Q@K.T: (T,D)@(D,T) gives a (T,T) score matrix with one score per query-key pair.',
         'For query position i and candidate j, score = Qᵢ · Kⱼ. Softmax converts those scores into attention weights. The output is the weighted sum of value vectors.',
@@ -72,7 +72,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'causal-attention',title:'Why Attention Needs a Causal Mask',emoji:'🚧',blurb:'Understand the training-time leak before seeing the mask that blocks it.',minutes:7,
     moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['qkv-attention'],outcomes:['Explain teacher forcing','Identify future-token leakage','Explain a causal mask'],concepts:['parallel training','teacher forcing','future-token leakage','causal mask'],
     steps:[
-      {kind:'concept',title:'Training can see the answer unless we hide it',lines:[
+      {kind:'concept',figure:'causal-mask',title:'Training can see the answer unless we hide it',lines:[
         'During generation, future tokens do not exist. During training, the complete known sequence is available, and all positions are processed in parallel for efficiency.',
         'Position 3 is asked to predict token 4 while token 4 is physically present elsewhere in the tensor. Without a restriction, attention could read the answer. This is future-token leakage.',
         'A causal mask blocks scores pointing to future positions before softmax. Each position may attend to itself and the past. Feeding known earlier tokens during training is called teacher forcing.',
@@ -89,7 +89,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'position-information',title:'How the Model Knows Order',emoji:'📍',blurb:'Prove that content alone loses order, then add position information.',minutes:6,
     moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['attention-intuition'],outcomes:['Explain why content alone cannot encode order','Describe positional information'],concepts:['permutation','position encoding','word order','RoPE'],
     steps:[
-      {kind:'concept',title:'A weighted sum does not know where a value sat',lines:[
+      {kind:'concept',figure:'position-order',title:'A weighted sum does not know where a value sat',lines:[
         'Attention combines token representations with weighted sums. If representations contain only token identity, shuffling the same tokens preserves the same collection of content.',
         'But “dog bites man” and “man bites dog” have opposite meanings. The model needs a signal telling it where each token appeared.',
         'Position information is woven into token representations before attention. Modern models often use rotary position embeddings (RoPE), but the essential job is to make the same token at different positions distinguishable.',
@@ -103,7 +103,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'multihead-attention',title:'Why Attention Uses Multiple Heads',emoji:'🧠',blurb:'Let several small attention routes preserve different relationships at once.',minutes:7,
     moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['qkv-attention','position-information'],outcomes:['Explain parallel attention heads','Relate hidden size and head dimension'],concepts:['attention head','head dimension','concatenation','output projection'],
     steps:[
-      {kind:'concept',title:'One mixture can blur several jobs',lines:[
+      {kind:'concept',figure:'multihead-split',title:'One mixture can blur several jobs',lines:[
         'One attention head creates one routing pattern. A sentence may simultaneously need pronoun resolution, syntax, punctuation, and long-range topic information.',
         'Multi-head attention splits hidden features into H smaller head spaces. Each has its own Q, K, and V projections and can learn a different pattern. Outputs are concatenated and projected back to hidden size.',
         'If hidden size C is 512 and there are 8 heads, head dimension D = C/H = 64. Heads divide feature capacity; they do not multiply output width.',
@@ -120,7 +120,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'transformer-block',title:'Inside One Transformer Block',emoji:'🏗️',blurb:'Assemble attention, a per-position network, residual paths, and normalization.',minutes:8,
     moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['multihead-attention','causal-attention'],outcomes:['Trace one transformer block','Separate attention, FFN, residual, and normalization'],concepts:['feed-forward network','activation','residual connection','normalization','residual stream'],
     steps:[
-      {kind:'concept',title:'Routing, then processing',lines:[
+      {kind:'concept',figure:'transformer-block',title:'Routing, then processing',lines:[
         'Attention moves information between positions. A feed-forward network (FFN) then processes each position independently using learned linear layers and a nonlinear activation, commonly GELU or ReLU. Both suppress small or negative values; without any nonlinearity, stacked linear layers collapse to a single linear map, so depth would add nothing. Attention communicates; the FFN transforms.',
         'A residual connection adds the input back: x + f(x). This preserves an unchanged path and lets later blocks refine rather than replace the representation.',
         'Layer Normalization (LayerNorm) rescales each token representation to zero mean and unit variance. Modern transformers apply it before each sub-layer, called pre-normalization, which stabilizes training compared to the original post-normalization design. The running representation is the residual stream.',
@@ -149,7 +149,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'parameter-counts',title:'Counting Parameters',emoji:'🔢',blurb:'Trace where the numbers in a model headline come from, by hand.',minutes:8,
     moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['transformer-block'],outcomes:['Count embedding parameters','Count per-block parameters','Verify a published total'],concepts:['parameter count','embedding table','projection size','weight sharing'],
     steps:[
-      {kind:'concept',title:'Two slabs per block plus one table',lines:[
+      {kind:'concept',figure:'param-slabs',title:'Two slabs per block plus one table',lines:[
         'A transformer model\'s parameter count comes from a small set of learned matrices. The token embedding table has V rows of width C. A position table, if present, adds context_length times C entries.',
         'Inside each block, attention uses four C-by-C projections (Q, K, V, output). The FFN typically expands to 4C and returns: two matrices of size C times 4C. LayerNorm adds a tiny fraction.',
         'Many models reuse the token embedding table as the output projection (weight tying), adding zero extra parameters for the final logit layer.',
@@ -174,7 +174,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'inference-loop',title:'End-to-End Inference',emoji:'🔁',blurb:'Trace one generated token through the complete model.',minutes:8,
     moduleId:M_ARCH,moduleTitle:T_ARCH,prerequisites:['transformer-block'],outcomes:['Trace text through the model','Separate fixed weights from context'],concepts:['inference','model weights','context window','generation loop'],
     steps:[
-      {kind:'concept',title:'The full path has two loops',lines:[
+      {kind:'concept',figure:'inference-loops',title:'The full path has two loops',lines:[
         'Inside one forward pass, token IDs become embeddings, pass through transformer blocks, and produce logits. Outside the model, the generation loop chooses a token, appends it, and invokes the next pass.',
         'Model weights stay fixed during inference. Prompt and generated tokens form the context, which changes each cycle. The model does not permanently learn from the conversation.',
         'A context window is the maximum token positions processed at once. Software must reject, truncate, summarize, or use another memory mechanism when it overflows.',

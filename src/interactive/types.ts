@@ -9,6 +9,8 @@ export interface ConceptStep {
   lines: string[]
   code?: string
   cta?: string
+  // key into the FIGURES registry (figures.tsx); rendered after the first line
+  figure?: string
 }
 
 export interface McqStep {

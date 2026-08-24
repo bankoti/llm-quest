@@ -9,6 +9,7 @@ import type { Step, PredictQuestion, NumericQuestion } from './types'
 import { getLevel } from '@/data/curriculum'
 import { loadProgress, nextRecommendedLevel } from '@/engine/progress'
 import { beacon } from '@/engine/beacon'
+import { Figure } from './figures'
 
 // ── atoms ─────────────────────────────────────────────────────────────────────
 
@@ -53,7 +54,9 @@ function StepConcept({ step, onDone }: { step: Extract<Step, { kind: 'concept' }
   return (
     <div className="w-full max-w-lg">
       <h2 className="text-2xl font-bold text-white mb-4">{step.title}</h2>
-      {step.lines.map((l, i) => <p key={i} className="text-gray-300 mb-3 leading-relaxed">{l}</p>)}
+      <p className="text-gray-300 mb-3 leading-relaxed">{step.lines[0]}</p>
+      {step.figure && <Figure name={step.figure} />}
+      {step.lines.slice(1).map((l, i) => <p key={i} className="text-gray-300 mb-3 leading-relaxed">{l}</p>)}
       {step.code && <pre className="bg-gray-900 border border-gray-800 rounded-lg p-3 mb-4 font-mono text-sm text-sky-300 overflow-x-auto">{step.code}</pre>}
       <ContinueBtn onClick={onDone} label={step.cta ?? 'Continue'} />
     </div>
@@ -395,7 +398,9 @@ function ReviewStep({ s }: { s: Step }) {
   if (s.kind === 'concept') return (
     <div>
       <h2 className="text-2xl font-bold text-white mb-4">{s.title}</h2>
-      {s.lines.map((l, i) => <p key={i} className="text-gray-300 mb-3 leading-relaxed">{l}</p>)}
+      <p className="text-gray-300 mb-3 leading-relaxed">{s.lines[0]}</p>
+      {s.figure && <Figure name={s.figure} />}
+      {s.lines.slice(1).map((l, i) => <p key={i} className="text-gray-300 mb-3 leading-relaxed">{l}</p>)}
       {pre(s.code)}
     </div>
   )
