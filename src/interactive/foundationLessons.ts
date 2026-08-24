@@ -22,7 +22,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['scalar', 'vector', 'matrix', 'tensor', 'rank', 'shape'],
     steps: [
       {
-        kind: 'concept', title: 'One idea, more axes',
+        kind: 'concept',figure: 'tensor-ranks', title: 'One idea, more axes',
         lines: [
           'A model stores numbers in rectangular containers. One number is a scalar. A row of numbers is a vector. A table of rows and columns is a matrix. Add more directions and the general name is tensor.',
           'A shape records the length of each axis, from the outside inward. [[1, 2], [3, 4], [5, 6]] has 3 rows and 2 values per row, so its shape is (3, 2). Rank means how many axes there are: a matrix has rank 2.',
@@ -68,7 +68,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['axis', 'index', 'slice', 'reduction', 'reshape', 'B T C convention'],
     steps: [
       {
-        kind: 'concept', title: 'An axis is a direction you can move',
+        kind: 'concept',figure: 'axes-directions', title: 'An axis is a direction you can move',
         lines: [
           'In a matrix, axis 0 moves between rows and axis 1 moves within each row across columns. In a (B, T, C) tensor, axis 0 selects sequences, axis 1 selects positions, and axis 2 selects features.',
           'A reduction such as sum(axis=1) combines everything along the named axis, so that axis disappears. A slice keeps selected values. A colon means “keep all of this axis.”',
@@ -113,7 +113,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['dot product', 'matrix multiplication', 'inner dimension', 'row-column rule'],
     steps: [
       {
-        kind: 'concept', title: 'Match a row with a column',
+        kind: 'concept',figure: 'matmul-rowcol', title: 'Match a row with a column',
         lines: [
           'The dot product takes two equal-length vectors, multiplies matching positions, and adds the results. [1, 2, 3] · [4, 5, 6] = 1×4 + 2×5 + 3×6 = 32.',
           'Matrix multiplication repeats that operation. Every row of the left matrix meets every column of the right matrix. Therefore (m, n) @ (n, p) produces (m, p). The shared n is consumed inside each dot product.',
@@ -164,7 +164,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['direction', 'magnitude', 'similarity', 'normalization', 'cosine similarity'],
     steps: [
       {
-        kind: 'concept', title: 'Agreement has a score',
+        kind: 'concept',figure: 'dot-agreement', title: 'Agreement has a score',
         lines: [
           'A vector can be treated as a direction. The dot product is large and positive when two vectors point together, near zero when they are sideways to each other, and negative when they point in opposite directions.',
           'Vector length also affects the raw dot product. To compare direction alone, normalize both vectors to length 1. Their dot product then equals cosine similarity: 1 is the same direction, 0 is unrelated direction, and -1 is opposite.',
@@ -215,7 +215,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['token', 'tokenizer', 'vocabulary', 'token ID', 'encoding', 'decoding'],
     steps: [
       {
-        kind: 'concept', title: 'The string stops at the tokenizer',
+        kind: 'concept',figure: 'token-pipeline', title: 'The string stops at the tokenizer',
         lines: [
           'A language model does not receive characters or words. A tokenizer first divides text into pieces called tokens. Each possible token appears in a vocabulary, which assigns it an integer ID.',
           'The ID is only an address. If “cat” has ID 9246, the number 9246 does not mean “catness,” and a larger ID is not a larger meaning. It simply selects one vocabulary entry.',
@@ -259,7 +259,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['subword', 'byte-pair encoding', 'merge', 'vocabulary size', 'sequence length', 'tokenization blind spot'],
     steps: [
       {
-        kind: 'concept', title: 'Whole words are too many; characters are too long',
+        kind: 'concept',figure: 'subword-tradeoff', title: 'Whole words are too many; characters are too long',
         lines: [
           'A word-only vocabulary cannot cover every name, typo, code fragment, or language. A character-only vocabulary can represent anything, but common text becomes long sequences. Subword tokenization chooses a middle ground.',
           'Byte-pair encoding (BPE) starts with small pieces and repeatedly merges the most frequent adjacent pair. Common patterns become one token; rare strings remain several pieces.',
@@ -304,7 +304,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['embedding table', 'lookup', 'vocabulary axis', 'embedding dimension', 'learned representation'],
     steps: [
       {
-        kind: 'concept', title: 'An ID selects one learned row',
+        kind: 'concept',figure: 'embedding-row', title: 'An ID selects one learned row',
         lines: [
           'Token IDs are arbitrary addresses, so the model replaces each ID with a learned vector. The embedding table has one row per vocabulary item and one column per embedding feature.',
           'If vocabulary size is V and embedding dimension is C, the table shape is (V, C). Looking up one ID returns shape (C,). Looking up T token IDs returns (T, C). A batch of B sequences returns (B, T, C).',
@@ -347,7 +347,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['weight', 'bias', 'linear layer', 'projection', 'hidden state', 'logit'],
     steps: [
       {
-        kind: 'concept', title: 'Learned rows ask learned questions',
+        kind: 'concept',figure: 'linear-questions', title: 'Learned rows ask learned questions',
         lines: [
           'A linear layer multiplies an input vector by learned weights and optionally adds a learned bias. Each output has its own weight row. The dot product between the input and that row becomes one output number.',
           'The vector representation of a token inside the model after the embedding lookup and after each transformer block is called a hidden state. Its width is the hidden size C. Linear layers produce and consume hidden states.',
@@ -392,7 +392,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['exponentiation', 'softmax', 'probability distribution', 'temperature', 'argmax'],
     steps: [
       {
-        kind: 'concept', title: 'Convert scores into shares',
+        kind: 'concept',figure: 'softmax-shares', title: 'Convert scores into shares',
         lines: [
           'To choose a next token, we need non-negative probabilities that sum to 1. Softmax exponentiates every logit, then divides each result by the total. Exponentiation preserves order and makes every value positive.',
           'The largest logit gets the largest probability, but other tokens can keep some mass. Greedy decoding chooses the argmax. Sampling uses the full distribution.',
@@ -436,7 +436,7 @@ export const FOUNDATION_LESSONS: InteractiveLesson[] = [
     concepts: ['next-token prediction', 'forward pass', 'autoregressive generation', 'decoding', 'context'],
     steps: [
       {
-        kind: 'concept', title: 'One distribution at a time',
+        kind: 'concept',figure: 'next-token-dist', title: 'One distribution at a time',
         lines: [
           'A language model receives token IDs for the context and produces logits for what token should come next. Softmax turns those logits into a distribution. A decoding rule chooses one token from that distribution.',
           'The chosen token is appended to the context, and the model runs again to predict the following token. Repeating this loop is autoregressive generation: every new token depends on the tokens already present.',

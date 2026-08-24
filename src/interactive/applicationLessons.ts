@@ -7,7 +7,7 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     slug:'semantic-embeddings',title:'Sentence Embeddings and Similarity',emoji:'🗺️',blurb:'Reuse dot products to compare the meaning of whole pieces of text.',minutes:7,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['dot-product-similarity','model-capstone'],outcomes:['Distinguish token and sentence embeddings','Rank normalized embeddings by similarity','Name limits of embedding similarity'],concepts:['sentence embedding','pooling','cosine similarity','nearest neighbor','semantic retrieval'],
     steps:[
-      {kind:'concept',title:'One vector can summarize a piece of text',lines:[
+      {kind:'concept',figure:'text-to-point',title:'One vector can summarize a piece of text',lines:[
         'Token embeddings represent individual token positions. An embedding model can also produce one fixed-width vector for a sentence, passage, image, or other item so that related items point in similar directions.',
         'A sentence embedding is often produced by a model trained specifically for similarity and may pool information across positions. It is not simply one raw token embedding.',
         'After normalizing vectors, a dot product gives cosine similarity. This creates a useful ranking signal, but similarity is not factual correctness, logical entailment, or authorization to use a document.',
@@ -24,7 +24,7 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     slug:'retrieval-basics',title:'Retrieval-Augmented Generation',emoji:'📚',blurb:'Keep changing, citable knowledge outside model weights and place evidence in context.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['semantic-embeddings','inference-loop'],outcomes:['Trace a basic RAG pipeline','Explain when retrieval beats fine-tuning','Compute a context budget'],concepts:['RAG','vector index','top-k retrieval','grounding','citation','context budget'],
     steps:[
-      {kind:'concept',title:'Retrieve evidence before generating',lines:[
+      {kind:'concept',figure:'rag-pipeline',title:'Retrieve evidence before generating',lines:[
         'Model weights contain patterns learned during training, but those patterns are hard to update and cannot point to a source. Retrieval-augmented generation (RAG) keeps documents in an external index.',
         'At runtime, embed the question, retrieve relevant chunks, place them in the prompt, and ask the model to answer from that evidence. Updating the index is faster than retraining, and retrieved passages can support citations.',
         'Retrieval reduces unsupported guessing but does not remove it. The retriever can miss evidence, retrieve stale or malicious text, and the generator can still ignore or misread context.',
@@ -41,7 +41,7 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     slug:'retrieval-quality',title:'Lexical, Semantic, and Hybrid Retrieval',emoji:'🔎',blurb:'Diagnose retrieval failures before adding more context.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['retrieval-basics'],outcomes:['Distinguish lexical and semantic retrieval','Explain hybrid fusion and reranking','Explain why larger k is not always better'],concepts:['lexical retrieval','BM25','dense retrieval','rank fusion','reranker','lost in the middle'],
     steps:[
-      {kind:'concept',title:'Exact words and meaning fail differently',lines:[
+      {kind:'concept',figure:'lexical-vs-semantic',title:'Exact words and meaning fail differently',lines:[
         'Lexical retrieval — the most common algorithm is BM25, which scores matches by combining term frequency (how often the word appears in the document) with inverse document frequency (how rare the word is across all documents) — is excellent for identifiers, product codes, names, and exact phrases, but does not understand paraphrases.',
         'Dense semantic retrieval compares embeddings. It can connect paraphrases but may confuse concepts that share broad meaning or miss an exact rare identifier.',
         'Hybrid retrieval combines candidate lists. Rank fusion merges them; a reranker then reads query-document pairs more deeply. Retrieving more chunks can hurt when irrelevant text consumes context or important evidence lands in poorly attended middle positions.',
@@ -59,7 +59,7 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     slug:'tool-use',title:'Tool Calls and the Agent Loop',emoji:'🤖',blurb:'Turn a model response into a controlled loop over external functions.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['inference-loop','retrieval-basics'],outcomes:['Trace a structured tool call','Explain observation grounding','Design a stopping condition'],concepts:['tool schema','tool call','observation','agent loop','turn budget','ReAct'],
     steps:[
-      {kind:'concept',title:'The model requests; the program executes',lines:[
+      {kind:'concept',figure:'tool-loop',title:'The model requests; the program executes',lines:[
         'A language model cannot directly browse, run code, or query a database. A tool-enabled system gives it function descriptions and asks it to emit a structured request, typically a function name plus JSON arguments.',
         'The surrounding program validates the request, executes the real function, and returns the result as an observation. The model can then reason from that observation and either call another tool or answer.',
         'An agent is this loop plus control policy. Good control includes allowed tools, argument validation, a turn or cost budget, and a clear condition for when enough evidence has been gathered.',
@@ -77,7 +77,7 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     slug:'agent-reliability',title:'Reliable Agents: Budgets, Memory, and Failure',emoji:'🧯',blurb:'Design for loops that terminate, stay within context, and fail safely.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['tool-use','validation-generalization'],outcomes:['Budget agent turns and context','Distinguish working memory from durable state','Choose safe failure behavior'],concepts:['turn budget','token budget','working context','external state','retry limit','fallback'],
     steps:[
-      {kind:'concept',title:'A loop needs an operating envelope',lines:[
+      {kind:'concept',figure:'error-compounding',title:'A loop needs an operating envelope',lines:[
         'Every agent turn adds model input, output, and tool observations to context. Without limits, latency, cost, and context size grow. A turn budget bounds iterations; a token or deadline budget bounds total work.',
         'Context is temporary working memory. Durable facts, task state, and idempotency keys — markers ensuring that running the same operation twice has the same effect as running it once, which is critical for payment and state-change operations — belong in an external store with explicit read/write rules. Summaries can compress context but may lose details.',
         'Failures must be designed: retry only transient errors, cap retries, preserve partial state, and fall back to a safe response or human handoff when confidence or evidence is insufficient.',
@@ -94,7 +94,7 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     slug:'token-economics',title:'Token Economics: What a Conversation Costs',emoji:'💸',blurb:'Turn tokens into money, and see why long chats get quadratically expensive.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['agent-reliability'],outcomes:['Price a request from token counts','Explain input-output price asymmetry','Explain why conversation cost grows with history'],concepts:['input tokens','output tokens','price asymmetry','context resend','fixed overhead'],
     steps:[
-      {kind:'concept',title:'You pay per token, twice',lines:[
+      {kind:'concept',figure:'token-costs',title:'You pay per token, twice',lines:[
         'APIs price input (prompt) tokens and output (completion) tokens separately, and output usually costs several times more per token: each generated token needs its own forward pass, while the whole prompt is processed in one parallel pass.',
         'Chat APIs are stateless: every turn resends the entire history as fresh input. Context you keep around is not stored for free — it is re-billed on every request.',
         'So conversation cost grows roughly quadratically with turns: turn N resends everything from turns 1 through N-1. System prompts and tool schemas are fixed overhead paid on every single call.',
@@ -116,7 +116,7 @@ export const APPLICATION_LESSONS: InteractiveLesson[] = [
     slug:'application-capstone',title:'Grounded Assistant Checkpoint',emoji:'🏆',blurb:'Combine retrieval, tools, adaptation, and reliability in one system decision.',minutes:9,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['retrieval-quality','agent-reliability','token-economics','adaptation-capstone','systems-capstone'],outcomes:['Choose retrieval versus fine-tuning','Design a grounded tool loop','Identify confidence and provenance risks'],concepts:['system integration','grounding','adaptation choice','safe fallback'],
     steps:[
-      {kind:'concept',title:'Choose the mechanism that matches the failure',lines:[
+      {kind:'concept',figure:'rag-pipeline',title:'Choose the mechanism that matches the failure',lines:[
         'A production assistant combines several layers. Fine-tuning shapes stable behavior. Retrieval supplies fresh, citable evidence. Tools perform actions or exact computation. Calibration and validation decide when to trust, retry, or escalate.',
         'The strongest design is not the one with the most components. It is the smallest pipeline whose components each address a named failure mode.',
       ],cta:'Design the system'},

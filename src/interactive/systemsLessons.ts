@@ -7,7 +7,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
     slug:'scaling-laws',title:'Scaling Parameters, Data, and Compute',emoji:'🔭',blurb:'Learn the budget trade-off before optimizing inference.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['model-capstone'],outcomes:['Define parameters, tokens, and FLOPs','Explain compute-optimal balance','Explain deployment-driven overtraining'],concepts:['parameter count','training tokens','FLOPs','compute budget','Chinchilla ratio'],
     steps:[
-      {kind:'concept',title:'A fixed budget can buy width or experience',lines:[
+      {kind:'concept',figure:'budget-split',title:'A fixed budget can buy width or experience',lines:[
         'Model quality depends on parameter count N, training tokens D, and training compute. FLOPs means floating-point operations: a count of arithmetic work. A rough transformer training estimate is C ≈ 6ND FLOPs (forward and backward passes combined; the actual factor depends on architecture and implementation).',
         'For fixed C, a larger model receives fewer training tokens; a smaller model can train longer. Scaling-law studies estimate a balance that minimizes loss for that training budget. A useful Chinchilla-era rule of thumb is D ≈ 20N tokens, though exact optima depend on data and architecture.',
         'Deployment may favor training a smaller model past the training-optimal point. Extra one-time training can reduce the parameter count paid on every inference request.',
@@ -24,7 +24,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
     slug:'kv-cache',title:'The KV Cache: Reuse, Not Free Attention',emoji:'🗃️',blurb:'See exactly what is cached, what still grows, and why long contexts cost memory.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['inference-loop','qkv-attention'],outcomes:['Explain cached K/V projections','Distinguish projection reuse from attention cost','Compute cache memory'],concepts:['KV cache','projection reuse','linear memory growth','per-token attention cost'],
     steps:[
-      {kind:'concept',title:'Keep old keys and values; compute one new pair',lines:[
+      {kind:'concept',figure:'kv-growth',title:'Keep old keys and values; compute one new pair',lines:[
         'Without a cache, every generation step recomputes key and value projections for all earlier tokens. A KV cache stores those previous K and V tensors at every layer, so only the new token’s projections are appended.',
         'Caching does not make attention constant-time. The new query still compares against T cached keys and mixes T values, so attention work for one new token grows O(T). The cache removes repeated projection work and changes full-prefix recomputation toward linear work per step.',
         'Cache memory also grows O(T): 2 × layers × KV heads × context length × head dimension × bytes per value. “O(T)” means proportional to context length T.',
@@ -41,7 +41,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
     slug:'precision-quantization',title:'Precision and Quantization',emoji:'📦',blurb:'Turn bits per weight into memory, then understand the quality trade.',minutes:7,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['scaling-laws'],outcomes:['Convert bits to bytes per weight','Estimate model memory','Explain quantization trade-offs'],concepts:['floating point','bit width','quantization','weight memory','calibration data'],
     steps:[
-      {kind:'concept',title:'Store each learned number with fewer bits',lines:[
+      {kind:'concept',figure:'bit-layout',title:'Store each learned number with fewer bits',lines:[
         'A parameter is a numeric weight stored as a floating-point number: a value encoded as a sign, exponent, and fraction in a fixed number of bits. fp32 uses 32 bits for wide precision range; fp16 and bf16 use 16 bits, trading some precision for half the memory. fp32 stores about 32 bits = 4 bytes per weight; fp16 or bf16 stores 16 bits = 2 bytes. A 7B-parameter model therefore needs about 28 GB at fp32 or 14 GB at 16-bit precision just for weights.',
         'Quantization maps weights to a smaller set of representable values, commonly 8 or 4 bits. This cuts memory and bandwidth, but rounding introduces error. Good methods choose scales carefully and often use representative calibration data.',
         'Memory savings do not guarantee equal speed on every device: runtime kernels and hardware support determine whether compressed weights execute efficiently.',
@@ -57,7 +57,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
     slug:'grouped-query-attention',title:'Grouped-Query Attention',emoji:'🧩',blurb:'Reduce cache memory by sharing K/V heads while keeping many query heads.',minutes:7,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['multihead-attention','kv-cache'],outcomes:['Distinguish Q heads from KV heads','Explain GQA cache savings','Compute the memory ratio'],concepts:['multi-query attention','grouped-query attention','KV head sharing','cache bandwidth'],
     steps:[
-      {kind:'concept',title:'Queries can stay diverse while keys and values are shared',lines:[
+      {kind:'concept',figure:'gqa-sharing',title:'Queries can stay diverse while keys and values are shared',lines:[
         'Standard multi-head attention gives every query head its own key and value head. Multi-query attention shares one K/V head across all query heads. Grouped-query attention (GQA) chooses a middle ground: several query heads share each K/V head.',
         'Attention still produces many query-head outputs, but fewer K and V tensors must be stored and moved during generation. If 32 query heads use 8 K/V heads, the cache’s head factor is one quarter as large.',
         'The trade-off is representational flexibility versus serving efficiency. Modern models often find that many query heads with fewer K/V heads preserve quality well.',
@@ -73,7 +73,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
     slug:'mixture-of-experts',title:'Mixture of Experts',emoji:'🚦',blurb:'Separate stored capacity from the parameters active for one token.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['transformer-block'],outcomes:['Explain learned routing','Distinguish total and active parameters','Explain load balancing'],concepts:['dense model','expert FFN','router','top-k routing','load-balancing loss'],
     steps:[
-      {kind:'concept',title:'Not every parameter runs for every token',lines:[
+      {kind:'concept',figure:'moe-router',title:'Not every parameter runs for every token',lines:[
         'A dense transformer runs the same feed-forward network for every token. A mixture-of-experts (MoE) layer stores several alternative FFNs called experts.',
         'A learned router is a small linear layer that scores experts from each token representation. It selects the top-k experts, often two, and combines their outputs. Attention and other shared layers still run normally.',
         'Total parameters determine storage. Active parameters approximate compute per token. A load-balancing objective prevents a rich-get-richer loop where a few experts receive almost all tokens and others never learn.',
@@ -90,7 +90,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
     slug:'speculative-decoding',title:'Speculative Decoding and Test-Time Compute',emoji:'🚀',blurb:'Separate a speed technique from spending more inference compute for quality.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['decoding-controls','kv-cache'],outcomes:['Explain draft-and-verify decoding','Explain why target distribution is preserved','Explain majority voting limits'],concepts:['draft model','verification','rejection sampling intuition','test-time compute','majority vote'],
     steps:[
-      {kind:'concept',title:'Use extra inference in two different ways',lines:[
+      {kind:'concept',figure:'draft-verify',title:'Use extra inference in two different ways',lines:[
         'Speculative decoding targets speed. A small draft model proposes several tokens; the target model checks them in a parallel pass. A correction rule accepts or replaces proposals so the final samples follow the target model’s distribution.',
         'Test-time compute targets quality. A system may sample several independent solutions, run tools, critique drafts, or search a reasoning tree. More compute helps only when the extra attempts contain useful, partly independent information.',
         'These levers should not be conflated: speculative decoding aims for the same distribution faster; voting or search spends more work to improve the answer.',
@@ -108,7 +108,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
     slug:'systems-capstone',title:'Scaling and Serving Checkpoint',emoji:'🏆',blurb:'Connect scaling laws, caching, precision, routing, and decoding tricks.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['speculative-decoding','grouped-query-attention','mixture-of-experts'],outcomes:['Choose precision for a deployment constraint','Diagnose a KV-cache bottleneck','Distinguish stored and active parameters'],concepts:['system integration','deployment trade-offs','bottleneck diagnosis'],
     steps:[
-      {kind:'concept',title:'Every serving choice is a named trade-off',lines:['Scaling laws guide how to spend a training budget. Precision and quantization trade accuracy for memory. GQA trades head diversity for cache size. MoE trades routing complexity for capacity without proportional compute. Speculative decoding trades draft-model overhead for fewer sequential target passes.','This checkpoint introduces no new mechanism. It asks you to retrieve and connect earlier ideas under new scenarios.'],cta:'Start the checkpoint'},
+      {kind:'concept',figure:'serving-tradeoffs',title:'Every serving choice is a named trade-off',lines:['Scaling laws guide how to spend a training budget. Precision and quantization trade accuracy for memory. GQA trades head diversity for cache size. MoE trades routing complexity for capacity without proportional compute. Speculative decoding trades draft-model overhead for fewer sequential target passes.','This checkpoint introduces no new mechanism. It asks you to retrieve and connect earlier ideas under new scenarios.'],cta:'Start the checkpoint'},
       {kind:'mcq',prompt:'A 70B model must serve on a single 80 GB GPU. What is the first bottleneck?',options:['Weight memory exceeds capacity at full precision','The vocabulary is too large','Attention is constant-time','The KV cache is always empty'],answer:0,explain:'70B at fp16 = 140 GB, exceeding 80 GB. Quantization to 4-bit brings it to about 35 GB.',nudge:'Multiply parameters by bytes per weight.'},
       {kind:'mcq',prompt:'Long conversations slow down. KV cache grows linearly. Which architectural choice directly reduces cache size?',options:['Grouped-query attention with fewer KV heads','More transformer blocks','A larger vocabulary','Higher temperature'],answer:0,explain:'GQA reduces the per-layer KV-head count, directly shrinking cache memory.',nudge:'Which design shares KV heads?'},
       {kind:'predict',prompt:'A deployment uses an MoE model with 8 experts, top-2 routing.',questions:[

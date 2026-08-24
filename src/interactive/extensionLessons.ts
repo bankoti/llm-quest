@@ -7,7 +7,7 @@ export const EXTENSION_LESSONS: InteractiveLesson[] = [
     slug:'reading-model-cards',title:'Reading Model Claims',emoji:'📇',blurb:'Separate storage, compute, context, evaluation, and license claims.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['mixture-of-experts','precision-quantization'],outcomes:['Distinguish total and active parameters','Interrogate context and benchmark claims','Check licensing before deployment'],concepts:['model card','total parameters','active parameters','benchmark conditions','context length','license'],track:'extension',
     steps:[
-      {kind:'concept',title:'A headline number rarely answers the deployment question',lines:[
+      {kind:'concept',figure:'card-anatomy',title:'A headline number rarely answers the deployment question',lines:[
         'For a dense model, nearly all parameters are active for each token. For a mixture-of-experts model, total parameters describe stored capacity while active parameters better approximate the routed compute path. Memory still follows total stored weights.',
         'A claimed context length says what the system accepts, not how well it retrieves facts across that entire window or what the latency and cache cost will be. A benchmark score is meaningful only with task version, prompting, tools, sampling, and evaluation method.',
         '“Weights available” is not a license. Commercial rights, geographic limits, attribution, acceptable-use terms, and redistribution conditions come from the actual license text.',
@@ -24,7 +24,7 @@ export const EXTENSION_LESSONS: InteractiveLesson[] = [
     slug:'long-context-architectures',title:'Long Context: Exact Recall or Fixed State',emoji:'🌀',blurb:'Compare full attention, compressed state, and hybrid designs.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['kv-cache','qkv-attention'],outcomes:['Explain why full attention cost grows with context','Explain fixed-state compression','Explain the hybrid trade-off'],concepts:['full attention','fixed-size recurrent state','linear attention','exact recall','hybrid architecture'],track:'extension',
     steps:[
-      {kind:'concept',title:'Perfect access has a growing bill',lines:[
+      {kind:'concept',figure:'attention-cost',title:'Perfect access has a growing bill',lines:[
         'Full causal attention keeps keys and values for every prior token. The new query can compare against any exact earlier position, but cache memory and per-token attention work grow with context length.',
         'Linear-attention and state-space approaches (architectures like Mamba that maintain a fixed-size compressed history rather than per-token keys and values) compress history into a fixed-size running state. Per-token state update cost need not grow with context, but compression can lose rare exact details because many past events share limited state.',
         'Hybrid models mix frequent fixed-state layers with occasional full-attention layers. The design aims to keep cheap long-range processing while restoring some exact lookup ability. The right mix depends on the workload, not a universal ratio.',
@@ -43,7 +43,7 @@ export const EXTENSION_LESSONS: InteractiveLesson[] = [
     slug:'parallel-decoding',title:'Parallel and Diffusion-Style Decoding',emoji:'🌫️',blurb:'Understand masked-token denoising as an alternative to strict left-to-right generation.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['decoding-basics','causal-attention'],outcomes:['Contrast autoregressive and block-parallel decoding','Define masked-token denoising','Compute sequential-pass trade-offs'],concepts:['autoregressive latency','unknown-token mask','denoising','blockwise generation','parallel decoding'],track:'extension',
     steps:[
-      {kind:'concept',title:'Unknown placeholders are refined in parallel',lines:[
+      {kind:'concept',figure:'parallel-refine',title:'Unknown placeholders are refined in parallel',lines:[
         'Autoregressive decoding chooses one token, appends it, and repeats. An output of N tokens therefore has at least N dependent token-choice steps, even when matrix work inside each step is parallel.',
         'Diffusion-style text decoding can begin a block with unknown placeholder tokens. Recent systems using this approach include masked diffusion language models (MDLMs) such as LLaDA. Here “masked” means the token content is hidden or not yet chosen; it is different from a causal attention mask. Denoising means repeatedly replacing uncertain placeholders with more confident token guesses.',
         'Positions inside a block can update in parallel, reducing sequential rounds. Each round processes many positions, and quality, cache behavior, and total arithmetic may differ, so fewer rounds do not imply equal-factor wall-clock speedup.',

@@ -7,7 +7,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     slug:'finetuning-basics',title:'Fine-Tuning and Forgetting',emoji:'🛠️',blurb:'Adapt a pretrained model to examples without confusing knowledge with behavior.',minutes:7,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['validation-generalization'],outcomes:['Explain supervised fine-tuning','Distinguish behavior adaptation from factual retrieval','Explain catastrophic forgetting'],concepts:['pretraining','supervised fine-tuning','instruction-response pair','catastrophic forgetting'],
     steps:[
-      {kind:'concept',title:'Continue training on a narrower objective',lines:[
+      {kind:'concept',figure:'sft-shift',title:'Continue training on a narrower objective',lines:[
         'Pretraining teaches broad next-token patterns from large text collections. Supervised fine-tuning (SFT) continues training on labeled input-output pairs, such as an instruction and an ideal response.',
         'SFT is good for behavior: answer format, tone, task procedure, and domain style. It is a poor way to keep changing facts current because knowledge becomes distributed through weights and is difficult to cite or replace.',
         'Updating every weight on a narrow dataset can damage older abilities. This is catastrophic forgetting. Mixing general examples, using a smaller update, or freezing the base model can reduce it.',
@@ -23,7 +23,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     slug:'lora',title:'LoRA: Small Trainable Adapters',emoji:'🔧',blurb:'Understand low-rank adaptation after matrix multiplication and fine-tuning are secure.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['finetuning-basics','matmul','optimizer-loop'],outcomes:['Explain frozen-base adaptation','Explain rank as a limited number of update directions','Compare merged and unmerged serving'],concepts:['LoRA','adapter','matrix rank intuition','frozen base','merge'],
     steps:[
-      {kind:'concept',title:'Learn a small update instead of replacing W',lines:[
+      {kind:'concept',figure:'lora-bypass',title:'Learn a small update instead of replacing W',lines:[
         'Full fine-tuning stores gradients and optimizer state for every weight. Optimizer state is extra per-weight memory, such as running averages used to choose better updates, so training memory can be several times weight memory.',
         'LoRA freezes the base weight matrix W and learns a small update B@A. A maps the large feature space down to r directions; B maps those directions back up. The rank r controls how many independent update directions the adapter can express.',
         'At deployment, B@A can be added into W for zero extra matrix multiplications, or kept separate so many small adapters share one base model.',
@@ -43,7 +43,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     slug:'distillation',title:'Distillation: A Teacher for a Smaller Model',emoji:'🧪',blurb:'Transfer a teacher’s graded beliefs, not only its final answer.',minutes:7,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['softmax-probabilities','training-objective'],outcomes:['Distinguish hard and soft targets','Explain dark knowledge','Explain teacher-student training'],concepts:['teacher model','student model','hard label','soft target','distillation','dark knowledge'],
     steps:[
-      {kind:'concept',title:'The wrong answers also carry information',lines:[
+      {kind:'concept',figure:'teacher-student',title:'The wrong answers also carry information',lines:[
         'A hard target says only which answer is correct: Paris=1, every other city=0. A teacher distribution may say Paris=0.85, Lyon=0.08, Rome=0.04. Those smaller probabilities reveal relationships the hard label hides.',
         'Distillation trains a smaller student to match a larger teacher’s output distribution. The student learns both the answer and how the teacher ranks alternatives.',
         'This transferred structure is often called dark knowledge. It can improve a small model without copying the teacher’s architecture or weights.',
@@ -61,7 +61,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     slug:'rlhf-reward-models',title:'Reward Models and RLHF',emoji:'🎯',blurb:'Build from preference pairs to a reward signal, then optimize a policy with PPO.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['finetuning-basics','softmax-probabilities'],outcomes:['Explain preference pairs','Explain reward model training','Explain PPO-style policy optimization'],concepts:['preference pair','reward model','policy','PPO','KL divergence','RLHF'],
     steps:[
-      {kind:'concept',title:'Correct-looking text is not yet preferred behavior',lines:[
+      {kind:'concept',figure:'preference-pair',title:'Correct-looking text is not yet preferred behavior',lines:[
         'SFT teaches from demonstrations. Preference learning adds comparisons: for one prompt, a rater chooses response A over response B. A reward model learns to map a prompt-response pair to one scalar preference score.',
         'Why comparisons instead of more demonstrations? Judging which of two responses is better is easier and cheaper than writing an ideal one, and it captures a signal SFT cannot: among several plausible outputs, which one people actually prefer.',
         'In reinforcement learning, an agent learns from scalar reward signals rather than explicit correct labels. The model\'s current learned token-choice behavior is called a policy. There is no ground-truth answer key, only feedback on whether outcomes were good.',
@@ -80,7 +80,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     slug:'direct-preference-optimization',title:'DPO: Preferences Without a Reward Model',emoji:'⚖️',blurb:'Skip the separate reward model and RL loop with a direct pairwise objective.',minutes:7,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['rlhf-reward-models'],outcomes:['Explain DPO objective','Contrast DPO with RLHF','Explain reference model role'],concepts:['DPO','direct preference optimization','reference model','likelihood ratio'],
     steps:[
-      {kind:'concept',title:'Preferences can directly shape probabilities',lines:[
+      {kind:'concept',figure:'dpo-direct',title:'Preferences can directly shape probabilities',lines:[
         'RLHF requires two components: a reward model trained from preferences, and an RL loop to optimize the language model policy. DPO removes both.',
         'DPO reframes preference learning as a supervised objective: directly increase the relative likelihood of chosen responses over rejected ones, anchored against a reference model. No separate reward model is trained and no online RL loop runs.',
         'The reference model acts as a tether. DPO maximizes the log-ratio of chosen probability to rejected probability relative to that same ratio under the reference model, applying a KL-like constraint implicitly.',
@@ -98,7 +98,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     slug:'calibration',title:'Confidence and Calibration',emoji:'🎚️',blurb:'Separate correctness, probability, and confident-sounding language.',minutes:6,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['softmax-probabilities'],outcomes:['Define calibration','Interpret a reliability gap','Explain why stated confidence can mislead'],concepts:['calibration','confidence bin','reliability','stated confidence','expected calibration error'],
     steps:[
-      {kind:'concept',title:'80% confidence should mean 80% correct',lines:[
+      {kind:'concept',figure:'reliability-diagram',title:'80% confidence should mean 80% correct',lines:[
         'A system is calibrated when predictions made with 80% confidence are correct about 80% of the time across many cases. Calibration is a group-level reliability property, not proof that one answer is right.',
         'Models can be accurate but overconfident, or less accurate but honestly uncertain. Expected calibration error (ECE) summarizes gaps between confidence bins and accuracy: it is the weighted average absolute gap across bins, where each bin is weighted by the fraction of predictions it contains. A perfectly calibrated system has ECE of zero.',
         'Spoken phrases such as “I am certain” are generated text, not a guaranteed readout of internal probability. After the RLHF and DPO lessons, you can trace why preference training may reward confident tone even when factual accuracy does not improve.',
@@ -116,7 +116,7 @@ export const ADAPTATION_LESSONS: InteractiveLesson[] = [
     slug:'adaptation-capstone',title:'Adaptation Checkpoint',emoji:'🏅',blurb:'Retrieve and connect fine-tuning, preference learning, and calibration.',minutes:8,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['direct-preference-optimization','calibration','lora'],outcomes:['Choose between SFT, LoRA, RLHF, and DPO for a requirement','Diagnose calibration and forgetting risks','Trace a preference learning pipeline'],concepts:['adaptation choice','pipeline integration','risk diagnosis'],
     steps:[
-      {kind:'concept',title:'Match the mechanism to the need',lines:['Fine-tuning shapes behavior; LoRA does so with fewer trainable parameters; RLHF and DPO shape preferences from comparisons; calibration measures whether stated confidence tracks accuracy.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them under pressure makes knowledge usable.'],cta:'Start the checkpoint'},
+      {kind:'concept',figure:'adapt-toolkit',title:'Match the mechanism to the need',lines:['Fine-tuning shapes behavior; LoRA does so with fewer trainable parameters; RLHF and DPO shape preferences from comparisons; calibration measures whether stated confidence tracks accuracy.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them under pressure makes knowledge usable.'],cta:'Start the checkpoint'},
       {kind:'mcq',prompt:'A model must adopt a concise JSON output format. Which approach fits best?',options:['Supervised fine-tuning on format examples','RLHF with vague preference pairs','Quantization','Increasing temperature'],answer:0,explain:'A stable output format is a behavior pattern best taught from demonstrations.',nudge:'Is this a behavior or a preference?'},
       {kind:'mcq',prompt:'You need multiple style variants sharing one base model in production. Best mechanism?',options:['Separate LoRA adapters per variant','Full fine-tuning for each variant','Raise temperature per variant','One distilled student per variant'],answer:0,explain:'LoRA adapters are small, can share a frozen base, and switch quickly.',nudge:'What keeps memory low while serving many variants?'},
       {kind:'predict',prompt:'A model trained with RLHF says "I am absolutely certain" about a wrong answer.',questions:[

@@ -2,14 +2,15 @@
 // Widgets handle interaction; figures show the *shape* of an idea at the moment
 // it is introduced. Dark-theme SVG, no state, safe for the smoke harness.
 import type { ReactElement } from 'react'
+import { FIGURES_EXT } from './figuresExt'
 
-const C = {
+export const C = {
   box: '#1f2937', edge: '#4b5563', text: '#d1d5db', dim: '#9ca3af', faint: '#6b7280',
   violet: '#a78bfa', emerald: '#34d399', sky: '#38bdf8', amber: '#fbbf24', bg: '#111827',
 }
-const mono = { fontFamily: 'ui-monospace, monospace' }
+export const mono = { fontFamily: 'ui-monospace, monospace' }
 
-function TokenBox({ x, y, w = 60, label, accent }: { x: number; y: number; w?: number; label: string; accent?: string }) {
+export function TokenBox({ x, y, w = 60, label, accent }: { x: number; y: number; w?: number; label: string; accent?: string }) {
   return (
     <g>
       <rect x={x} y={y} width={w} height={26} rx={6} fill={accent ? `${accent}22` : C.box} stroke={accent ?? C.edge} />
@@ -278,10 +279,11 @@ export const FIGURES: Record<string, () => ReactElement> = {
   'transformer-block': TransformerBlockFig,
   'param-slabs': ParamSlabs,
   'inference-loops': InferenceLoops,
+  ...FIGURES_EXT,
 }
 
 export function Figure({ name }: { name: string }) {
   const F = FIGURES[name]
   if (!F) return null
-  return <div className="my-4 px-3 py-2 rounded-xl bg-gray-900/70 border border-gray-800"><F /></div>
+  return <div data-figure={name} className="my-4 px-3 py-2 rounded-xl bg-gray-900/70 border border-gray-800"><F /></div>
 }

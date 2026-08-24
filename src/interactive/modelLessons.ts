@@ -191,7 +191,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'training-objective',title:'How Training Examples Are Built',emoji:'🎯',blurb:'Turn known text into next-token questions and measurable loss.',minutes:8,
     moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['inference-loop'],outcomes:['Create shifted input-target pairs','Explain loss','Count targets'],concepts:['training example','input-target shift','loss','cross-entropy intuition','batch'],
     steps:[
-      {kind:'concept',title:'Known text supplies its own answer key',lines:[
+      {kind:'concept',figure:'answer-key',title:'Known text supplies its own answer key',lines:[
         'Training starts with token sequences from data. At each position, earlier tokens are input and the actual next token is the target. A ten-token sequence provides nine targets.',
         'The model assigns probability to every possible next token. Loss measures how poor those probabilities were. Cross-entropy is low when the true target has high probability and high when it has low probability.',
         'A batch groups many sequences so predictions can be computed together. Position losses are usually averaged into one batch loss before updates.',
@@ -217,7 +217,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'training-data',title:'What the Model Is Made Of: Data',emoji:'🌐',blurb:'Follow raw web text into a training mixture, and see why the mixture is the model.',minutes:7,
     moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['training-objective'],outcomes:['Describe the pipeline from crawl to training tokens','Explain filtering and deduplication','Reason about mixture proportions'],concepts:['web crawl','filtering','deduplication','data mixture','training corpus'],
     steps:[
-      {kind:'concept',title:'From crawl to corpus',lines:[
+      {kind:'concept',figure:'data-funnel',title:'From crawl to corpus',lines:[
         'Pretraining data starts as raw crawled web pages plus curated sources: books, code, encyclopedias, forums. Raw crawl is mostly unusable — boilerplate, spam, duplicated pages, broken encoding.',
         'A filtering pipeline keeps pages that look like readable prose, drops machine-generated junk, and removes personal data. Deduplication then deletes near-identical documents, because repeated text gets memorized verbatim instead of generalized.',
         'What survives is weighted into a mixture: so much web, so much code, so much books. The model can only learn patterns that survive this pipeline. A useful mental model: a language model is a lossy compression of its training mixture.',
@@ -238,7 +238,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'gradients',title:'Gradients: Which Way Should We Change?',emoji:'🧗',blurb:'Build gradient intuition as a local slope before backpropagation.',minutes:8,
     moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['training-objective','training-data'],outcomes:['Describe local sensitivity','Choose update direction','Use gradient magnitude'],concepts:['parameter','gradient','slope','gradient descent'],
     steps:[
-      {kind:'concept',title:'A gradient is a local “what if?”',lines:[
+      {kind:'concept',figure:'loss-slope',title:'A gradient is a local “what if?”',lines:[
         'Model weights are adjustable numbers, also called parameters. After computing loss, we need to know how a small change to each weight would change that loss.',
         'A gradient is that local sensitivity. A positive gradient means increasing the weight raises loss, so gradient descent moves downward. A negative gradient means increasing the weight reduces loss, so the update moves upward.',
         'Gradient magnitude indicates sensitivity. It is a local guide, not a guarantee about far-away values.',
@@ -254,7 +254,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'backpropagation',title:'Backpropagation and Residual Paths',emoji:'↩️',blurb:'Trace blame backward without assuming calculus notation.',minutes:8,
     moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['gradients','transformer-block'],outcomes:['Explain chained sensitivities','Explain vanishing gradients','Explain residual paths'],concepts:['backpropagation','chain rule intuition','vanishing gradient','residual gradient path'],
     steps:[
-      {kind:'concept',title:'Every operation passes sensitivity backward',lines:[
+      {kind:'concept',figure:'backprop-chain',title:'Every operation passes sensitivity backward',lines:[
         'The forward pass records how values were computed. Backpropagation starts from loss and moves backward, using each operation’s local sensitivity to determine how earlier values contributed.',
         'Sensitivities multiply through a chain. If ten stages each pass one quarter of the signal, the earliest receives 0.25¹⁰, less than one millionth. This is a vanishing gradient.',
         'A residual addition x + f(x) provides a direct identity path with multiplier 1. Some gradient travels without repeated shrinking.',
@@ -271,7 +271,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'optimizer-loop',title:'The Optimizer Loop',emoji:'⚙️',blurb:'Connect forward, loss, backward, and update into one cycle.',minutes:8,
     moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['backpropagation'],outcomes:['Order training phases','Explain learning rate','Explain gradient reset'],concepts:['optimizer','learning rate','zero_grad','gradient accumulation'],
     steps:[
-      {kind:'concept',title:'Four phases repeat',lines:[
+      {kind:'concept',figure:'train-cycle',title:'Four phases repeat',lines:[
         'One training step has four phases: forward pass produces predictions; loss compares them with targets; backward computes gradients; optimizer step updates weights.',
         'Learning rate scales every update. Too small means barely visible movement. Too large can overshoot and make loss oscillate or diverge. In practice, training schedules warm up the learning rate from near-zero over the first few hundred steps, then decay it following a cosine curve or stepped schedule, rather than holding it fixed throughout.',
         'Many frameworks add new gradients into existing buffers. Resetting prevents accidental accumulation across batches.',
@@ -288,7 +288,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'validation-generalization',title:'Validation and Generalization',emoji:'📉',blurb:'Know whether the model learned a pattern or memorized examples.',minutes:8,
     moduleId:M_TRAIN,moduleTitle:T_TRAIN,prerequisites:['optimizer-loop'],outcomes:['Distinguish data splits','Diagnose overfitting','Choose early stopping'],concepts:['training set','validation set','test set','generalization','overfitting'],
     steps:[
-      {kind:'concept',title:'Seen examples cannot judge transfer',lines:[
+      {kind:'concept',figure:'train-val-curves',title:'Seen examples cannot judge transfer',lines:[
         'Training loss measures examples used to update the model. A flexible model can memorize them, so low training loss alone does not prove useful learning.',
         'A validation set is withheld from updates and guides choices such as training duration. If validation loss rises while training loss falls, the model is overfitting.',
         'A test set stays untouched until final evaluation. Choosing models based on test results leaks information and makes the reported result optimistic.',
@@ -306,7 +306,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'decoding-basics',title:'Greedy Decoding and Sampling',emoji:'🎲',blurb:'Choose between consistency and variation after prediction.',minutes:7,
     moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['inference-loop'],outcomes:['Distinguish greedy and sampling','Choose by task','Locate randomness'],concepts:['greedy decoding','sampling','random seed','determinism'],
     steps:[
-      {kind:'concept',title:'Prediction and choice are separate',lines:[
+      {kind:'concept',figure:'decode-tree',title:'Prediction and choice are separate',lines:[
         'The model produces a probability distribution. Greedy decoding chooses the highest-probability token every time and is deterministic under identical computation.',
         'Sampling randomly draws according to probabilities. Likely tokens appear more often, but alternatives sometimes appear, producing useful diversity.',
         'Temperature changes the distribution before sampling. A seed may repeat sampling in a fixed environment, but greedy removes the random draw.',
@@ -330,7 +330,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'decoding-controls',title:'Top-k, Top-p, and Beam Search',emoji:'🌲',blurb:'Add guardrails and search after greedy and sampling are clear.',minutes:8,
     moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['decoding-basics'],outcomes:['Explain top-k and top-p','Explain beam search','Choose controls by task'],concepts:['top-k','top-p nucleus','cumulative probability','beam search'],
     steps:[
-      {kind:'concept',title:'Filter choices or search sequences',lines:[
+      {kind:'concept',figure:'dist-reshape',title:'Filter choices or search sequences',lines:[
         'Top-k keeps the k highest-probability tokens, then samples. Candidate count stays fixed even when the model is certain or uncertain.',
         'Top-p keeps the smallest set whose cumulative probability reaches p. It shrinks for concentrated distributions and grows for flat ones.',
         'Beam search keeps several whole partial sequences and expands promising ones. It is deterministic but often favors generic wording in open-ended generation.',
@@ -347,7 +347,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'llm-in-practice',title:'Prompting, Chat Format, and Failure Modes',emoji:'💬',blurb:'Three ideas every practitioner needs immediately: few-shot prompting, chat structure, and hallucination.',minutes:7,
     moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['next-token-prediction','decoding-controls'],outcomes:['Use few-shot prompting to shape behavior','Describe system/user/assistant turn structure','Name hallucination as a structural failure mode'],concepts:['few-shot prompting','zero-shot','system prompt','chat format','hallucination'],
     steps:[
-      {kind:'concept',title:'What happens before the model runs',lines:[
+      {kind:'concept',figure:'prompt-anatomy',title:'What happens before the model runs',lines:[
         'Few-shot prompting places example input-output pairs in the context before the real question. The model observes the pattern and continues it without any weight update. Zero-shot gives only the question; few-shot gives a short demonstration.',
         'Chat models structure their context as a sequence of turns: a system prompt sets standing instructions, then user and assistant turns alternate. The system prompt is part of the model\'s input, not a separate mechanism; it controls tone, role, and policy for the conversation.',
         'Hallucination is the name for output that sounds confident but is not grounded in training data or retrieved context. It is a structural property of next-token prediction: the model generates plausible-looking continuations even when no grounding exists. Retrieval and calibration reduce it; no technique eliminates it.',
@@ -366,7 +366,7 @@ export const MODEL_LESSONS: InteractiveLesson[] = [
     slug:'model-capstone',title:'Model Mechanics Checkpoint',emoji:'🏁',blurb:'Retrieve and connect the complete path before applications.',minutes:8,
     moduleId:M_GEN,moduleTitle:T_GEN,prerequisites:['validation-generalization','decoding-controls','llm-in-practice','parameter-counts'],outcomes:['Trace inference','Trace training','Diagnose boundary confusions'],concepts:['integration','inference trace','training trace'],
     steps:[
-      {kind:'concept',title:'Two traces, one model',lines:['Inference uses fixed weights to turn context into next-token distributions. Training adds targets, loss, backpropagation, and optimizer updates to change those weights.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them makes knowledge usable.'],cta:'Start the checkpoint'},
+      {kind:'concept',figure:'inference-loops',title:'Two traces, one model',lines:['Inference uses fixed weights to turn context into next-token distributions. Training adds targets, loss, backpropagation, and optimizer updates to change those weights.','This checkpoint introduces no new mechanism. It mixes earlier concepts because retrieving and connecting them makes knowledge usable.'],cta:'Start the checkpoint'},
       {kind:'mcq',prompt:'Which path describes one inference cycle?',options:['text → IDs → embeddings → blocks → logits → probabilities → token choice','text → loss → gradient → ID','embedding → tokenizer → optimizer → text','probability → update → vocabulary'],answer:0,explain:'That is the forward and decoding path. Loss and gradients belong to training.',nudge:'Start with text and end with a token choice.'},
       {kind:'mcq',prompt:'Which event changes model weights?',options:['An optimizer step during training','Appending a generated token','Softmax during inference','Tokenization'],answer:0,explain:'Only a training update changes parameters.',nudge:'Which applies gradients?'},
       {kind:'predict',prompt:'Retrieve the roles.',questions:[

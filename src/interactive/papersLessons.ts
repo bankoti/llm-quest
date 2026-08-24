@@ -19,7 +19,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'sequential-bottleneck',
         title: 'Before 2017, sequences ran one step at a time',
         lines: [
           'Recurrent neural networks processed text left to right: each word updated a fixed-size hidden state, which carried forward to the next word. To get the meaning of position 50, you waited for 49 steps to finish.',
@@ -83,7 +83,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'encoder-decoder',
         title: 'The 2017 transformer was solving translation',
         lines: [
           'The paper was solving machine translation: map an English sentence to a French sentence. That task has a natural two-part structure — fully understand the source, then generate the target one word at a time.',
@@ -161,7 +161,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'stack-split',
         title: 'The field kept one stack at a time',
         lines: [
           'The full encoder-decoder suits sequence-to-sequence tasks: translation, summarization, question answering over a fixed document. But for language modeling — predicting the next token from scratch — there is no separate source to encode.',
@@ -240,7 +240,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'mlm-masking',
         title: 'BERT hides words and asks the model to recover them',
         lines: [
           'GPT predicts the next token. BERT instead masks 15% of input tokens at random, replaces them with a [MASK] placeholder, and trains the model to predict the original token from context on both sides.',
@@ -305,7 +305,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'pretrain-finetune',
         title: 'Pretrain once; fine-tune for any task',
         lines: [
           'Before BERT, most NLP models were trained from scratch per task. BERT changed the default: pretrain a large encoder on massive unlabeled text, then fine-tune the same checkpoint on a small labeled dataset for each specific task.',
@@ -373,7 +373,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'scale-jump',
         title: 'The bet: more compute, qualitatively different behavior',
         lines: [
           'GPT-2 (2019, 1.5B parameters) could generate coherent paragraphs but failed at most reasoning tasks. The GPT-3 paper (2020) ran a controlled experiment: train a decoder-only transformer to 175B parameters with proportionally more data and compute, and record what changes.',
@@ -438,7 +438,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'shot-taxonomy',
         title: 'The prompt is the training set',
         lines: [
           'The GPT-3 paper introduced a taxonomy that stuck. Zero-shot: provide only a task description, no examples. One-shot: one demonstration before the query. Few-shot: several demonstrations, limited by context window.',
@@ -505,7 +505,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'objective-gap',
         title: 'Next-token prediction optimizes for the corpus, not the user',
         lines: [
           'A base LM is trained to predict the next token in text scraped from the web. That corpus contains arguments, tutorials, fiction, and misinformation — all equally likely continuations in their respective contexts. The model\'s best prediction is not the same as "what would be helpful here."',
@@ -570,7 +570,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'rlhf-stages',
         title: 'Three stages, three types of human signal',
         lines: [
           'Stage 1 — Supervised fine-tuning (SFT): human labelers wrote ideal responses to diverse prompts sampled from the API. GPT-3 was fine-tuned on these demonstrations to produce an instruction-following baseline.',
@@ -635,7 +635,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'powerlaw-lines',
         title: 'Three knobs, one predictable output',
         lines: [
           '"Scaling Laws for Neural Language Models" (Kaplan et al., 2020) trained hundreds of transformers and measured one thing: final test loss as a function of parameter count N, dataset size D, and compute C.',
@@ -699,7 +699,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'chinchilla-shift',
         title: 'Same question, fixed methodology, opposite answer',
         lines: [
           '"Training Compute-Optimal Large Language Models" (Hoffmann et al., 2022) re-ran the scaling question with one methodological fix: Kaplan\'s runs had reused learning-rate schedules that were not matched to each run\'s token budget, which quietly penalized the heavily-trained small models.',
@@ -759,7 +759,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'lora-bypass',
         title: 'The problem was storage and serving, not training',
         lines: [
           'By 2021, full fine-tuning of GPT-3 worked fine as machine learning. It failed as engineering: every fine-tuned task produced a complete 175B-parameter copy — 350GB per customer, per task — and you cannot hot-swap that between requests.',
@@ -823,7 +823,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'lora-arith',
         title: 'The arithmetic, then the deployment payoff',
         lines: [
           'Take one attention weight matrix at a typical size: d = k = 4096. A full fine-tuning update touches every entry — d × k parameters. LoRA at rank r stores only B (d×r) and A (r×k): that is r × (d + k) parameters instead.',
@@ -884,7 +884,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'cot-prompt',
         title: 'Change the examples, not the model',
         lines: [
           'GPT-3 established few-shot prompting: show the model a handful of question–answer pairs, then ask your question. On math word problems this mostly failed — and making models bigger barely helped. The scaling curve for arithmetic reasoning looked flat.',
@@ -943,7 +943,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     track: 'extension',
     steps: [
       {
-        kind: 'concept',
+        kind: 'concept',figure: 'cot-prompt',
         title: 'Two mechanisms, one caveat',
         lines: [
           'Mechanism one is decomposition. A multi-step problem forces a single-leap prompt to compute everything implicitly at once. A chain breaks it into steps that are each individually easy, and every written step becomes context the next step can attend to — external scratch memory.',
