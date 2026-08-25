@@ -105,7 +105,7 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
   },
 
   {
-    slug:'systems-capstone',title:'Scaling and Serving Checkpoint',emoji:'🏆',blurb:'Connect scaling laws, caching, precision, routing, and decoding tricks.',minutes:8,
+    slug:'systems-capstone',title:'Scaling and Serving Checkpoint',emoji:'🏆',blurb:'Connect scaling laws, caching, precision, routing, and decoding tricks.',minutes:10,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['speculative-decoding','grouped-query-attention','mixture-of-experts'],outcomes:['Choose precision for a deployment constraint','Diagnose a KV-cache bottleneck','Distinguish stored and active parameters'],concepts:['system integration','deployment trade-offs','bottleneck diagnosis'],
     steps:[
       {kind:'concept',figure:'serving-tradeoffs',title:'Every serving choice is a named trade-off',lines:['Scaling laws guide how to spend a training budget. Precision and quantization trade accuracy for memory. GQA trades head diversity for cache size. MoE trades routing complexity for capacity without proportional compute. Speculative decoding trades draft-model overhead for fewer sequential target passes.','This checkpoint introduces no new mechanism. It asks you to retrieve and connect earlier ideas under new scenarios.'],cta:'Start the checkpoint'},
@@ -114,6 +114,15 @@ export const SYSTEMS_LESSONS: InteractiveLesson[] = [
       {kind:'predict', figure: 'moe-router',prompt:'A deployment uses an MoE model with 8 experts, top-2 routing.',questions:[
         {label:'fraction of expert parameters active per token',options:['1/4','All','1/8'],answer:0,reveal:'2 of 8 experts are routed, so 2/8 = 1/4 of expert parameters are active.'},
         {label:'memory required for weights',options:['Proportional to total (all 8 experts stored)','Proportional to active only','Zero because experts are virtual'],answer:0,reveal:'All expert weights must reside in memory even though only a subset runs per token.'},
+      ]},
+      {kind:'worked', figure: 'fx-kv-per-token',title:'One number to compare serving cost',prompt:'KV cache per token lets you compare serving cost across architectures. Compute it for GPT-2 1.5B: 48 layers, 25 heads (full MHA, so every head caches K and V), head dimension 64, bf16.',stages:[
+        {label:'Values per layer',body:'25 KV heads x 64 numbers x 2 (a key and a value) = 3,200 values cached per layer.'},
+        {label:'Values across layers',body:'48 layers x 3,200 = 153,600 values cached per token.'},
+        {label:'Bytes',body:'bf16 stores each value in 2 bytes: 153,600 x 2 = 307,200 bytes = 300 KiB per token.'},
+      ],takeaway:'layers x KV heads x head_dim x 2 (K and V) x 2 bytes. At a 128k context that is about 37 GB for one sequence, which is why modern architectures attack the KV cache first.'},
+      {kind:'numeric', figure: 'fx-kv-per-token',prompt:'A modern 8B model uses GQA: 36 layers, 32 query heads but only 8 KV heads, head dimension 128, bf16.',questions:[
+        {label:'KV cache per token in KiB',answer:144,tolerance:1,reveal:'36 x 8 x 128 x 2 x 2 = 147,456 bytes = 144 KiB. Only KV heads count; the 32 query heads cache nothing.'},
+        {label:'GPT-2 1.5B stores 300 KiB per token. Ratio 300 / your answer, one decimal',answer:2.1,tolerance:0.15,reveal:'300 / 144 is about 2.1. A model five times larger by parameters costs less than half per cached token: cache cost follows architecture, not size.'},
       ]},
       {kind:'numeric',prompt:'Quick deployment math.',questions:[
         {label:'13B params at 4 bits: weight memory in GB',answer:6.5,tolerance:0.2,reveal:'4 bits = 0.5 bytes. 13B x 0.5 = 6.5 GB.'},

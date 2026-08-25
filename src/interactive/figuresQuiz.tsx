@@ -698,6 +698,58 @@ function TokenCompute(): ReactElement {
   )
 }
 
+
+// systems-capstone worked + numeric: KV cache per token, the comparable serving number
+function KvPerToken(): ReactElement {
+  const boxes = [
+    { t: 'layers', v: '48', c: C.violet },
+    { t: 'KV heads', v: '25', c: C.sky },
+    { t: 'head_dim', v: '64', c: C.emerald },
+    { t: 'K and V', v: '× 2', c: C.amber },
+    { t: 'bf16', v: '2 B', c: C.amber },
+  ]
+  return (
+    <svg viewBox="0 0 530 190" className="w-full h-auto">
+      <text x={265} y={24} textAnchor="middle" fontSize={10} fill={C.dim} style={mono}>GPT-2 1.5B, full multi-head attention</text>
+      {boxes.map((b, i) => (
+        <g key={i}>
+          <rect x={38 + i * 96} y={40} width={72} height={44} rx={6} fill={`${b.c}22`} stroke={b.c} />
+          <text x={74 + i * 96} y={58} textAnchor="middle" fontSize={9} fill={b.c} style={mono}>{b.t}</text>
+          <text x={74 + i * 96} y={74} textAnchor="middle" fontSize={10.5} fill={C.text} style={mono}>{b.v}</text>
+          {i < 4 && <text x={122 + i * 96} y={66} textAnchor="middle" fontSize={11} fill={C.dim} style={mono}>×</text>}
+        </g>
+      ))}
+      <text x={265} y={112} textAnchor="middle" fontSize={11} fill={C.text} style={mono}>= 307,200 bytes = 300 KiB cached per token</text>
+      <text x={265} y={132} textAnchor="middle" fontSize={9.5} fill={C.amber} style={mono}>at a 128k context: roughly 37 GB for one sequence</text>
+      <Cap cx={265} y={166} t="only KV heads count — query heads cost compute but store nothing in the cache" />
+    </svg>
+  )
+}
+
+// reading-model-cards mcq + numeric: decoding a config.json
+function ConfigReader(): ReactElement {
+  const rows: Array<[string, string, string]> = [
+    ['"num_hidden_layers": 30,', 'depth: multiplies every per-layer cost', C.violet],
+    ['"num_attention_heads": 24,', 'query heads: compute, not cache', C.dim],
+    ['"num_key_value_heads": 4,', 'GQA signature: 24 queries share 4 KV heads', C.emerald],
+    ['"head_dim": 128,', 'width of each cached K and V vector', C.sky],
+    ['"sliding_window": 512,', 'most layers only look 512 tokens back', C.amber],
+  ]
+  return (
+    <svg viewBox="0 0 530 195" className="w-full h-auto">
+      <rect x={30} y={22} width={200} height={140} rx={8} fill={C.box} stroke={C.edge} />
+      {rows.map(([code, note, color], i) => (
+        <g key={i}>
+          <text x={42} y={48 + i * 24} fontSize={8.5} fill={color === C.dim ? C.faint : color} style={mono}>{code}</text>
+          <line x1={234} y1={44 + i * 24} x2={256} y2={44 + i * 24} stroke={color} strokeDasharray="3 2" />
+          <text x={262} y={48 + i * 24} fontSize={8.5} fill={color} style={mono}>{note}</text>
+        </g>
+      ))}
+      <Cap cx={265} y={184} t="the config states architecture as fact — read it before believing the marketing card" />
+    </svg>
+  )
+}
+
 export const FIGURES_QUIZ: Record<string, () => ReactElement> = {
   'fx-batch-count': BatchCount,
   'fx-read-shape': ReadShape,
@@ -729,4 +781,6 @@ export const FIGURES_QUIZ: Record<string, () => ReactElement> = {
   'fx-lora-zero-init': LoraZeroInit,
   'fx-lora-merge': LoraMerge,
   'fx-token-compute': TokenCompute,
+  'fx-kv-per-token': KvPerToken,
+  'fx-config-reader': ConfigReader,
 }

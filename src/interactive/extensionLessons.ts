@@ -4,7 +4,7 @@ const MODULE_TITLE='Beyond the Core: Frontier Extensions'
 
 export const EXTENSION_LESSONS: InteractiveLesson[] = [
   {
-    slug:'reading-model-cards',title:'Reading Model Claims',emoji:'📇',blurb:'Separate storage, compute, context, evaluation, and license claims.',minutes:8,
+    slug:'reading-model-cards',title:'Reading Model Claims',emoji:'📇',blurb:'Separate storage, compute, context, evaluation, and license claims.',minutes:10,
     moduleId:MODULE,moduleTitle:MODULE_TITLE,prerequisites:['mixture-of-experts','precision-quantization'],outcomes:['Distinguish total and active parameters','Interrogate context and benchmark claims','Check licensing before deployment'],concepts:['model card','total parameters','active parameters','benchmark conditions','context length','license'],track:'extension',
     steps:[
       {kind:'concept',figure:'card-anatomy',title:'A headline number rarely answers the deployment question',lines:[
@@ -17,6 +17,13 @@ export const EXTENSION_LESSONS: InteractiveLesson[] = [
       ],takeaway:'Translate every headline into the specific cost, quality, or permission question it actually answers.'},
       {kind:'mcq', figure: 'moe-router',prompt:'A 100B-total MoE activates 12B parameters per token. Which statement is safest?',options:['Storage tracks about 100B weights; routed compute is closer to the 12B active path','It needs memory for only 12B weights','It always runs exactly like a 12B dense model','All 100B parameters run for every token'],answer:0,explain:'Inactive experts still need storage. Active count informs compute but does not erase routing and systems overhead.',nudge:'Separate what must be stored from what one token traverses.'},
       {kind:'mcq',prompt:'What settles whether downloadable weights may be used in a paid product?',options:['The governing license text','The benchmark score','The quantization format','The model name'],answer:0,explain:'Access to files and legal permission to use them are different questions.',nudge:'Which artifact defines rights and restrictions?'},
+      {kind:'mcq', figure: 'fx-config-reader',prompt:'A release is vague about architecture, but its config.json is public. What do num_attention_heads: 24 and num_key_value_heads: 4 together tell you?',code:'{\n  "num_hidden_layers": 30,\n  "num_attention_heads": 24,\n  "num_key_value_heads": 4,\n  "head_dim": 128,\n  "sliding_window": 512\n}',
+        options:['Grouped-query attention: every 6 query heads share one KV head, so the cache is 6x smaller than MHA at this width','The model has 28 attention heads in total','20 of the heads are disabled at inference','K and V are quantized to 4 bits'],answer:0,
+        explain:'Fewer KV heads than query heads is the GQA signature. The cache stores only the 4 KV heads per layer; query heads cost compute but no cache.',nudge:'Which attention design stores fewer K and V heads than query heads?'},
+      {kind:'numeric', figure: 'fx-config-reader',prompt:'Same config: 30 layers, 4 KV heads, head_dim 128, bf16 (2 bytes). Ignore the sliding window and compute the full-attention upper bound.',questions:[
+        {label:'KV cache per token in KiB',answer:60,tolerance:1,reveal:'30 x 4 x 128 x 2 (K and V) x 2 bytes = 61,440 bytes = 60 KiB per token.'},
+        {label:'cache for one 100k-token conversation, in GB (one decimal)',answer:6.1,tolerance:0.2,reveal:'61,440 bytes x 100,000 tokens is about 6.1 GB for a single sequence. This is exactly what sliding_window: 512 exists to cap.'},
+      ]},
       {kind:'predict', figure: 'fx-lost-middle',prompt:'A card claims a 1M-token context.',questions:[{label:'what must still be tested',options:['Recall quality, latency, memory cost, and behavior across positions','Whether token IDs are integers','Whether softmax sums to one'],answer:0,reveal:'Maximum accepted length is only one dimension of long-context usefulness.'},{label:'if recall degrades in the middle of context',options:['The model accepts the length but does not use it uniformly','The context window is too short','Tokenization failed'],answer:0,reveal:'Lost-in-the-middle effects mean acceptance length alone does not guarantee uniform retrieval quality.'}]},
     ],
   },
