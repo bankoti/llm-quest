@@ -1,9 +1,11 @@
+from numbers import Integral
 import numpy as np
 
 class PagedCache:
     def __init__(self, block_size=2, total_blocks=4):
-        if block_size <= 0 or total_blocks <= 0:
-            raise ValueError('positive sizes required')
+        if any(isinstance(size, bool) or not isinstance(size, Integral) or size <= 0
+               for size in (block_size, total_blocks)):
+            raise ValueError('positive integer sizes required')
         self.block_size, self.total_blocks = block_size, total_blocks
         self.tables, self.blocks, self.refs = {}, {}, {}
 

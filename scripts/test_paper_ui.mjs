@@ -75,13 +75,18 @@ try {
           for(let i=0;i<step.stages.length;i++)await click(page,i===0?'Walk through it':`Show step ${i+1}`)
           await click(page,step.cta??'Try one yourself')
         } else if(step.kind==='numeric') {
-          for(const q of step.questions) {
+          for(const [index,q] of step.questions.entries()) {
+            await page.getByPlaceholder('type a number').waitFor()
+            assert.equal(await page.getByPlaceholder('type a number').count(),1)
+            if(step.questions.length>1)await page.getByText(`question ${index+1} of ${step.questions.length}`,{exact:true}).waitFor()
             await page.getByPlaceholder('type a number').fill(String(q.answer))
             await click(page,'Check');await click(page,'Continue')
           }
           await click(page,'Continue')
         } else if(step.kind==='mcq') {
-          await click(page,step.options[step.answer]);await click(page,"I'm sure");await click(page,'Continue')
+          await click(page,step.options[step.answer])
+          assert.equal(await page.getByRole('button',{name:'Continue',exact:true}).count(),0)
+          await click(page,"I'm sure");await click(page,'Continue')
         } else if(step.kind==='widget') {
           if(slug==='scaling-laws') {
             for(const i of [0,4,2]){await slider(page,'parameter-ratio',i);assert.equal(await page.getByTestId('budget-ratio').innerText(),'1.000')}
@@ -108,7 +113,8 @@ try {
       }
       await page.getByRole('link',{name:'Back to track',exact:true}).waitFor()
       const completed=await page.evaluate(slug=>JSON.parse(localStorage.getItem('llmquest_interactive_v2'))[slug],slug)
-      assert.ok(completed.scored>=2,`${slug}: new completion must be persisted`)
+      const expectedScore=lesson.steps.reduce((n,s)=>n+(s.kind==='mcq'?1:['numeric','predict'].includes(s.kind)?s.questions.length:0),0)
+      assert.equal(completed.scored,expectedScore,`${slug}: every question must be scored`)
       assert.equal(completed.firstTries,completed.scored,`${slug}: score must persist`)
       console.log(`PASS ${viewport.width}px ${slug}: completed and scored`)
     }
@@ -121,6 +127,7 @@ try {
       const expected=fs.readFileSync(path.join(root,'public/content/solutions',level.challengeFile),'utf8')
       assert.equal((await page.locator('section pre').innerText()).trimEnd(),expected.trimEnd())
       assert.ok((await page.getByRole('link',{name:'Open in Colab'}).getAttribute('href')).includes(level.challengeFile.replace('.py','.ipynb')))
+      await page.locator('section pre').scrollIntoViewIfNeeded()
       await layout(page,`${viewport.width}-${id}-solution`)
     }
     if(process.env.PAPER_PYODIDE==='1' && viewport.width===1280) {

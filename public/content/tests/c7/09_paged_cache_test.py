@@ -1,4 +1,12 @@
 import numpy as np
+for _size in [0, -1, 1.5, 2.0, float('nan'), float('inf'), True, False, '2', None]:
+    for _sizes in [(_size, 4), (2, _size)]:
+        try:
+            PagedCache(*_sizes)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f'positive integer sizes required: {_sizes}')
 _c = PagedCache(block_size=2, total_blocks=4)
 _c.append('a', 1, 10)
 _c.append('a', 2, 20)
