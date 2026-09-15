@@ -3,9 +3,12 @@ dist/
 *.local
 .DS_Store
 
-# answer key — never commit
+# Keep private author keys out; the public course includes learner solutions.
 solutions/
+!public/content/solutions/
+!public/content/solutions/**
 __pycache__/
 *.pyc
 
 smoke-shots/
+/.paper-test-output/

@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "npm run validate:interactive && tsc && vite build",
     "preview": "vite preview",
-    "validate:interactive": "node scripts/validate-interactive.mjs"
+    "validate:interactive": "node scripts/validate-interactive.mjs",
+    "test": "node scripts/test_paper_math.mjs",
+    "test:paper-ui": "node scripts/test_paper_ui.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

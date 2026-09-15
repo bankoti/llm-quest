@@ -5,6 +5,7 @@
  * Colab has torch preinstalled and a free GPU, so "go deeper" is one click.
  */
 
+import { PAPER_LABS } from '@/data/paperLabs'
 const REPO = 'bankoti/llm-quest'
 const COLAB_COURSES = new Set([1, 2, 3])
 
@@ -14,7 +15,8 @@ interface Props {
 }
 
 export function GoDeeper({ courseId, challengeFile }: Props) {
-  if (!COLAB_COURSES.has(courseId)) return null
+  const experiment = PAPER_LABS[challengeFile]?.experiment
+  if (!COLAB_COURSES.has(courseId) && !experiment) return null
   // Debug levels (90_*) are quest-only exercises with no PyTorch lab.
   if ((challengeFile.split('/').pop() ?? '').startsWith('90_')) return null
 
@@ -26,12 +28,12 @@ export function GoDeeper({ courseId, challengeFile }: Props) {
     <div className="mt-3 rounded-xl border border-gray-800 bg-gray-900/60 px-4 py-3 flex items-start gap-3">
       <span className="text-lg mt-0.5 shrink-0">🚀</span>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-gray-300 mb-0.5">Go Deeper — Full PyTorch Lab</p>
+        <p className="text-xs font-semibold text-gray-300 mb-0.5">{experiment ? 'Paper Lab: Experiments and Solutions' : 'Go Deeper — Full PyTorch Lab'}</p>
         <p className="text-xs text-gray-500 leading-relaxed mb-2">
-          The browser version grades numpy. This same exercise also exists as a
+          {experiment ? 'Notebook with the exercise, grader, worked solution, and follow-up experiment. CPU simulations teach the mechanism; GPU performance is a separate measurement.' : <>The browser version grades numpy. This same exercise also exists as a
           PyTorch notebook: open it in Google Colab (free, torch preinstalled,
           GPU optional) and solve it with real tensors. Solved it there? Come
-          back and pass the browser check to bank the XP; same logic in numpy.
+          back and pass the browser check to bank the XP; same logic in numpy.</>}
         </p>
         <div className="flex gap-2 flex-wrap">
           <a

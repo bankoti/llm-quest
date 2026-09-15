@@ -75,9 +75,9 @@ the number of dot products remains quadratic.
 
 ## Experiment
 
-Complete the challenge below. Compute the bytes required by a naive score
-matrix and compare them with a tiled algorithm's on-chip tile. This exercise is a
-traffic model, not a claim about wall-clock speed.
+Complete the memory accounting, then implement `tiled_attention(q,k,v,block_size)`.
+This CPU reference validates the online-softmax algorithm; it is not a fused GPU
+kernel. Storage estimates are not measured traffic or wall-clock speed.
 
 If you have supported hardware, compare PyTorch's explicit attention against
 `scaled_dot_product_attention`. Verify output closeness before timing warm runs.
@@ -98,3 +98,41 @@ Explain how exact attention can avoid storing the full score matrix, and name on
 architecture property and one hardware property that determine the speedup.
 
 Primary source: [FlashAttention-3](https://arxiv.org/abs/2407.08608).
+
+## Implement the recurrence
+
+For each query tile, initialize one maximum `m=-inf` and exponential sum `l=0`
+per row, and weighted value sum `a=0` with shape `(query_rows, value_width)`.
+Visit key tiles up to the end of this query tile. Use GLOBAL position indices
+to set future scores to `-inf`. The diagonal remains visible.
+
+```text
+S = Q_tile @ K_tile.T / sqrt(D), with causal mask
+m_new = maximum(m, row_max(S))
+alpha = exp(m - m_new)
+P = exp(S - m_new[:, None])
+l_new = alpha * l + row_sum(P)
+a_new = alpha[:, None] * a + P @ V_tile
+```
+
+Assign the new statistics after each tile. Return `a/l[:,None]` only after all
+allowed tiles. The first key tile includes at least one visible key for each
+query row, so its maximum is finite. Skipping fully future tiles also avoids
+the undefined expression `-inf - -inf` in an empty accumulator.
+
+For scores `[1,2]` and values `[10,20]`, `m=2`, `l=1+exp(-1)`, and
+`a=20+10*exp(-1)`. A later tile with maximum 4 changes the scale: multiply
+both previous sums by `exp(2-4)` before adding new contributions. Equal-weight
+averaging of two tile outputs would discard their different probability mass.
+
+Implement query tiling as well as key tiling. With tile size B, score storage is
+at most B squared (when T>B), with additional row accumulators and input/output
+arrays. The grader checks multiple tile sizes, non-divisible lengths, large
+logits, and isolation from future values. It cannot prove memory scheduling from
+outputs alone; inspect allocations and compare peak memory in the notebook.
+
+**Challenge:** Deliberately remove the `alpha` correction. Explain why a rising
+maximum breaks the result even when no NaN appears. The worked solution is
+available below the coding arena.
+
+Primary algorithm: [Dao et al., FlashAttention, Algorithm 1](https://arxiv.org/abs/2205.14135).

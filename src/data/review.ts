@@ -12,6 +12,10 @@ export interface ReviewQuestion {
 }
 
 export const REVIEW_QUESTIONS: ReviewQuestion[] = [
+  { id: 'c7-l9-q1', levelId: 'c7-l9', prompt: 'A sequence maps logical blocks to [0,2,1]. How should attention read them?', options: ['Sorted as [0,1,2]', 'In table order [0,2,1]', 'Only the last block', 'In allocation timestamp order'], answer: 1, explain: 'The block table preserves token order independently of physical placement.' },
+  { id: 'c7-l9-q2', levelId: 'c7-l9', prompt: 'Appending to a shared partial block requires:', options: ['Overwriting all owners', 'Dropping the prefix', 'A private copy before writing', 'Renormalizing all previous attention'], answer: 2, explain: 'Copy-on-write protects other sequences. If allocation fails, leave both histories unchanged.' },
+  { id: 'c9-l8-q1', levelId: 'c9-l8', prompt: 'What does ZeRO stage 2 partition?', options: ['Only activations', 'Only parameters', 'The training dataset only', 'Optimizer state and gradients'], answer: 3, explain: 'Stage 1 shards optimizer state; stage 2 adds gradients; stage 3 adds parameters.' },
+  { id: 'c9-l8-q2', levelId: 'c9-l8', prompt: 'Why can peak stage-3 memory exceed persistent state accounting?', options: ['Activations and temporary gathered weights also occupy memory', 'Sharding reduces model quality', 'Adam has no state', 'All KV caches must be stored during training'], answer: 0, explain: 'Persistent sharded state excludes activation storage, communication buffers, and transient parameter gathers.' },
   // ── Course 0: The Python Toolkit ────────────────────────────────────────
   { id: 'c0-l1-q1', levelId: 'c0-l1',
     prompt: 'A 140 GB model must fit on 80 GB GPUs. Which expression gives the GPU count?',
@@ -158,9 +162,9 @@ export const REVIEW_QUESTIONS: ReviewQuestion[] = [
     options: ['x W1 plus x W3', 'silu(x W1) elementwise-times (x W3), then W2', 'relu(x W1) then W2', 'softmax(x W1) then W2'], answer: 1,
     explain: 'A gated MLP: one projection is passed through SiLU and gates the other. The gate is why it beats plain ReLU MLPs.' },
   { id: 'c2-l5-q1', levelId: 'c2-l5',
-    prompt: 'Standard attention on long sequences is slow mostly because...',
-    options: ['It reads/writes an N x N matrix to slow GPU memory', 'The FLOPs exceed hardware limits', 'Softmax is numerically unstable', 'Python overhead dominates'], answer: 0,
-    explain: 'Attention is memory-bandwidth bound: materializing N x N scores in HBM costs more time than the math itself.' },
+    prompt: 'Which avoidable cost does FlashAttention specifically target?',
+    options: ['Writing and rereading the full score matrix in external GPU memory', 'All quadratic arithmetic', 'The entire backward pass', 'All model weight storage'], answer: 0,
+    explain: 'Tiling reduces intermediate memory traffic. The dominant bottleneck and speedup still depend on shape, dtype, hardware, and kernel.' },
   { id: 'c2-l5-q2', levelId: 'c2-l5',
     prompt: 'FlashAttention gets its speedup by...',
     options: ['Skipping the softmax', 'Using lower precision only', 'Pruning attention heads', 'Tiling + online softmax so the N x N matrix never hits HBM'], answer: 3,

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { WidgetProps } from './types'
+import { allocation } from './paperMath'
 
 // ── shared atoms ─────────────────────────────────────────────────────────────
 
@@ -1037,55 +1038,31 @@ export function CalibrationPlay({ onDone }: WidgetProps) {
 
 // ── Tier 2: scaling laws / compute-optimal allocation ────────────────────────
 
-const SCALING_CONFIGS: { label: string; n: number; d: number }[] = [
-  { label: 'Tiny model, massive data (1B × 1T)', n: 1e9, d: 1e12 },
-  { label: 'Balanced (10B × 200B)', n: 1e10, d: 2e11 },
-  { label: 'Chinchilla-optimal (14B × 280B)', n: 1.4e10, d: 2.8e11 },
-  { label: 'Giant model, thin data (100B × 10B)', n: 1e11, d: 1e10 },
-]
-// proxy loss: lower is better; Chinchilla formula Lˣ ≈ A/N^α + B/D^β
-const scalingLoss = (n: number, d: number) =>
-  Math.round((406.4 / (n / 1e9) ** 0.34 + 410.7 / (d / 1e9) ** 0.28) * 100) / 100
-
 export function ScalingPlay({ onDone }: WidgetProps) {
-  const [sel, setSel] = useState<number | null>(null)
+  const [sel, setSel] = useState(2)
   const [tried, setTried] = useState<Set<number>>(new Set())
-  const pick = (i: number) => { setSel(i); setTried(t => new Set(t).add(i)) }
-  const losses = SCALING_CONFIGS.map(c => scalingLoss(c.n, c.d))
-  const best = losses.indexOf(Math.min(...losses))
+  const ratios = [0.25, 0.5, 1, 2, 4]
+  const current = allocation(3e21, ratios[sel])
   return (
-    <div className="w-full max-w-lg">
-      <p className="text-lg text-gray-100 mb-1">Fixed compute budget: 3×10²¹ FLOPs. How should you spend it?</p>
-      <p className="text-sm text-gray-400 mb-4">Tap each allocation and watch the predicted loss. One combination is compute-optimal.</p>
-      <div className="grid gap-2 mb-4">
-        {SCALING_CONFIGS.map((c, i) => (
-          <button key={i} onClick={() => pick(i)}
-            className={`px-4 py-3 rounded-xl border text-left text-sm transition-colors
-              ${sel === i ? 'bg-violet-600/20 border-violet-500 text-gray-100' : 'bg-gray-800/60 border-gray-700 text-gray-200 hover:border-violet-500'}`}>
-            {c.label}
-            {tried.has(i) && (
-              <span className={`float-right font-mono text-xs ${i === best ? 'text-emerald-400' : 'text-gray-400'}`}>
-                loss {losses[i]} {i === best ? '← best' : ''}
-              </span>
-            )}
-          </button>
-        ))}
+    <div className="w-full max-w-lg" data-testid="scaling-experiment">
+      <p className="text-lg text-gray-100 mb-4">Fixed budget: 3 x 10²¹ FLOPs</p>
+      <label className="block text-sm text-gray-300" htmlFor="parameter-ratio">Parameters relative to the 20:1 allocation: {ratios[sel]}x</label>
+      <input id="parameter-ratio" className="w-full my-4 accent-emerald-500" type="range" min="0" max="4" step="1" value={sel}
+        onChange={e => { const i = Number(e.target.value); setSel(i); setTried(t => new Set(t).add(i)) }} />
+      <dl className="grid grid-cols-2 gap-3 text-sm font-mono">
+        <dt>Parameters</dt><dd>{(current.params / 1e9).toFixed(2)}B</dd>
+        <dt>Training tokens</dt><dd>{(current.tokens / 1e9).toFixed(2)}B</dd>
+        <dt>6ND / budget</dt><dd data-testid="budget-ratio">{(current.compute / 3e21).toFixed(3)}</dd>
+        <dt>Teaching proxy</dt><dd>{current.proxy.toFixed(3)}</dd>
+      </dl>
+      <div className="mt-5 flex items-end gap-2 h-32" aria-label="Proxy loss across five equal-compute allocations">
+        {ratios.map((r, i) => <div key={r} className="flex-1 min-w-0 flex flex-col justify-end h-full text-center text-xs">
+          <div className={`${i === sel ? 'bg-emerald-500' : 'bg-sky-800'} rounded-t-sm`} style={{ height: `${allocation(3e21, r).proxy * 30}%` }} />
+          <span className="mt-2">{r}x</span>
+        </div>)}
       </div>
-      {sel !== null && (
-        <motion.div key={sel} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-          className="p-3 rounded-xl border bg-gray-900 border-gray-800 mb-3 text-sm text-gray-300">
-          {sel === 2
-            ? 'Chinchilla (DeepMind, 2022): for a given compute budget C, optimal N* ≈ 0.1C^0.5 params and D* ≈ 20N* tokens. Models like GPT-3 were ~4× undertrained — you get a better model for the same FLOP budget by shrinking params and training longer.'
-            : sel === 3
-            ? 'Over-parameterized and undertrained. The giant model memorizes quickly then stagnates. You are paying for capacity you cannot afford to fill with data.'
-            : sel === 0
-            ? 'Reversed extreme: the model is too small to absorb what the data teaches. Capacity-limited even with abundant tokens.'
-            : 'Close to optimal but slightly off-balance. A further nudge toward Chinchilla improves loss with no extra compute.'}
-        </motion.div>
-      )}
-      {tried.size >= 4
-        ? <ContinueBtn onClick={onDone} label="Got it, continue" />
-        : <p className="text-xs text-gray-500 mt-2">Try all 4 allocations ({tried.size}/4).</p>}
+      <p className="mt-5 text-sm text-gray-400">Doubling parameters halves tokens. The symmetric proxy has its minimum at D/N = 20 by construction; it is not measured loss or a fitted prediction. Real optima depend on data and training.</p>
+      {tried.size >= 2 ? <ContinueBtn onClick={onDone} /> : <p className="mt-4 text-sm text-gray-400">Compare two allocations ({tried.size}/2).</p>}
     </div>
   )
 }

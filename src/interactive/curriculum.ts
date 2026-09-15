@@ -9,6 +9,7 @@ import { SYSTEMS_LESSONS } from './systemsLessons'
 import { APPLICATION_LESSONS } from './applicationLessons'
 import { EXTENSION_LESSONS } from './extensionLessons'
 import { PAPERS_LESSONS } from './papersLessons'
+import { PAPER_SYSTEMS_LESSONS } from './paperSystemsLessons'
 export { WARMUPS } from './warmups'
 
 export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
@@ -16,6 +17,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
   ...MODEL_LESSONS,
   ...ADAPTATION_LESSONS,
   ...SYSTEMS_LESSONS,
+  ...PAPER_SYSTEMS_LESSONS,
   ...APPLICATION_LESSONS,
   ...EXTENSION_LESSONS,
   ...PAPERS_LESSONS,
@@ -42,4 +44,3 @@ export const MODULE_META: Record<string, { builds: string; short: string; option
 }
 
 export const MODULES = [...new Map(INTERACTIVE_LESSONS.map(l => [l.moduleId, { id: l.moduleId, title: l.moduleTitle }])).values()]
-

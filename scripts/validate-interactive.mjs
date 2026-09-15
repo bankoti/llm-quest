@@ -2,7 +2,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 const root=path.resolve(import.meta.dirname,'..')
-const lessonFiles=['foundationLessons.ts','modelLessons.ts','adaptationLessons.ts','systemsLessons.ts','applicationLessons.ts','extensionLessons.ts','papersLessons.ts'].map(f=>`src/interactive/${f}`)
+const lessonFiles=['foundationLessons.ts','modelLessons.ts','adaptationLessons.ts','systemsLessons.ts','paperSystemsLessons.ts','applicationLessons.ts','extensionLessons.ts','papersLessons.ts'].map(f=>`src/interactive/${f}`)
 const source=lessonFiles.map(f=>fs.readFileSync(path.join(root,f),'utf8')).join('\n')
 const errors=[]
 const slugs=[...source.matchAll(/\bslug:\s*'([^']+)'/g)].map(m=>m[1]), unique=new Set(slugs)
