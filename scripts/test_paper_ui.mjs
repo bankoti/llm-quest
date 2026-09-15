@@ -12,7 +12,7 @@ const chrome='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 let browser
 const shots=process.env.PAPER_EVIDENCE_DIR ?? path.join(root,'.paper-test-output')
 fs.mkdirSync(shots,{recursive:true})
-const slugs=['scaling-laws','flash-attention','zero-sharding','switch-transformer','paged-attention']
+const slugs=['scaling-laws','flash-attention','zero-sharding','switch-transformer','paged-attention','byte-boundaries','byte-distillation','byte-model-evaluation']
 
 async function layout(page,name) {
   await page.waitForTimeout(500)
@@ -106,6 +106,26 @@ try {
           } else if(slug==='paged-attention') {
             for(let i=0;i<4;i++)await click(page,'Next cache event')
             assert.match(await page.getByTestId('paging-experiment').innerText(),/\[0, 2, 1\]/)
+          } else if(slug==='byte-boundaries') {
+            await page.locator('#boundary-sample').selectOption('unicode')
+            assert.deepEqual(await page.getByTestId('byte-lengths').locator('dd').allTextContents(),['4','2','5','7'])
+          } else if(slug==='byte-distillation') {
+            assert.match(await page.getByTestId('byte-next-probabilities').innerText(),/0.625/)
+            await page.locator('#byte-scheme').selectOption('eot')
+            assert.match(await page.getByTestId('byte-next-probabilities').innerText(),/0.200/)
+            await page.locator('#byte-prefix').selectOption('ab')
+            assert.match(await page.getByTestId('byte-next-probabilities').innerText(),/1.000/)
+            await page.locator('#byte-scheme').selectOption('approximate')
+            await page.getByText('No remaining token continuation.',{exact:false}).waitFor()
+            await page.locator('#byte-scheme').selectOption('eot')
+            await page.locator('#byte-prefix').selectOption('a')
+            await slider(page,'short-token-mass',40)
+            assert.match(await page.getByTestId('byte-next-probabilities').innerText(),/0.400/)
+          } else if(slug==='byte-model-evaluation') {
+            await slider(page,'evidence-budget',15)
+            assert.match(await page.getByTestId('evidence-region').innerText(),/interpolated/)
+            await slider(page,'evidence-budget',100)
+            assert.equal(await page.getByTestId('evidence-region').innerText(),'extrapolated: 58.0')
           }
           await layout(page,`${viewport.width}-${slug}`)
           await click(page,'Continue')
@@ -118,7 +138,7 @@ try {
       assert.equal(completed.firstTries,completed.scored,`${slug}: score must persist`)
       console.log(`PASS ${viewport.width}px ${slug}: completed and scored`)
     }
-    for(const id of ['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1']) {
+    for(const id of ['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10']) {
       await page.goto(`${base}/level/${id}`)
       if(viewport.width<768)await page.getByRole('tab',{name:'code',exact:true}).click()
       await click(page,'Show worked solution')
@@ -131,7 +151,7 @@ try {
       await layout(page,`${viewport.width}-${id}-solution`)
     }
     if(process.env.PAPER_PYODIDE==='1' && viewport.width===1280) {
-      for(const id of ['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8']) {
+      for(const id of ['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8','c9-l9','c9-l10']) {
         const level=data.levels.find(l=>l.id===id)
         const result=await page.evaluate(async file=>{
           const {runChallenge}=await import('/src/engine/pyodide.ts')

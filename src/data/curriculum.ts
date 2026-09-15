@@ -265,6 +265,7 @@ export const COURSES: Course[] = [
       'Derive compute-optimal model and data sizes from a FLOP budget',
       'Implement DPO loss and GRPO advantages from the papers',
       'Design a training recipe that fits compute, memory, and alignment constraints',
+      'Distill across tokenizations and distinguish measured quality from scaling predictions',
     ],
     levels: [
       { id:'c9-l1', courseId:9, index:1, title:'Scaling Laws',            description:'Derive compute-optimal parameter and token counts from first principles.',   xp:150, type:'challenge', lessonFile:'c9/01_scaling_laws.md',    challengeFile:'c9/01_scaling_laws.py',    estimateMinutes:30 },
@@ -276,6 +277,8 @@ export const COURSES: Course[] = [
       { id:'c9-d1', courseId:9, index:7, title:'Debug: Budget That Forgot Inference', description:'The Chinchilla formula is correct. The objective is wrong.', xp:150, type:'debug', lessonFile:'c9/90_debug_scaling.md', challengeFile:'c9/90_debug_scaling.py', estimateMinutes:25 },
       { id:'c9-l6', courseId:9, index:8, title:'Training Recipe Defense', description:'Design a full training recipe that satisfies compute, memory, and alignment constraints.', xp:1000, type:'boss', lessonFile:'c9/06_training_recipe.md', challengeFile:'c9/06_training_recipe.py', estimateMinutes:75 },
       { id:'c9-l8', courseId:9, index:9, title:'ZeRO: Sharded Training State', description:'Calculate state ownership and match a sharded Adam update to its baseline.', xp:300, type:'challenge', lessonFile:'c9/08_zero.md', challengeFile:'c9/08_zero.py', estimateMinutes:65 },
+      { id:'c9-l9', courseId:9, index:10, title:'Distill a Byte Student', description:'Convert token probabilities to byte targets and verify the distillation objective.', xp:350, type:'challenge', lessonFile:'c9/09_byte_distillation.md', challengeFile:'c9/09_byte_distillation.py', estimateMinutes:100 },
+      { id:'c9-l10', courseId:9, index:11, title:'Byte Model Evidence Audit', description:'Compare likelihood, target storage, content throughput, and extrapolation.', xp:250, type:'challenge', lessonFile:'c9/10_byte_evaluation.md', challengeFile:'c9/10_byte_evaluation.py', estimateMinutes:70 },
     ],
   },
 ]

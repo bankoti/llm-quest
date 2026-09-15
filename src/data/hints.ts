@@ -5,6 +5,16 @@
 // XP cost keeps the testing effect intact: help is available, not free.
 
 export const HINTS: Record<string, [string, string, string]> = {
+  'c9-l9': [
+    'Filter byte strings by prefix. A token ending exactly at the prefix maps to symbol 256 with EOT; without EOT it is discarded.',
+    'Normalize eligible logits with their own maximum, then sum by next byte. Multiply all byte conditionals AND the final EOT to reconstruct a token probability.',
+    'Forward KL averages sum(p * (log(p) - log_softmax(z))) over rows. Zero p contributes zero. Validate shapes and target row sums before computing.',
+  ],
+  'c9-l10': [
+    'Sum NLLs before dividing by content_bytes * ln(2). EOT loss can contribute to the numerator, but EOT is not a content byte.',
+    'Dense targets cost positions*vocab*4; sparse targets cost positions*k*8 because each FP32 value has an int32 index.',
+    'Aggregate sequential throughput is total bytes / total time, not mean request rates. Sort times for nearest-rank p95; classify budgets against the sampled range.',
+  ],
   // Course 1
   'c0-l1': [
     'All four are one-liners over the math module. ceil_div: math.ceil(a / b) or (a + b - 1) // b. close_enough: math.isclose(a, b).',

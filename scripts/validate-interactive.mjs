@@ -19,6 +19,7 @@ try {
     ['adaptationLessons', 'ADAPTATION_LESSONS'], ['systemsLessons', 'SYSTEMS_LESSONS'],
     ['paperSystemsLessons', 'PAPER_SYSTEMS_LESSONS'], ['applicationLessons', 'APPLICATION_LESSONS'],
     ['extensionLessons', 'EXTENSION_LESSONS'], ['papersLessons', 'PAPERS_LESSONS'],
+    ['byteLessons', 'BYTE_LESSONS'],
   ]) {
     const module = await server.ssrLoadModule(`/src/interactive/${file}.ts`)
     for (const lesson of module[name]) assert.ok(lessons.includes(lesson), `curriculum omits ${lesson.slug}`)

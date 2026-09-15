@@ -28,7 +28,7 @@ def main():
             raise AssertionError(f'{relative}: unimplemented scaffold passed')
         passed += 1
         print(f'PASS {relative}: solution accepted, empty scaffold rejected')
-    assert passed == 7, f'Expected seven reference exercises, got {passed}'
+    assert passed == 9, f'Expected nine reference exercises, got {passed}'
 
 if __name__ == '__main__':
     main()

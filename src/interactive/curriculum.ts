@@ -10,6 +10,7 @@ import { APPLICATION_LESSONS } from './applicationLessons'
 import { EXTENSION_LESSONS } from './extensionLessons'
 import { PAPERS_LESSONS } from './papersLessons'
 import { PAPER_SYSTEMS_LESSONS } from './paperSystemsLessons'
+import { BYTE_LESSONS } from './byteLessons'
 export { WARMUPS } from './warmups'
 
 export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
@@ -21,6 +22,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
   ...APPLICATION_LESSONS,
   ...EXTENSION_LESSONS,
   ...PAPERS_LESSONS,
+  ...BYTE_LESSONS,
 ]
 
 export const LESSON_BY_SLUG = new Map(INTERACTIVE_LESSONS.map(l => [l.slug, l]))
@@ -41,6 +43,7 @@ export const MODULE_META: Record<string, { builds: string; short: string; option
   applications: { short: 'Products', builds: 'Things built on top: retrieval, tool use, agents, and the economics of running them.' },
   frontier: { short: 'Frontier', builds: 'Optional deep dives past the core build.', optional: true },
   papers: { short: 'Papers', builds: 'Optional history: the papers where these ideas first appeared, read with the concepts you now have.', optional: true },
+  'byte-models': { short: 'Byte models', builds: 'A token teacher converted into byte targets, a trained student, and an evidence-based quality/cost comparison.', optional: true },
 }
 
 export const MODULES = [...new Map(INTERACTIVE_LESSONS.map(l => [l.moduleId, { id: l.moduleId, title: l.moduleTitle }])).values()]

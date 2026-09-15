@@ -3,6 +3,7 @@
 // full interactive prerequisite graph: a warm-up is a just-in-time refresher,
 // not a second course gate.
 export const WARMUPS: Record<string, string> = {
+  'c9-l9':'byte-distillation','c9-l10':'byte-model-evaluation',
   'c7-l9':'paged-attention','c9-l8':'zero-sharding',
   'c0-l1':'numbers-to-tensors','c0-l2':'axes-and-slices','c0-l3':'next-token-prediction','c0-l4':'axes-and-slices','c0-l5':'matmul',
   'c1-l1':'numbers-to-tensors','c1-l2':'subword-tokenization','c1-l3':'training-objective','c1-l4':'next-token-prediction','c1-l5':'gradients','c1-l6':'causal-attention','c1-d1':'causal-attention','c1-l7':'transformer-block',

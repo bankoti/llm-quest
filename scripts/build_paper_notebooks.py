@@ -14,6 +14,8 @@ LABS = [
     ('c9/01_scaling_laws', 'c9/01_scaling_laws.md', 'scaling_runs.py'),
     ('c9/08_zero', 'c9/08_zero.md', None),
     ('c7/09_paged_cache', 'c7/10_paged_attention.md', None),
+    ('c9/09_byte_distillation', 'c9/09_byte_distillation.md', 'byte_student.py'),
+    ('c9/10_byte_evaluation', 'c9/10_byte_evaluation.md', 'byte_evaluation.py'),
 ]
 EXTRA = {
     'c9/08_zero': '''for ranks in [1, 2, 4, 8]:

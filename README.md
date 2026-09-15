@@ -23,20 +23,46 @@ are preserved; new levels start incomplete and unlock through the course graph.
 Learners who previously completed an expanded exercise can reopen it to try the
 new requirements; old completion records are not silently revoked.
 
+## Beyond BPE: byte-model distillation
+
+The advanced [Breaking the Token Ceiling](https://arxiv.org/abs/2609.12303)
+module connects the tokenizer, distillation, and scaling lessons:
+
+1. [Bytes, Tokens, and Boundaries](https://bankoti.github.io/llm-quest/interactive/byte-boundaries): UTF-8 content, teacher segmentation, and EOT prediction units.
+2. [Distillation Across Tokenizations](https://bankoti.github.io/llm-quest/interactive/byte-distillation): compare approximate conversion with boundary-preserving targets and reconstruct token probabilities.
+3. [Does the Byte Student Actually Win?](https://bankoti.github.io/llm-quest/interactive/byte-model-evaluation): distinguish observations from fitted predictions and compare equal content.
+
+The [conversion challenge](https://bankoti.github.io/llm-quest/level/c9-l9)
+and [evidence audit](https://bankoti.github.io/llm-quest/level/c9-l10) include
+worked solutions, hints, spaced review, and self-contained notebooks. They are
+appended to Course 9 without renumbering existing levels or revoking progress.
+The interactive module has its own prerequisite chain and is an optional advanced
+track. Each lesson includes hand calculations and AI-assisted coding checks.
+
+The training notebook learns a token teacher and four smaller byte-student arms
+across two seeds: supervised/distilled, with/without EOT. It uses synthetic
+segmented text with disjoint raw train/validation strings, not the paper corpus
+or a learned BPE tokenizer. It reports fixed-data, unequal-compute training and
+constrained CPU decoding for equal returned content. The evaluation notebook
+uses clearly labeled synthetic observations to test extrapolation sensitivity.
+Neither notebook establishes the paper's scaling predictions or production wins.
+
 ### Solutions and experiments
 
-Seven core exercises have a **Show worked solution** control below the coding
+Nine core exercises have a **Show worked solution** control below the coding
 arena and an original-paper link. Reference code lives in
 `public/content/solutions/` and is tested against the learner's exact grader.
 Revealing a solution does not run it or overwrite the editor.
 
-Five notebooks add the starter, grader, solution, and experiment in one file:
+Seven notebooks add the starter, grader, solution, and experiment in one file:
 
 - [FlashAttention](colab/c2/05_flash_io.ipynb)
 - [Switch routing](colab/c2/03_sparse_moe.ipynb)
 - [Chinchilla allocations](colab/c9/01_scaling_laws.ipynb)
 - [ZeRO ownership](colab/c9/08_zero.ipynb)
 - [Paged KV cache](colab/c7/09_paged_cache.ipynb)
+- [Byte-student distillation](colab/c9/09_byte_distillation.ipynb)
+- [Byte-model evidence audit](colab/c9/10_byte_evaluation.ipynb)
 
 They run on CPU with NumPy and PyTorch. CUDA measurements are optional and
 explicitly skipped without supported hardware. GPU speedups, cluster memory
@@ -58,13 +84,14 @@ npm run build
 uv run --with numpy python scripts/test_paper_labs.py
 uv run python scripts/build_paper_notebooks.py --check
 uv run --with numpy --with torch python scripts/test_paper_notebooks.py
+uv run --with numpy --with torch python scripts/test_byte_experiment.py
 npx playwright install chromium
 npm run test:paper-ui
 ```
 
-`PAPER_PYODIDE=1 npm run test:paper-ui` also runs the seven reference exercises
+`PAPER_PYODIDE=1 npm run test:paper-ui` also runs the nine reference exercises
 through the browser's real Pyodide runner; it requires access to the Pyodide CDN.
-The focused UI test completes five lessons at desktop and phone sizes, checks
+The focused UI test completes eight lessons at desktop and phone sizes, checks
 scoring, solution display, and notebook links, and saves screenshots under
 `.paper-test-output/`. The default CI avoids requiring Pyodide's external CDN.
 
@@ -81,3 +108,4 @@ under that generator's ownership.
 - [Rajbhandari et al., ZeRO](https://arxiv.org/abs/1910.02054)
 - [Fedus et al., Switch Transformers](https://arxiv.org/abs/2101.03961)
 - [Kwon et al., PagedAttention](https://arxiv.org/abs/2309.06180)
+- [Marathe et al., Breaking the Token Ceiling](https://arxiv.org/abs/2609.12303)
