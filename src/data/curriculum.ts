@@ -97,9 +97,9 @@ export const COURSES: Course[] = [
     levels: [
       { id:'c2-l1', courseId:2, index:1, title:'RMSNorm & RoPE',         description:'Replace LayerNorm and add rotary position embeddings.',        xp:150, type:'challenge', lessonFile:'c2/01_rmsnorm.md',          challengeFile:'c2/01_norm_and_rope.py',   estimateMinutes:30 },
       { id:'c2-l2', courseId:2, index:2, title:'Grouped-Query Attention', description:'Share key/value heads to cut KV cache size.',                 xp:150, type:'challenge', lessonFile:'c2/03_gqa.md',              challengeFile:'c2/02_gqa_and_masks.py',   estimateMinutes:30 },
-      { id:'c2-l3', courseId:2, index:3, title:'Sparse MoE',             description:'Route tokens to experts; activate only a fraction.',          xp:200, type:'challenge', lessonFile:'c2/06_moe.md',              challengeFile:'c2/03_sparse_moe.py',      estimateMinutes:35 },
+      { id:'c2-l3', courseId:2, index:3, title:'Sparse MoE & Switch Routing', description:'Execute selected experts, enforce capacity, and calculate balancing loss.', xp:200, type:'challenge', lessonFile:'c2/06_moe.md', challengeFile:'c2/03_sparse_moe.py', estimateMinutes:65 },
       { id:'c2-l4', courseId:2, index:4, title:'The Modern Block',       description:'Assemble the full Llama/Mistral-style decoder block.',         xp:400, type:'boss',      lessonFile:'c2/07_modern_block.md',     challengeFile:'c2/04_modern_decoder.py',  estimateMinutes:50 },
-      { id:'c2-l5', courseId:2, index:5, title:'IO-Aware Attention',     description:'Derive why FlashAttention rewrites are memory-bandwidth wins.', xp:200, type:'challenge', lessonFile:'c2/09_io_aware_attention.md',challengeFile:'c2/05_flash_io.py',        estimateMinutes:35 },
+      { id:'c2-l5', courseId:2, index:5, title:'FlashAttention: Exact Tiled Attention', description:'Implement online softmax and verify causal attention across tiles.', xp:200, type:'challenge', lessonFile:'c2/09_io_aware_attention.md',challengeFile:'c2/05_flash_io.py', estimateMinutes:65 },
       { id:'c2-l6', courseId:2, index:6, title:'KV Cache Arithmetic',    description:'Calculate cache size, eviction, and speculative budgets.',     xp:200, type:'challenge', lessonFile:'c2/11_kv_cache.md',         challengeFile:'c2/06_kv_cache.py',        estimateMinutes:35 },
       { id:'c2-l7', courseId:2, index:7, title:'Multi-head Latent Attention', description:'Compress K and V into a shared latent; reduce KV cache by 93%.', xp:200, type:'challenge', lessonFile:'c2/12_mla.md', challengeFile:'c2/07_mla.py', estimateMinutes:35 },
       { id:'c2-d1', courseId:2, index:8, title:'Debug: The Norm That Centers', description:'This RMSNorm passes a quick glance. The paper disagrees.', xp:150, type:'debug', lessonFile:'c2/90_debug_rmsnorm.md', challengeFile:'c2/90_debug_rmsnorm.py', estimateMinutes:25 },
@@ -225,6 +225,7 @@ export const COURSES: Course[] = [
       { id:'c7-l7', courseId:7, index:7, title:'Memory-Budget Serving', description:'Calculate what fits: weights, KV cache, and max batch size for any device.', xp:200, type:'challenge', lessonFile:'c7/08_memory_budget.md', challengeFile:'c7/07_memory_budget.py', estimateMinutes:35 },
       { id:'c7-l8', courseId:7, index:8, title:'Speculative Decoding', description:'Draft cheap, verify exact: the acceptance math behind 2-3x serving speedups.', xp:200, type:'challenge', lessonFile:'c7/09_speculative_decoding.md', challengeFile:'c7/08_spec_decode.py', estimateMinutes:35 },
       { id:'c7-l6', courseId:7, index:9, title:'Canary Gate',            description:'Block a rollout automatically when error rate spikes.',       xp:500, type:'boss',      lessonFile:'c7/07_deployments.md',        challengeFile:'c7/06_canary_gate.py',     estimateMinutes:55 },
+      { id:'c7-l9', courseId:7, index:10, title:'PagedAttention & Shared KV Blocks', description:'Build a bounded cache with block tables, prefix sharing, and copy-on-write.', xp:300, type:'challenge', lessonFile:'c7/10_paged_attention.md', challengeFile:'c7/09_paged_cache.py', estimateMinutes:75 },
     ],
   },
   {
@@ -264,6 +265,7 @@ export const COURSES: Course[] = [
       'Derive compute-optimal model and data sizes from a FLOP budget',
       'Implement DPO loss and GRPO advantages from the papers',
       'Design a training recipe that fits compute, memory, and alignment constraints',
+      'Distill across tokenizations and distinguish measured quality from scaling predictions',
     ],
     levels: [
       { id:'c9-l1', courseId:9, index:1, title:'Scaling Laws',            description:'Derive compute-optimal parameter and token counts from first principles.',   xp:150, type:'challenge', lessonFile:'c9/01_scaling_laws.md',    challengeFile:'c9/01_scaling_laws.py',    estimateMinutes:30 },
@@ -274,6 +276,9 @@ export const COURSES: Course[] = [
       { id:'c9-l7', courseId:9, index:6, title:'Test-Time Compute', description:'Buy accuracy with inference FLOPs: pass@n, majority voting, and the small-vs-large trade.', xp:200, type:'challenge', lessonFile:'c9/07_test_time_compute.md', challengeFile:'c9/07_test_time.py', estimateMinutes:35 },
       { id:'c9-d1', courseId:9, index:7, title:'Debug: Budget That Forgot Inference', description:'The Chinchilla formula is correct. The objective is wrong.', xp:150, type:'debug', lessonFile:'c9/90_debug_scaling.md', challengeFile:'c9/90_debug_scaling.py', estimateMinutes:25 },
       { id:'c9-l6', courseId:9, index:8, title:'Training Recipe Defense', description:'Design a full training recipe that satisfies compute, memory, and alignment constraints.', xp:1000, type:'boss', lessonFile:'c9/06_training_recipe.md', challengeFile:'c9/06_training_recipe.py', estimateMinutes:75 },
+      { id:'c9-l8', courseId:9, index:9, title:'ZeRO: Sharded Training State', description:'Calculate state ownership and match a sharded Adam update to its baseline.', xp:300, type:'challenge', lessonFile:'c9/08_zero.md', challengeFile:'c9/08_zero.py', estimateMinutes:65 },
+      { id:'c9-l9', courseId:9, index:10, title:'Distill a Byte Student', description:'Convert token probabilities to byte targets and verify the distillation objective.', xp:350, type:'challenge', lessonFile:'c9/09_byte_distillation.md', challengeFile:'c9/09_byte_distillation.py', estimateMinutes:100 },
+      { id:'c9-l10', courseId:9, index:11, title:'Byte Model Evidence Audit', description:'Compare likelihood, target storage, content throughput, and extrapolation.', xp:250, type:'challenge', lessonFile:'c9/10_byte_evaluation.md', challengeFile:'c9/10_byte_evaluation.py', estimateMinutes:70 },
     ],
   },
 ]

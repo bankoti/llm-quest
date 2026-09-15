@@ -9,6 +9,7 @@ import { lazy, Suspense } from 'react'
 const Arena = lazy(() => import('@/components/Arena/Arena').then(m => ({ default: m.Arena })))
 import { XPBar } from '@/components/Progress/XPBar'
 import { GoDeeper } from '@/components/GoDeeper'
+import { WorkedSolution } from '@/components/Lesson/WorkedSolution'
 import { SplitPane } from '@/components/SplitPane'
 import { isAdminMode } from '@/engine/admin'
 import { HINTS } from '@/data/hints'
@@ -192,6 +193,7 @@ export function LevelPage({ onProgressChange }: Props) {
               </Suspense>
             )}
             <GoDeeper courseId={level.courseId} challengeFile={level.challengeFile} />
+            <WorkedSolution key={level.challengeFile} challengeFile={level.challengeFile} />
           </div>
         }
       />

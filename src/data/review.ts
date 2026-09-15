@@ -12,6 +12,14 @@ export interface ReviewQuestion {
 }
 
 export const REVIEW_QUESTIONS: ReviewQuestion[] = [
+  { id:'c9-l9-q1', levelId:'c9-l9', prompt:'Why preserve a completed token with EOT when converting probabilities?', options:['It compresses all text into one byte','It keeps probability mass that would otherwise be discarded','It replaces the teacher optimizer','It guarantees the student matches the teacher'], answer:1, explain:'A terminal token is still a possible branch. EOT represents it; exact targets do not guarantee exact learned behavior.' },
+  { id:'c9-l9-q2', levelId:'c9-l9', prompt:'Which test checks exact token-to-byte conversion?', options:['A vector has 257 entries','Targets sum to one','Training loss decreases once','The product of byte and final EOT conditionals recovers each token probability'], answer:3, explain:'Normalization can hold despite losing a branch. Complete path probabilities test the preservation contract.' },
+  { id:'c9-l10-q1', levelId:'c9-l10', prompt:'What denominator belongs in BPB for byte-plus-EOT training?', options:['Raw UTF-8 content bytes, excluding markers','All prediction positions including padding','Unicode character count','Teacher token count'], answer:0, explain:'Keep the content denominator fixed and disclose which representation is scored by the summed loss.' },
+  { id:'c9-l10-q2', levelId:'c9-l10', prompt:'A fitted score beyond the largest training budget is:', options:['A measured checkpoint result','A production latency guarantee','An extrapolation that needs validation','Proof the model family always wins'], answer:2, explain:'The fit can motivate a future experiment, but does not supply a measured observation or quality/cost parity.' },
+  { id: 'c7-l9-q1', levelId: 'c7-l9', prompt: 'A sequence maps logical blocks to [0,2,1]. How should attention read them?', options: ['Sorted as [0,1,2]', 'In table order [0,2,1]', 'Only the last block', 'In allocation timestamp order'], answer: 1, explain: 'The block table preserves token order independently of physical placement.' },
+  { id: 'c7-l9-q2', levelId: 'c7-l9', prompt: 'Appending to a shared partial block requires:', options: ['Overwriting all owners', 'Dropping the prefix', 'A private copy before writing', 'Renormalizing all previous attention'], answer: 2, explain: 'Copy-on-write protects other sequences. If allocation fails, leave both histories unchanged.' },
+  { id: 'c9-l8-q1', levelId: 'c9-l8', prompt: 'What does ZeRO stage 2 partition?', options: ['Only activations', 'Only parameters', 'The training dataset only', 'Optimizer state and gradients'], answer: 3, explain: 'Stage 1 shards optimizer state; stage 2 adds gradients; stage 3 adds parameters.' },
+  { id: 'c9-l8-q2', levelId: 'c9-l8', prompt: 'Why can peak stage-3 memory exceed persistent state accounting?', options: ['Activations and temporary gathered weights also occupy memory', 'Sharding reduces model quality', 'Adam has no state', 'All KV caches must be stored during training'], answer: 0, explain: 'Persistent sharded state excludes activation storage, communication buffers, and transient parameter gathers.' },
   // ── Course 0: The Python Toolkit ────────────────────────────────────────
   { id: 'c0-l1-q1', levelId: 'c0-l1',
     prompt: 'A 140 GB model must fit on 80 GB GPUs. Which expression gives the GPU count?',
@@ -158,9 +166,9 @@ export const REVIEW_QUESTIONS: ReviewQuestion[] = [
     options: ['x W1 plus x W3', 'silu(x W1) elementwise-times (x W3), then W2', 'relu(x W1) then W2', 'softmax(x W1) then W2'], answer: 1,
     explain: 'A gated MLP: one projection is passed through SiLU and gates the other. The gate is why it beats plain ReLU MLPs.' },
   { id: 'c2-l5-q1', levelId: 'c2-l5',
-    prompt: 'Standard attention on long sequences is slow mostly because...',
-    options: ['It reads/writes an N x N matrix to slow GPU memory', 'The FLOPs exceed hardware limits', 'Softmax is numerically unstable', 'Python overhead dominates'], answer: 0,
-    explain: 'Attention is memory-bandwidth bound: materializing N x N scores in HBM costs more time than the math itself.' },
+    prompt: 'Which avoidable cost does FlashAttention specifically target?',
+    options: ['Writing and rereading the full score matrix in external GPU memory', 'All quadratic arithmetic', 'The entire backward pass', 'All model weight storage'], answer: 0,
+    explain: 'Tiling reduces intermediate memory traffic. The dominant bottleneck and speedup still depend on shape, dtype, hardware, and kernel.' },
   { id: 'c2-l5-q2', levelId: 'c2-l5',
     prompt: 'FlashAttention gets its speedup by...',
     options: ['Skipping the softmax', 'Using lower precision only', 'Pruning attention heads', 'Tiling + online softmax so the N x N matrix never hits HBM'], answer: 3,

@@ -1,0 +1,30 @@
+name: Course checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  course:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: npm test
+      - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install numpy
+      - run: python scripts/test_paper_labs.py
+      - run: python scripts/build_paper_notebooks.py --check
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: python scripts/test_byte_experiment.py
+      - run: python scripts/test_paper_notebooks.py
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:paper-ui

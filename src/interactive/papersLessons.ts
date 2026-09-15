@@ -694,7 +694,7 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
     moduleId: MODULE,
     moduleTitle: MODULE_TITLE,
     prerequisites: ['paper-scaling-powerlaws'],
-    outcomes: ['Explain what Kaplan\'s setup got wrong and why', 'Apply the ~20 tokens-per-parameter rule', 'State what Chinchilla vs Gopher demonstrated'],
+    outcomes: ['Contrast earlier scaling results with the revised allocation', 'Apply the approximate 20 tokens-per-parameter rule', 'State what Chinchilla vs Gopher demonstrated'],
     concepts: ['compute-optimal', 'tokens per parameter', 'undertraining', 'learning-rate schedule'],
     track: 'extension',
     steps: [
@@ -702,10 +702,10 @@ export const PAPERS_LESSONS: InteractiveLesson[] = [
         kind: 'concept',figure: 'chinchilla-shift',
         title: 'Same question, fixed methodology, opposite answer',
         lines: [
-          '"Training Compute-Optimal Large Language Models" (Hoffmann et al., 2022) re-ran the scaling question with one methodological fix: Kaplan\'s runs had reused learning-rate schedules that were not matched to each run\'s token budget, which quietly penalized the heavily-trained small models.',
-          'With schedules tuned per budget, the answer flipped. Parameters and data should scale together — roughly equally. The rule of thumb that fell out: about 20 training tokens per parameter for a compute-optimal model.',
+          '"Training Compute-Optimal Large Language Models" (Hoffmann et al., 2022) revisited model size and training duration with hundreds of runs and several estimation approaches. Matching learning-rate schedules to run duration is one methodological consideration; the result should not be attributed to a single change.',
+          'The study supported scaling parameters and training tokens roughly together. About 20 tokens per parameter is a useful planning approximation, not a universal optimum across datasets, architectures, and serving objectives.',
           'By that rule, nearly every headline model of the era was undertrained. GPT-3 had 175B parameters but only ~300B tokens — under 2 tokens per parameter, a tenth of optimal.',
-          'DeepMind proved the point by construction: Chinchilla, at 70B parameters on 1.4T tokens, used the same compute as their own 280B-parameter Gopher — and beat it across the board.',
+          'Chinchilla, at 70B parameters on 1.4T tokens, outperformed the larger 280B-parameter Gopher across the reported evaluation suite at a comparable training-compute budget.',
         ],
         cta: 'Run the compute-optimal numbers yourself',
       },

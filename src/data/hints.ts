@@ -5,6 +5,16 @@
 // XP cost keeps the testing effect intact: help is available, not free.
 
 export const HINTS: Record<string, [string, string, string]> = {
+  'c9-l9': [
+    'Filter byte strings by prefix. A token ending exactly at the prefix maps to symbol 256 with EOT; without EOT it is discarded.',
+    'Normalize eligible logits with their own maximum, then sum by next byte. Multiply all byte conditionals AND the final EOT to reconstruct a token probability.',
+    'Forward KL averages sum(p * (log(p) - log_softmax(z))) over rows. Zero p contributes zero. Validate shapes and target row sums before computing.',
+  ],
+  'c9-l10': [
+    'Sum NLLs before dividing by content_bytes * ln(2). EOT loss can contribute to the numerator, but EOT is not a content byte.',
+    'Dense targets cost positions*vocab*4; sparse targets cost positions*k*8 because each FP32 value has an int32 index.',
+    'Aggregate sequential throughput is total bytes / total time, not mean request rates. Sort times for nearest-rank p95; classify budgets against the sampled range.',
+  ],
   // Course 1
   'c0-l1': [
     'All four are one-liners over the math module. ceil_div: math.ceil(a / b) or (a + b - 1) // b. close_enough: math.isclose(a, b).',
@@ -85,9 +95,9 @@ export const HINTS: Record<string, [string, string, string]> = {
     'After repeating K and V to n_heads, the attention math is identical to standard multi-head. The cache savings come only from what you STORE, not what you compute.',
   ],
   'c2-l3': [
-    'MoE is routing: score each token against each expert, keep the top-k, weight expert outputs by the (renormalized) router probabilities.',
-    'Use argsort/argpartition to get top-k expert indices per token. Renormalize the selected router weights so they sum to 1 per token.',
-    'Output = sum over selected experts of weight * expert(x). Tokens not routed to an expert contribute nothing to it — loop experts, gather their assigned tokens.',
+    'route() renormalizes selected top-k weights. switch_forward() is different: keep the selected ORIGINAL softmax probability so the router retains a task gradient.',
+    'Switch: use argmax; cap each expert at ceil(factor*T/E), accepting in input order. Gather accepted inputs and call each used expert once.',
+    'Compute f from all pre-capacity choices, P from mean softmax probabilities, then E*sum(f*P). Return zeros for overflow FFN contributions plus a boolean accepted mask.',
   ],
   'c2-l4': [
     'Same skeleton as the C1 block, new parts: RMSNorm instead of LayerNorm, RoPE on q/k, GQA repeat, SwiGLU MLP.',
@@ -95,9 +105,9 @@ export const HINTS: Record<string, [string, string, string]> = {
     'Wire order: x = x + gqa_attention(rmsnorm(x), rope); x = x + swiglu(rmsnorm(x)). Check every sub-shape against the docstring before assembling.',
   ],
   'c2-l5': [
-    'This level is arithmetic, not code golf: count bytes moved between HBM and SRAM for naive vs tiled attention.',
-    'Naive attention materializes the (N, N) score matrix in HBM — that read/write dominates. Tiled attention only streams Q, K, V blocks.',
-    'Bytes for the score matrix = N * N * bytes_per_element (once written, once read). Compare against N * d terms to see why tiling wins at large N.',
+    'First count storage bytes; then process Q/K tiles with running maximum m, exponential sum l, and weighted value sum a per query row.',
+    'For each tile, new_m=max(m,row_max). correction=exp(m-new_m). Rescale BOTH l and a, then add the tile contributions relative to new_m.',
+    'Use global row/column indices for causality, skip entirely future key tiles, and return a/l at the end. Uneven tails and large logits must agree with dense attention.',
   ],
   'c2-l6': [
     'KV cache bytes = 2 (K and V) x layers x kv_heads x head_dim x seq_len x bytes_per_element.',
@@ -351,9 +361,19 @@ export const HINTS: Record<string, [string, string, string]> = {
   ],
 
   'c9-l1': [
-    'Chinchilla formula: N* = 0.2 * sqrt(C), D* = 10 * N*. Training FLOPs = 6 * N * D.',
+    'Under the D/N = 20 approximation: C = 6ND = 120N², so N = sqrt(C/120) and D = 20N. Round N down if returning an integer.',
     'inference_memory_gb: params * bytes_per_param / 1e9 (1 GB = 1e9 bytes). Check: 7B params * 2 bytes = 14GB.',
-    'chinchilla_optimal returns a dict with keys "params" and "tokens". Make sure D* = exactly 10 * N* (integer).',
+    'Return params and tokens. For budget_tokens use floor(C/(6N)). Check that 6ND <= C and that adding one token would exceed C.',
+  ],
+  'c9-l8': [
+    'Largest shard = ceil(params/ranks). Stage 1 shards 12 optimizer bytes; stage 2 adds 2 gradient bytes; stage 3 adds 2 weight bytes.',
+    'Average the full gradients across logical ranks, then slice by each owner\'s parameter-shard length. Do not assume equally sized shards.',
+    'm=.9*m+.1*g; v=.999*v+.001*g*g; p-=lr*(m/(1-.9**step))/(sqrt(v/(1-.999**step))+1e-8). Return new arrays.',
+  ],
+  'c7-l9': [
+    'Use one block table per sequence plus shared physical blocks and reference counts. Logical order follows the table, not sorted physical IDs.',
+    'Before appending to a shared partial block, reserve a free copy. If reservation fails, do not change the old table or reference count.',
+    'fork copies the list of IDs and increments references. release decrements references and frees only last-owner blocks. Decode must agree with a contiguous stable softmax.',
   ],
   'c9-l2': [
     'retained_tokens = int(raw * rate). embedding_matrix_bytes = vocab * hidden * bpp. domain_token_counts: each domain = total * fraction.',

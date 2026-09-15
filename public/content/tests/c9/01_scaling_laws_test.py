@@ -19,6 +19,18 @@ assert abs(mem - 14.0) < 0.1, f"memory: expected ~14GB, got {mem:.2f}GB"
 # Chinchilla-optimal for 2e23
 r2 = chinchilla_optimal(2e23)
 assert r2["tokens"] == 20 * r2["params"], "D* = 20*N* must hold"
+for _c in [0, 1000, 12000, 1e8]:
+    for _n in [1, 7, 1000]:
+        _d = budget_tokens(_c, _n)
+        assert isinstance(_d, int)
+        assert 6 * _n * _d <= _c < 6 * _n * (_d + 1), 'maximal allocation inside budget'
+for _c, _n in [(-1, 2), (100, 0), (100, -1)]:
+    try:
+        budget_tokens(_c, _n)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid allocation must raise ValueError')
 
 print(f"N* = {result['params']:,}")
 print(f"D* = {result['tokens']:,}")

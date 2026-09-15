@@ -107,6 +107,8 @@ def main() -> None:
         for title, challenge in re.findall(pattern, curriculum):
             if challenge.startswith("90_"):
                 continue  # debug levels are quest-only
+            if f'{course}/{challenge}' in ('c2/05_flash_io.py', 'c2/03_sparse_moe.py'):
+                continue  # Owned by build_paper_notebooks.py; includes solutions and experiments.
             lab = lab_dir / renames.get(challenge, challenge)
             assert lab.exists(), f"missing lab for {course}/{challenge}: {lab}"
             name = challenge.replace(".py", ".ipynb")
@@ -116,6 +118,8 @@ def main() -> None:
             made += 1
             print(f"  {course}/{name}")
     print(f"{made} notebooks written to {QUEST / 'colab'}")
+    from build_paper_notebooks import main as build_papers
+    build_papers()
 
 
 if __name__ == "__main__":
