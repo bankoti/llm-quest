@@ -95,10 +95,12 @@ The focused UI test completes eight lessons at desktop and phone sizes, checks
 scoring, solution display, and notebook links, and saves screenshots under
 `.paper-test-output/`. The default CI avoids requiring Pyodide's external CDN.
 
-After changing a paper exercise or its lesson, regenerate its self-contained
-notebook with `uv run python scripts/build_paper_notebooks.py`. The `--check`
-mode detects stale notebooks. General `build_colab.py` leaves these notebooks
-under that generator's ownership.
+After changing a paper lesson, starter, grader, reference solution, or experiment,
+regenerate its self-contained notebook with
+`uv run python scripts/build_paper_notebooks.py`. Edit those source files rather
+than the generated notebooks; the generator owns their mapping and notebook-only
+experiment cells. The `--check` mode detects stale notebooks. General
+`build_colab.py` delegates these notebooks to that generator.
 
 ## Primary sources
 
