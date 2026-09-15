@@ -10,7 +10,7 @@ await server.listen()
 const base=`http://127.0.0.1:${server.httpServer.address().port}`
 const chrome='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 let browser
-const shots=path.join(root,'.paper-test-output')
+const shots=process.env.PAPER_EVIDENCE_DIR ?? path.join(root,'.paper-test-output')
 fs.mkdirSync(shots,{recursive:true})
 const slugs=['scaling-laws','flash-attention','zero-sharding','switch-transformer','paged-attention']
 

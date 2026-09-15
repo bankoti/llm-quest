@@ -12,7 +12,8 @@ For each token, the router computes probabilities and selects only `k` experts:
 
 ```text
 p = softmax(W_router x)
-y = sum(p_i * Expert_i(x)) for i in top_k(p)
+w_i = p_i / sum(p_j for j in top_k(p))
+y = sum(w_i * Expert_i(x)) for i in top_k(p)
 ```
 
 Total parameter capacity grows with `E`, while active feed-forward compute grows
@@ -39,11 +40,12 @@ Experts 2 and 3 do no work for this token and receive no gradient from it.
 Multiply that by millions of tokens and load balance across experts becomes a
 training-stability problem, which is why the balance loss exists.
 
-## Invariants
+## Top-k mixing invariants
 
 - Each token selects exactly `k` expert indices.
 - Selected weights are renormalized to sum to one.
-- Gradients reach the router and selected experts.
+- With multiple selected experts, normalized gates provide a task-gradient path
+  to the router; a normalized top-1 gate is constant, as explained below.
 - A useful report includes both total and active parameter counts.
 
 ## Practice

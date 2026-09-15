@@ -1,5 +1,5 @@
-"""Level 10 — Sparse MoE
-Each token routes to top-k experts; only those activate.
+"""Sparse MoE lab.
+See the paired lesson, c2/06_moe.md, for mixing versus sparse execution.
 """
 import numpy as np
 
