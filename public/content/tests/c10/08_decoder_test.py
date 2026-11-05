@@ -48,4 +48,29 @@ for dtype, row, position in [(np.uint8, [200, 1, 100], [100, 0, 0]),
     assert np.allclose(result, expected), 'Add numeric embeddings in floating point before normalization'
     assert np.issubdtype(result.dtype, np.floating)
     assert all(np.array_equal(value, original) for value, original in zip((ids, embedding, positions), before))
+ids, embedding, positions = np.array([[0]]), np.array([[1., -1.]]), np.zeros((1, 2))
+zero_block = {**{name: np.zeros((2, 2)) for name in ('q', 'k', 'v', 'o')}, 'up': np.zeros((2, 1)), 'down': np.zeros((1, 2))}
+expected = _independent_decoder(ids, embedding, positions, [zero_block], 1)
+negative_block = {**zero_block, 'up': np.array([[-1e308], [1e308]])}
+before = {name: value.copy() for name, value in negative_block.items()}
+with np.errstate(over='raise', invalid='raise'):
+    result = decoder_logits(ids, embedding, positions, [negative_block], 1)
+    np.testing.assert_allclose(result, expected)
+    assert np.isfinite(result).all()
+    for block in [
+        {**zero_block, 'up': -negative_block['up']},
+        {**zero_block, 'q': np.eye(2)*1e308, 'k': np.eye(2)*1e308},
+    ]:
+        try:
+            decoder_logits(ids, embedding, positions, [block], 1)
+        except FloatingPointError:
+            pass
+        else:
+            raise AssertionError('Nonrepresentable active decoder intermediates must fail explicitly')
+assert all(np.array_equal(value, before[name]) for name, value in negative_block.items())
+with np.errstate(over='raise', invalid='raise'):
+    huge_embedding = np.array([[1e200, -1e200]])
+    result = decoder_logits(ids, huge_embedding, positions, [], 1)
+    np.testing.assert_allclose(result, [[[2e200]]])
+    assert np.array_equal(huge_embedding, [[1e200, -1e200]])
 print('Complete decoder checks passed.')

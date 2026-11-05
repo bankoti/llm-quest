@@ -29,4 +29,27 @@ for i in range(3):
     assert np.isclose(got['grad_w'][i], (loss(w+delta,b)-loss(w-delta,b))/(2*eps))
 assert np.isclose(got['grad_b'], (loss(w,b+eps)-loss(w,b-eps))/(2*eps))
 assert np.isfinite(imitation_l1(np.array([[1000.], [-1000.]]), np.array([0, 1]), np.ones(1), 0.)['loss'])
+with np.errstate(over='raise', invalid='raise'):
+    large_states = np.full((8, 1), 1e308)
+    averaged = imitation_l1(large_states, np.zeros(8), np.zeros(1), 0.)
+    assert averaged['loss'] == .5 and averaged['grad_b'] == .25
+    np.testing.assert_allclose(averaged['grad_w'], [2.5e307])
+    tiny = imitation_l1(large_states, np.zeros(8), np.zeros(1), -744.)
+    probability = np.exp(-np.logaddexp(0., 744.))
+    assert tiny['grad_w'][0] > 0
+    np.testing.assert_allclose(tiny['grad_w'], [1e308*probability*(1-probability)], rtol=1e-12, atol=0.)
+    assert np.array_equal(large_states, np.full((8, 1), 1e308))
+    for weight in [2., -2.]:
+        for labels in [np.array([1., 0.]), np.array([0., 1.])]:
+            saturated = imitation_l1(np.array([[1e308], [-1e308]]), labels, np.array([weight]), 0.)
+            expected = np.array([1., 0.]) if weight > 0 else np.array([0., 1.])
+            assert np.array_equal(saturated['probabilities'], expected)
+            assert saturated['loss'] == float(np.abs(expected-labels).mean())
+            assert np.array_equal(saturated['grad_w'], [0.]) and saturated['grad_b'] == 0.
+    try:
+        imitation_l1(np.array([[1e308, 1e308]]), np.array([1.]), np.array([2., -2.]), 0.)
+    except FloatingPointError:
+        pass
+    else:
+        raise AssertionError('Indeterminate logit cancellation must fail explicitly')
 print('Sigmoid imitation checks passed.')

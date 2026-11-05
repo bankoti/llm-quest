@@ -9,10 +9,22 @@ def imitation_l1(states, actions, weights, bias):
     Mean L1 between sigmoid probabilities and binary expert actions.
     Assume valid shapes/values. Compute in floating point, including for
     integer inputs. Stable at extreme logits; no input mutation.
+    Infinite logits from overflow use the sigmoid limits 0/1. Raise
+    FloatingPointError for indeterminate NaN logits or nonfinite results.
     """
     states, actions, weights = [np.asarray(value, float) for value in (states, actions, weights)]
     bias = float(bias)
-    logits = states @ weights + bias
-    p = np.exp(-np.logaddexp(0., -logits))
-    slope = (1-2*actions)*p*(1-p)
-    return dict(probabilities=p, loss=float(np.abs(p-actions).mean()), grad_w=states.T@slope/len(states), grad_b=float(slope.mean()))
+    with np.errstate(over='ignore', invalid='ignore'):
+        logits = states @ weights + bias
+        if np.isnan(logits).any():
+            raise FloatingPointError('Indeterminate imitation logits')
+        p = np.exp(-np.logaddexp(0., -logits))
+        slope = (1-2*actions)*p*(1-p)
+        loss = float(np.abs(p-actions).mean())
+        contributions = states*slope[:, None]
+        scale = np.max(np.abs(contributions), axis=0)
+        scaled = np.divide(contributions, scale, out=np.zeros_like(contributions), where=scale != 0)
+        grad_w, grad_b = scaled.mean(axis=0)*scale, float(slope.mean())
+    if not all(np.isfinite(value).all() for value in (p, loss, grad_w, grad_b)):
+        raise FloatingPointError('Imitation result exceeds float64 range')
+    return dict(probabilities=p, loss=loss, grad_w=grad_w, grad_b=grad_b)

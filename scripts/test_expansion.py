@@ -12,6 +12,7 @@ CONTENT=ROOT/'public/content'
 INTEGER_INPUT_LABS=('c10/08_decoder','c11/02_landscape','c11/05_interpolation',
                     'c11/06_search','c12/01_policy','c12/02_trajectory',
                     'c12/06_search','c13/01_vision','c13/04_latents','c13/05_planning')
+STABILITY_LABS=('c10/08_decoder','c12/01_policy','c12/02_trajectory','c13/02_ssl')
 
 
 def reject_mutation(name, mutate):
@@ -76,7 +77,7 @@ def reference_checks(names):
 
 
 def numeric_regressions():
-    reference_checks(('c10/02_training', 'c12/04_grpo'))
+    reference_checks(('c10/02_training', 'c12/04_grpo', 'c13/02_ssl'))
     for script in ('test_dynamics_numerics.py', 'test_scratch_updates.py'):
         runpy.run_path(str(ROOT/'scripts'/script),run_name='__main__')
 
@@ -99,7 +100,10 @@ def notebooks(names=None):
 
 
 if __name__=='__main__':
-    if '--integer-inputs' in sys.argv:
+    if '--stability' in sys.argv:
+        reference_checks(STABILITY_LABS)
+        notebooks(set(STABILITY_LABS))
+    elif '--integer-inputs' in sys.argv:
         reference_checks(INTEGER_INPUT_LABS)
         notebooks(set(INTEGER_INPUT_LABS))
     elif '--numerics' in sys.argv:
