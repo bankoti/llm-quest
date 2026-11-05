@@ -71,11 +71,9 @@ Four independent slots each offer three word choices.
 
 - Possible word sequences before deduplication
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 81: 3^4=81.
-
-</details>
 
 ## Experiment
 

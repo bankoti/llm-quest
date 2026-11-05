@@ -63,11 +63,9 @@ A prompt has 5 tokens and its response has 3 tokens, followed by EOS.
 
 - Number of scored targets
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 4: Three response tokens plus EOS. Prompt length affects context, not this count.
-
-</details>
 
 ## Experiment
 

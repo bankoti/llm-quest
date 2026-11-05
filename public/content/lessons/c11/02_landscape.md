@@ -67,11 +67,9 @@ L(w+0.001)=1.003 and L(w-0.001)=0.997.
 
 - Central-difference slope
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 3: (1.003-.997)/.002=3.
-
-</details>
 
 ## Experiment
 

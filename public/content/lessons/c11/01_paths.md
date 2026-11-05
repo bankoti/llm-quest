@@ -65,12 +65,10 @@ A network has 5 additive residual blocks.
 - Routes with exactly two transformed branches
 - All routes
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 10: Choose(5,2)=5*4/2=10.
 - 32: Each of 5 blocks offers 2 branches: 2^5.
-
-</details>
 
 ## Experiment
 

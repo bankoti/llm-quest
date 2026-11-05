@@ -70,11 +70,9 @@ Two equally likely scalar futures are -2 and +2 under squared error.
 
 - Optimal deterministic prediction
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 0: The conditional mean is 0, even though neither actual future equals 0.
-
-</details>
 
 ## Experiment
 

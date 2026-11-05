@@ -96,11 +96,9 @@ Three constant standardized features give C=0.
 
 - Diagonal penalty
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 3: Three terms (1-0)^2 sum to 3.
-
-</details>
 
 ## Experiment
 

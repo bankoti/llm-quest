@@ -82,11 +82,9 @@ The initial byte vocabulary has 256 entries. Twelve merges are successfully lear
 
 - Final vocabulary size
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 268: Each successful merge introduces exactly one ID: 256 + 12.
-
-</details>
 
 ## Experiment
 

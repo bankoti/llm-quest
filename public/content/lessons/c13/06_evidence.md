@@ -61,11 +61,9 @@ Method A succeeds in 6 of 10 paired trials; B in 8 of 10.
 
 - Observed B-minus-A rate difference
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 0.2: .8-.6=.2. The pairing affects uncertainty, not this mean difference.
-
-</details>
 
 ## Experiment
 

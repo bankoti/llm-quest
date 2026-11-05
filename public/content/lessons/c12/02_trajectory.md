@@ -67,11 +67,9 @@ Four chosen actions each have probability .5.
 
 - Action probability product
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 0.0625: (.5)^4=1/16.
-
-</details>
 
 ## Experiment
 

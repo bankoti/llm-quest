@@ -68,11 +68,9 @@ A row mask is [0,0,1,1,1]. Positions are zero-based.
 
 - Index to pool
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 4: The last true position is 4, not mask.sum()-1=2.
-
-</details>
 
 ## Experiment
 

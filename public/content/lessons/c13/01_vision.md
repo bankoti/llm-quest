@@ -69,11 +69,9 @@ An 8x8 image is divided into 2x2 patches.
 
 - Spatial patch tokens
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 16: (8/2)*(8/2)=16.
-
-</details>
 
 ## Experiment
 

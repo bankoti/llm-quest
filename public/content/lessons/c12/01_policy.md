@@ -66,11 +66,9 @@ A demonstrated action is 0 and p(action=1)=0.8.
 
 - L1 imitation loss
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 0.8: |.8-0|=.8; chosen-action confidence is .2.
-
-</details>
 
 ## Experiment
 

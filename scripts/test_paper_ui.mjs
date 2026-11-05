@@ -155,12 +155,22 @@ try {
       console.log(`PASS ${viewport.width}px ${slug}: completed and scored`)
     }
     for(const id of selectedLevels??['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
-      assert.ok(data.levels.some(l=>l.id===id),`unknown selected level ${id}`)
+      const level=data.levels.find(l=>l.id===id)
+      assert.ok(level,`unknown selected level ${id}`)
       await page.goto(`${base}/level/${id}`)
+      if(level.courseId>=10) {
+        if(viewport.width<768)await page.getByRole('tab',{name:'lesson',exact:true}).click()
+        await page.getByRole('heading',{name:'Check Your Understanding',exact:true}).waitFor()
+        const answers=page.getByRole('heading',{name:'Worked Answers',exact:true})
+        assert.equal(await answers.count(),1,`${id}: worked answers must render as a lesson heading`)
+        assert.doesNotMatch(await page.locator('body').innerText(),/<\/?(?:details|summary)>/,`${id}: disclosure tags must not appear as lesson text`)
+        await answers.scrollIntoViewIfNeeded()
+        await layout(page,`${viewport.width}-${id}-answers`)
+        console.log(`PASS ${viewport.width}px ${id}: worked answers rendered`)
+      }
       if(viewport.width<768)await page.getByRole('tab',{name:'code',exact:true}).click()
       await click(page,'Show worked solution')
       await page.getByText('Loading solution...',{exact:true}).waitFor({state:'hidden'})
-      const level=data.levels.find(l=>l.id===id)
       const expected=fs.readFileSync(path.join(root,'public/content/solutions',level.challengeFile),'utf8')
       assert.equal((await page.locator('section pre').innerText()).trimEnd(),expected.trimEnd())
       assert.ok((await page.getByRole('link',{name:'Open in Colab'}).getAttribute('href')).includes(level.challengeFile.replace('.py','.ipynb')))

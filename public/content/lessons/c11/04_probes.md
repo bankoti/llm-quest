@@ -67,11 +67,9 @@ A grid is [[1,3],[5,7]]. Keep only its DC frequency.
 
 - Every reconstructed cell
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 4: The DC-only reconstruction is the mean: 16/4=4.
-
-</details>
 
 ## Experiment
 

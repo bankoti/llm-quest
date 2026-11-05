@@ -66,11 +66,9 @@ An action chunk has horizon 12 and 7 action coordinates per step.
 
 - Predicted scalar action values
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 84: 12*7=84; inference steps are an additional computation dimension.
-
-</details>
 
 ## Experiment
 

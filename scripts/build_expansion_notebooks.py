@@ -57,10 +57,10 @@ def lesson(track, unit, scaffold):
               '```python', scaffold.rstrip(), '```', '', '## Check Your Understanding', '', unit['numeric']['prompt'], '']
     for question in unit['numeric']['questions']:
         lines += ['- ' + question['label']]
-    lines += ['', '<details><summary>Worked answers</summary>', '']
+    lines += ['', '### Worked Answers', '']
     for question in unit['numeric']['questions']:
         lines += [f"- {question['answer']}: {question['reveal']}"]
-    lines += ['', '</details>', '', '## Experiment', '', f"Run `experiments/{unit['experiment']}` from the repository, or use the self-contained notebook linked below the editor. Start with the declared CPU defaults. The notebook includes any required local model source; no model weights, datasets, API keys, or paid GPU are needed.", '']
+    lines += ['', '## Experiment', '', f"Run `experiments/{unit['experiment']}` from the repository, or use the self-contained notebook linked below the editor. Start with the declared CPU defaults. The notebook includes any required local model source; no model weights, datasets, API keys, or paid GPU are needed.", '']
     lines += ['- ' + value for value in unit['interpretation']]
     lines += ['', '## Transfer Problems', '', *[f'{i}. {value}' for i, value in enumerate(unit['transfer'], 1)], '',
               'For each transfer, submit the changed code, one predicted outcome, actual measurements, one negative control, and a limitation. These open experiments need a defensible result, not a predetermined winning curve.', '',

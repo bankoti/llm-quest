@@ -68,11 +68,9 @@ Predicted states are [1,2], goal=3, no action penalty.
 
 - Sum of squared goal distances
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 5: (1-3)^2+(2-3)^2=4+1=5.
-
-</details>
 
 ## Experiment
 

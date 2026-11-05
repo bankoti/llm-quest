@@ -67,11 +67,9 @@ Rewards=[1,1,1], gamma=1.
 
 - Return at time 0
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 3: All three undiscounted rewards count.
-
-</details>
 
 ## Experiment
 

@@ -62,11 +62,9 @@ A dataset has total natural-log NLL 20 over 10 scored tokens.
 
 - Mean NLL (not perplexity)
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 2: 20/10=2. Perplexity is exp(2), about 7.389.
-
-</details>
 
 ## Experiment
 

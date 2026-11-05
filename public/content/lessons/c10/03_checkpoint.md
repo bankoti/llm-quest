@@ -71,11 +71,9 @@ A dense projection expects [input=4, output=7].
 
 - Number of weight values (no bias)
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 28: 4*7=28. A matching count alone does not prove matching orientation.
-
-</details>
 
 ## Experiment
 

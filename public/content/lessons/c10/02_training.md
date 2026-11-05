@@ -76,11 +76,9 @@ Batch A: loss sum 12 over 4 tokens. Batch B: loss sum 6 over 6 tokens.
 
 - Combined mean NLL
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 1.8: (12+6)/(4+6)=1.8. The unweighted average of the two batch means would be 2.
-
-</details>
 
 ## Experiment
 

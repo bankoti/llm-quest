@@ -61,11 +61,9 @@ A group has rewards [0,0,0,0].
 
 - Number of nonzero centered advantages
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 0: Every reward equals its mean. There is no relative task signal.
-
-</details>
 
 ## Experiment
 

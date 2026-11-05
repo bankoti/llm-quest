@@ -94,11 +94,9 @@ Rewards=[1,3]. Use population standard deviation and ignore tiny epsilon for thi
 
 - Advantage of reward 3
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 1: Mean=2, std=1, so advantage=(3-2)/1=1.
-
-</details>
 
 ## Experiment
 

@@ -73,11 +73,9 @@ X=[1,1], y=2, minimum Euclidean norm.
 
 - First fitted weight
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 1: Symmetry and the sum constraint give [1,1].
-
-</details>
 
 ## Experiment
 

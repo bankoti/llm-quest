@@ -91,11 +91,9 @@ Vocabulary=40, width=12. Input and output weights are tied, excluding positions 
 
 - Distinct token/output weight parameters
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 480: 40*12=480, not twice that count.
-
-</details>
 
 ## Experiment
 

@@ -61,11 +61,9 @@ Modulo 7, compute 6+5.
 
 - Remainder
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 4: 11 = 1*7 + 4.
-
-</details>
 
 ## Experiment
 

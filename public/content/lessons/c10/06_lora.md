@@ -64,11 +64,9 @@ d_in=12, d_out=20, rank=3, excluding bias.
 
 - Trainable adapter values
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 96: 3*(12+20)=96.
-
-</details>
 
 ## Experiment
 

@@ -71,11 +71,9 @@ A game tree has branching factor 4 and depth 5, ignoring early terminal states.
 
 - Leaf paths in exhaustive search
 
-<details><summary>Worked answers</summary>
+### Worked Answers
 
 - 1024: 4^5=1024.
-
-</details>
 
 ## Experiment
 
