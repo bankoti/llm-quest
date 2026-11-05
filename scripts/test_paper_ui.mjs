@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createServer } from 'vite'
 import { chromium } from 'playwright'
+import { lessonGeometry, codeGeometry, workspaceRegression } from './workspace_ui_checks.mjs'
 
 const root=path.resolve(import.meta.dirname,'..')
 const server=await createServer({root,server:{host:'127.0.0.1',port:0}})
@@ -63,6 +64,7 @@ try {
       localStorage.setItem('llmquest_interactive_v2',JSON.stringify(seed))
       localStorage.setItem('llmquest_progress_v1',JSON.stringify({levels:Object.fromEntries(levels.map(l=>[l.id,{status:'unlocked',xpEarned:0,attempts:0}])),totalXp:0,streakDays:0,lastActiveDate:''}))
     },{seed,levels:data.levels})
+    if(viewport.width===1280)await workspaceRegression(page,base,fs.readFileSync(path.join(root,'public/content/solutions/c10/08_decoder.py'),'utf8'),layout)
     const expansionSlugs=data.lessons.filter(l=>['scratch','dynamics','rl','embodied'].includes(l.moduleId)).map(l=>l.slug)
     for(const slug of selectedLessons??[...slugs,...expansionSlugs]) {
       const lesson=bySlug.get(slug)
@@ -163,6 +165,7 @@ try {
         await page.getByRole('heading',{name:'Check Your Understanding',exact:true}).waitFor()
         const answers=page.getByRole('heading',{name:'Worked Answers',exact:true})
         assert.equal(await answers.count(),1,`${id}: worked answers must render as a lesson heading`)
+        await lessonGeometry(page,`${viewport.width}-${id}-answers`)
         assert.doesNotMatch(await page.locator('body').innerText(),/<\/?(?:details|summary)>/,`${id}: disclosure tags must not appear as lesson text`)
         await answers.scrollIntoViewIfNeeded()
         await layout(page,`${viewport.width}-${id}-answers`)
@@ -175,6 +178,7 @@ try {
       assert.equal((await page.locator('section pre').innerText()).trimEnd(),expected.trimEnd())
       assert.ok((await page.getByRole('link',{name:'Open in Colab'}).getAttribute('href')).includes(level.challengeFile.replace('.py','.ipynb')))
       await page.locator('section pre').scrollIntoViewIfNeeded()
+      await codeGeometry(page,`${viewport.width}-${id}-solution`)
       await layout(page,`${viewport.width}-${id}-solution`)
     }
     if(process.env.PAPER_PYODIDE==='1' && viewport.width===1280) {

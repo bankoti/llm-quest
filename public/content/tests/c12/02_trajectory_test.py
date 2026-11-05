@@ -37,7 +37,7 @@ for states, actions, weights, bias in [
     (np.array([[-1e308]]), np.array([1]), np.array([2.]), 0.),
     (np.zeros((2, 1)), np.ones(2), np.zeros(1), -1e308),
     (np.full((4, 1), 1e308), np.ones(4), np.zeros(1), 0.),
-    (np.array([[1e308, 1e308]]), np.ones(1), np.array([2., -2.]), 0.),
+    (np.array([[0.]]), np.ones(1), np.array([np.inf]), 0.),
 ]:
     before = [value.copy() for value in (states, actions, weights)]
     try:

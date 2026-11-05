@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 const MIN_PCT=15, MAX_PCT=75, DEFAULT_PCT=40
 interface Props { storageKey:string; left:ReactNode; right:ReactNode }
 export function SplitPane({ storageKey,left,right }:Props) {
@@ -17,7 +17,7 @@ export function SplitPane({ storageKey,left,right }:Props) {
     <div className="md:hidden flex border-b border-gray-800" role="tablist" aria-label="Level workspace">
       {(['lesson','code'] as const).map(t=><button key={t} role="tab" aria-selected={mobileTab===t} onClick={()=>setMobileTab(t)} className={`flex-1 py-3 text-sm font-mono capitalize ${mobileTab===t?'text-violet-300 border-b-2 border-violet-500':'text-gray-500'}`}>{t}</button>)}
     </div>
-    {!collapsed&&<div style={{width:`${pct}%`}} className={`${mobileTab==='lesson'?'block':'hidden'} md:block md:shrink-0 overflow-hidden flex-1 md:flex-none min-h-0`}>{left}</div>}
+    <div style={{'--lesson-width':`${pct}%`} as CSSProperties} className={`${mobileTab==='lesson'?'block':'hidden'} ${collapsed?'md:hidden':'md:block'} w-full md:w-[var(--lesson-width)] md:shrink-0 overflow-hidden flex-1 md:flex-none min-h-0`}>{left}</div>
     <div role="separator" tabIndex={0} aria-label="Resize lesson and code panes" aria-orientation="vertical" aria-valuemin={MIN_PCT} aria-valuemax={MAX_PCT} aria-valuenow={collapsed?0:Math.round(pct)} onKeyDown={key} onPointerDown={down} onPointerMove={move} onPointerUp={up} onDoubleClick={()=>{setCollapsed(false);setPct(DEFAULT_PCT)}} className={`hidden md:block relative shrink-0 w-1.5 group transition-colors ${collapsed?'bg-gray-800':'cursor-col-resize bg-gray-800 hover:bg-violet-600'} ${dragging?'bg-violet-500':''}`}>
       {!collapsed&&<div className="absolute inset-y-0 -left-1.5 -right-1.5"/>}
       <button onPointerDown={e=>e.stopPropagation()} onDoubleClick={e=>e.stopPropagation()} onClick={()=>setCollapsed(c=>!c)} aria-label={collapsed?'Show lesson':'Hide lesson for full-width editor'} className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-10 w-6 h-11 rounded-md border border-gray-700 bg-gray-900 text-gray-400 hover:text-white hover:border-violet-500 flex items-center justify-center text-xs">{collapsed?'»':'«'}</button>
