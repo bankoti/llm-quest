@@ -24,7 +24,7 @@ The residual stream is the running x. Its identity route carries information and
 
 For L additive blocks there are 2^L choices of taking the identity or transformed branch. Exactly choose(L,k) routes use k transformed branches. This combinatorial picture is useful for reasoning about ablations, but paths share parameters and are not independently trained ensemble members.
 
-If every F_i is linear, the overall map is (I+W_L)...(I+W_1). For two blocks this is I+W_1+W_2+W_2 W_1. Order matters: W_2 W_1 generally differs from W_1 W_2. For nonlinear F, F_2(x+F_1(x)) cannot generally be split into F_2(x)+F_2(F_1(x)). The lab returns path counts and evaluates both plain and residual chains of linear matrices, with an independent nonlinear counterexample in the experiment.
+If every F_i is linear, the overall map is (I+W_L)...(I+W_1). For two blocks this is I+W_1+W_2+W_2 W_1. Order matters: W_2 W_1 generally differs from W_1 W_2. For nonlinear F, F_2(x+F_1(x)) cannot generally be split into F_2(x)+F_2(F_1(x)). The lab returns path counts and evaluates both plain and residual chains of linear matrices, with an independent nonlinear counterexample in the worked example.
 
 ## Worked Example: Unravel two linear blocks
 

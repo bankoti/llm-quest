@@ -7,8 +7,9 @@ excerpt contains 102 visible prompts; 1.8, 1.9, and 4.11 are not present.
 Every new unit below has a registered interactive lesson, a browser coding
 challenge, an independent grader, a worked reference solution, hints, review
 questions, and a self-contained CPU notebook. Notebook experiments use original
-synthetic data. Historical and research-judgment prompts are discussion targets,
-not problems with an invented uniquely correct answer.
+synthetic datasets or simulated environment rollouts. Historical and
+research-judgment prompts are discussion targets, not problems with an invented
+uniquely correct answer.
 
 ## Recommended Path
 

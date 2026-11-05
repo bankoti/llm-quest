@@ -1,10 +1,6 @@
 import { EXPANSION_COURSES } from './expansion'
 
 // Existing routes retain their IDs; continuation tracks append after Course 9.
-// XP calibrated: harder = more. Boss fights = 3x normal.
-// challengeFile: path to the numpy/pure-python challenge (C1-3)
-//   or the mini_llm workbook (C4-8)
-// runtime: 'pyodide' for all (C1-3 use numpy rewrites, C4-8 use mini_llm bundle)
 
 export type LevelType = 'challenge' | 'boss' | 'debug'
 

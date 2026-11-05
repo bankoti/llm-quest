@@ -24,7 +24,7 @@ First freeze the backbone and train only the head. This separates whether the re
 
 For a binary task, count TP, FP, FN, and TN on held-out examples. Positive-class F1 is 2TP/(2TP+FP+FN). Compute the analogous value for the negative class and average to obtain macro F1. Define a zero denominator to produce 0 in this exercise. Report per-class support; a macro number without support can be misleading on tiny samples.
 
-Split by the real unit of independence before fitting: related messages, customers, or duplicated documents should not leak across partitions. Select thresholds using validation data only. The final test split remains untouched until the choice is fixed. The browser lab implements pooling and binary metrics; the notebook supplies the differentiable training loop and measured learning curves.
+Split by the real unit of independence before fitting: related messages, customers, or duplicated documents should not leak across partitions. Select thresholds using validation data only. The final test split remains untouched until the choice is fixed. The browser lab implements pooling and binary metrics; the notebook supplies the differentiable training loop and measured held-out metrics.
 
 ## Worked Example: An accurate model that misses all positives
 

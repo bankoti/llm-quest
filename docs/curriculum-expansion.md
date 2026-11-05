@@ -23,12 +23,8 @@ material.
 
 ## New branches
 
-| Course | Entry requirement | Deliverable |
-| --- | --- | --- |
-| 10: From Components to a Trained LLM | Course 1 | Tokenizer through training, checkpoint recovery, classification, SFT, adapters, evaluation, full model |
-| 11: Learning Dynamics and Mechanisms | Course 1 | Residual paths, landscapes, modular learning, probes, double descent, search/learning trade-offs |
-| 12: Reinforcement Learning for Language Models | Course 10 | Stochastic policies, trajectories, REINFORCE, clipped group-relative updates, reward tests, search |
-| 13: Vision, Action, and World Models | Course 12 | Optional vision/SSL, VLA, latent prediction, planning, and research comparisons |
+See the README's [complete learning continuations](../README.md#complete-learning-continuations)
+for course scope and entry requirements.
 
 Keep all old level IDs, order within old courses, saved completions, XP, and
 existing certificate definitions. New levels start incomplete. New branches
@@ -38,21 +34,9 @@ just-in-time refreshers, not a second completion gate.
 
 ## From-scratch audit
 
-| Capability | Existing evidence | Decision |
-| --- | --- | --- |
-| Tensor shapes, broadcasting, matrix multiplication | Toolkit and Course 1; interactive foundations | Retain; do not repeat a full Python course |
-| Tokenization and shifted context windows | Course 1 tokenizer/batching; vendor byte BPE | Extend to a complete tested byte-BPE lifecycle and tokenizer identity |
-| Attention, normalization, MLP, residual stream | Courses 1-3, interactive model lessons | Retain; strengthen numerical graders so inert components fail |
-| End-to-end decoder | NumPy block challenge and PyTorch vendor code | Add a full forward/generation capstone connected to actual training |
-| Pretraining and validation | Vendor training loop, loss/generalization lessons | Add token-weighted accounting, gradient accumulation, clipping, schedule and actual CPU run |
-| Saving and loading | Vendor inference checkpoint | Teach optimizer/RNG/config/tokenizer state and continuation equivalence |
-| External pretrained weights | Architecture config reading only | Teach shape/orientation/name checks using a local fixture; real downloads optional |
-| Classification fine-tuning | No corresponding complete learner lab | Add nonpadding pooling, labels, baseline, held-out metrics, and a trained head |
-| Instruction fine-tuning | Explanatory SFT prose; DPO objective lab | Add collation, prompt/padding masks, EOS, actual update and held-out evaluation |
-| LoRA | Interactive explanation | Add coding, frozen-base checks, actual adapter updates and merge equivalence |
-| Decoding and model evaluation | Interactive controls and production metrics | Add a reproducible model-specific evaluation and sampling contract |
-| Distributed hardware, exhaustive framework ports | ZeRO simulation and optional CUDA comparison | Retain as advanced options; do not make paid hardware a prerequisite |
-| Every current model family and vendor API | Architecture atlas; outside finite core scope | Do not duplicate; teach portable mechanisms and explicit limitations |
+The [LLMs From Scratch crosswalk](coverage-crosswalk.md#llms-from-scratch)
+records the capability-by-capability audit, retained foundations, additions,
+and exclusions.
 
 ## Unit contract
 
@@ -71,19 +55,22 @@ Every new unit needs all of the following, not just a title and a link:
 8. Primary sources and a boundary between teaching demonstrations and paper
    reproductions. Do not label a synthetic curve as a measured training run.
 
-The implemented inventory is 26 new units, 26 notebooks, and 16 standalone
-experiment scripts, bringing the registered curriculum to 100 interactive
-lessons and 103 coding levels. Adjacent notebooks intentionally reuse a complete
-experiment so students can connect component exercises to an end-to-end run.
+The [generated expansion manifest](../public/content/expansion-manifest.json)
+lists unit artifacts and experiment assignments. The
+[interactive registry](../src/interactive/curriculum.ts) and
+[coding registry](../src/data/curriculum.ts) define the complete curriculum.
+Adjacent notebooks intentionally reuse a complete experiment so students can
+connect component exercises to an end-to-end run.
 The [coverage crosswalk](coverage-crosswalk.md) maps all 102 visible excerpt
 prompts and the practical from-scratch sequence, including explicit exclusions.
 
 ## Experiments and compute
 
-CPU defaults use small synthetic datasets with explicit train/validation/test
-boundaries and fixed seeds. No credentials, paid endpoints, robot hardware, or
-large model downloads are required. Real policy updates and neural training must
-actually execute. Optional longer runs may demonstrate grokking, but a short
+CPU defaults use small synthetic datasets or simulated environment rollouts with
+declared training and held-out evaluation boundaries and fixed seeds. No
+credentials, paid endpoints, robot hardware, or large model downloads are
+required. Real policy updates and neural training must actually execute.
+Optional longer runs may demonstrate grokking, but a short
 smoke run must not promise it will occur. Report every seed, including failures.
 
 Use Gymnasium for CartPole rather than inventing a physics implementation.

@@ -26,7 +26,7 @@ Convert x, y, and both weight grids to floating point before multiplying or squa
 
 For plain versus residual networks, keep the dataset, width, optimizer, learning rate, update count, and random seeds recorded. Equal width at different depth does not imply equal parameter count or compute. Report those differences. Inspect gradients near the input and output before claiming vanishing gradients; poor optimization can have more than one cause.
 
-Layerwise sweeps vary only one layer while holding all other layers fixed. They answer a conditional question, not what training would find after jointly adapting every layer. Randomly rescaled directions and differently normalized layers can manufacture a visual sharpness difference. The experiment therefore reports numbers and axis definitions as well as optional plots.
+Layerwise sweeps vary only one layer while holding all other layers fixed. They answer a conditional question, not what training would find after jointly adapting every layer. Randomly rescaled directions and differently normalized layers can manufacture a visual sharpness difference. The experiment therefore reports numbers and axis definitions for plotting.
 
 ## Worked Example: A central difference
 

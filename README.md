@@ -4,9 +4,8 @@ Interactive LLM lessons and graded Python exercises: [open the course](https://b
 
 ## Complete learning continuations
 
-The specialization now has 100 interactive lessons and 103 coding levels.
-Twenty-six new units extend the original routes without renumbering old levels
-or changing existing certificate requirements:
+Continuation courses extend the original interactive and coding routes without
+renumbering old levels or changing existing certificate requirements:
 
 | Course | Entry | What the learner builds |
 | --- | --- | --- |
@@ -17,9 +16,9 @@ or changing existing certificate requirements:
 
 Each new unit includes a detailed lesson, worked calculation, interactive checks,
 coding contract, independent grader, worked solution, hints, review, a CPU
-notebook, transfer problems, and an AI-assisted coding route. Experiments use
-original synthetic data; no paid model API, downloaded model, robot, or GPU is
-required. CartPole uses Gymnasium rather than homemade physics.
+notebook, transfer problems, and an AI-assisted coding route. No paid model API,
+downloaded model, robot, or GPU is required; see the
+[experiment and compute boundaries](docs/curriculum-expansion.md#experiments-and-compute).
 
 Read the [implementation scope](docs/curriculum-expansion.md) and the
 [exercise/from-scratch coverage crosswalk](docs/coverage-crosswalk.md). The latter
@@ -74,9 +73,9 @@ Neither notebook establishes the paper's scaling predictions or production wins.
 
 ### Solutions and experiments
 
-Thirty-five exercises have a **Show worked solution** control below the coding
-arena and a primary-source link. Reference code lives in
-`public/content/solutions/` and is tested against the learner's exact grader.
+Exercises in the [lab registry](src/data/paperLabs.ts) have a **Show worked
+solution** control below the coding arena and a primary-source link. Reference
+code lives in `public/content/solutions/` and is tested against the learner's exact grader.
 Revealing a solution does not run it or overwrite the editor.
 
 Seven original paper notebooks add the starter, grader, solution, and experiment in one file:
@@ -89,7 +88,7 @@ Seven original paper notebooks add the starter, grader, solution, and experiment
 - [Byte-student distillation](colab/c9/09_byte_distillation.ipynb)
 - [Byte-model evidence audit](colab/c9/10_byte_evaluation.ipynb)
 
-The 26 continuation notebooks are indexed by the
+Continuation notebooks are indexed by the
 [generated manifest](public/content/expansion-manifest.json) and available under
 `colab/c10` through `colab/c13`. Repeated experiment files intentionally connect
 adjacent exercises into one complete training or evaluation workflow.
@@ -123,10 +122,11 @@ npx playwright install chromium
 npm run test:paper-ui
 ```
 
-`PAPER_PYODIDE=1 npm run test:paper-ui` also runs all 35 reference exercises
+`PAPER_PYODIDE=1 npm run test:paper-ui` also runs the reference exercises
 through the browser's real Pyodide runner; it requires access to the Pyodide CDN.
-The focused UI test completes 34 lessons at desktop and phone sizes, checks
-scoring, solution display, and notebook links, and saves screenshots under
+The [UI suite](scripts/test_paper_ui.mjs) selects paper and continuation lessons
+at desktop and phone sizes, checks scoring, lesson geometry, worked-answer
+headings, solution display, and notebook links, and saves screenshots under
 `.paper-test-output/`. The default CI avoids requiring Pyodide's external CDN.
 
 After changing a paper lesson, starter, grader, reference solution, or experiment,
@@ -150,9 +150,10 @@ NumPy/PyTorch runtime setup, and browser exercises run through Pyodide.
 
 The generator emits readable lesson Markdown, starter scaffolds,
 self-contained notebooks, and the manifest. Do not manually edit generated
-starters/notebooks: change the reference function's public docstring/contract or
-the authored unit, then regenerate. The notebook test executes the actual
-reference, grader, setup, and experiment cells in a fresh namespace per file.
+lessons, starters, notebooks, or the manifest: change the reference function's
+public docstring/contract or the authored unit, then regenerate. The notebook
+test executes the actual reference, grader, setup, and experiment cells in a
+fresh namespace per file.
 
 ## Primary sources
 

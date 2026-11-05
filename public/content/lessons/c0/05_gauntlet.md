@@ -31,7 +31,7 @@ mixture-of-experts model in Course 2 and beyond.
 
 ## Why these four
 
-They are the four tool families the nine courses draw from: integer napkin
+They are the four tool families the coding courses draw from: integer napkin
 math, key-based selection over collections, defensive contracts, and
 axis-correct array work. Pass this gauntlet and no challenge in the
 curriculum will fail you on Python mechanics; from here on, every
