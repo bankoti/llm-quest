@@ -37,4 +37,15 @@ for width, heads, depth in [(4, 1, 0), (8, 2, 1), (6, 3, 2)]:
     assert np.allclose(result[:, :-1], decoder_logits(altered, e, p, blocks, heads)[:, :-1]), 'No future information'
     assert np.allclose(result[:, :3], decoder_logits(ids[:, :3], e, p, blocks, heads)), 'Prefix invariance'
     assert np.array_equal(e, before)
+for dtype, row, position in [(np.uint8, [200, 1, 100], [100, 0, 0]),
+                             (np.int8, [100, 1, -20], [100, 0, 0])]:
+    ids = np.array([[0]], dtype=np.int64)
+    embedding = np.array([row, [0, 10, 0]], dtype=dtype)
+    positions = np.array([position], dtype=dtype)
+    before = [value.copy() for value in (ids, embedding, positions)]
+    result = decoder_logits(ids, embedding, positions, [], 1)
+    expected = _independent_decoder(ids, embedding.astype(float), positions.astype(float), [], 1)
+    assert np.allclose(result, expected), 'Add numeric embeddings in floating point before normalization'
+    assert np.issubdtype(result.dtype, np.floating)
+    assert all(np.array_equal(value, original) for value, original in zip((ids, embedding, positions), before))
 print('Complete decoder checks passed.')

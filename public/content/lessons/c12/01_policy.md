@@ -50,7 +50,8 @@ def imitation_l1(states, actions, weights, bias):
 
 states finite [N,D], binary actions [N], weights [D], scalar bias; N>0.
 Mean L1 between sigmoid probabilities and binary expert actions.
-Assume valid shapes/values. Stable at extreme logits; no input mutation."""
+Assume valid shapes/values. Compute in floating point, including for
+integer inputs. Stable at extreme logits; no input mutation."""
     raise NotImplementedError('Implement this function, then run the checks.')
 ```
 

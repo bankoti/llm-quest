@@ -6,7 +6,8 @@ def conv_valid(image, kernel):
     """Valid stride-one cross-correlation, no kernel flip, bias, or activation.
 
 Finite 2D image [H,W], finite kernel [Kh,Kw] fitting the image, valid shapes
-assumed. Return [H-Kh+1,W-Kw+1]. Do not mutate inputs."""
+assumed. Return floating-point [H-Kh+1,W-Kw+1], computing products in
+floating point even for integer inputs. Do not mutate inputs."""
     raise NotImplementedError('Implement this function, then run the checks.')
 
 def patchify(image, size):

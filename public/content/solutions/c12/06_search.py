@@ -7,7 +7,9 @@ def puct_select(priors, values, visits, exploration=1.):
 
     Valid finite matching 1D arrays assumed: priors>=0 sum=1, visits>=0,
     exploration>=0. values are action mean values in the parent's perspective.
+    Convert priors, values, and visits to floating point before score arithmetic.
     """
+    priors,values,visits = [np.asarray(value,float) for value in (priors,values,visits)]
     scores = values+exploration*priors*np.sqrt(1+visits.sum())/(1+visits)
     return int(np.argmax(scores))
 

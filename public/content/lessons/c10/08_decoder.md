@@ -56,7 +56,8 @@ D divisible by positive heads. blocks is a list of dictionaries:
 q,k,v,o: [D,D]; up: [D,F]; down: [F,D]. No biases or learned norm affine.
 Each block: residual attention(norm(x)); then residual MLP(norm(x)).
 MLP uses GELU approximation h/(1+exp(-1.702*h)). Final norm, then @E.T.
-Assume valid finite shapes/IDs. Do not modify any inputs or parameters."""
+Assume valid finite shapes/IDs. Do not modify any inputs or parameters.
+Compute numeric parameters in floating point; IDs remain integers."""
     raise NotImplementedError('Implement this function, then run the checks.')
 ```
 

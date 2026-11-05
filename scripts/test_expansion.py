@@ -9,6 +9,9 @@ import numpy as np
 
 ROOT=Path(__file__).resolve().parents[1]
 CONTENT=ROOT/'public/content'
+INTEGER_INPUT_LABS=('c10/08_decoder','c11/02_landscape','c11/05_interpolation',
+                    'c11/06_search','c12/01_policy','c12/02_trajectory',
+                    'c12/06_search','c13/01_vision','c13/04_latents','c13/05_planning')
 
 
 def reject_mutation(name, mutate):
@@ -65,11 +68,15 @@ def negative_controls():
     reject_mutation('c13/04_latents',lambda s:s.update(latent_mse=lambda p,t,m:float(((p-t)**2).mean())))
 
 
-def numeric_regressions():
-    for name in ('c10/02_training', 'c12/04_grpo'):
+def reference_checks(names):
+    for name in names:
         scope={'__name__':'__test__'}
         exec(compile((CONTENT/'solutions'/f'{name}.py').read_text(),name,'exec'),scope)
         exec(compile((CONTENT/'tests'/f'{name}_test.py').read_text(),name+'_test','exec'),scope)
+
+
+def numeric_regressions():
+    reference_checks(('c10/02_training', 'c12/04_grpo'))
     for script in ('test_dynamics_numerics.py', 'test_scratch_updates.py'):
         runpy.run_path(str(ROOT/'scripts'/script),run_name='__main__')
 
@@ -92,7 +99,10 @@ def notebooks(names=None):
 
 
 if __name__=='__main__':
-    if '--numerics' in sys.argv:
+    if '--integer-inputs' in sys.argv:
+        reference_checks(INTEGER_INPUT_LABS)
+        notebooks(set(INTEGER_INPUT_LABS))
+    elif '--numerics' in sys.argv:
         numeric_regressions()
         manifest=json.loads((CONTENT/'expansion-manifest.json').read_text())
         affected={entry['name'] for entry in manifest if entry['experiment'] in
@@ -101,4 +111,5 @@ if __name__=='__main__':
     else:
         negative_controls()
         numeric_regressions()
+        reference_checks(INTEGER_INPUT_LABS)
         notebooks()

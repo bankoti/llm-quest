@@ -6,7 +6,8 @@ def puct_select(priors, values, visits, exploration=1.0):
     """Return first argmax of Q+c*P*sqrt(1+sum(N))/(1+N).
 
 Valid finite matching 1D arrays assumed: priors>=0 sum=1, visits>=0,
-exploration>=0. values are action mean values in the parent's perspective."""
+exploration>=0. values are action mean values in the parent's perspective.
+Convert priors, values, and visits to floating point before score arithmetic."""
     raise NotImplementedError('Implement this function, then run the checks.')
 
 def backup_values(leaf_value, edges, alternating=True):

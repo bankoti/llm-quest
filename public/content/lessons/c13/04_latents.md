@@ -50,7 +50,8 @@ def latent_mse(prediction, target, mask):
 
 prediction/target matching finite [B,T,D], Boolean mask [B,T]. Reject
 mismatched shapes, nonfinite values, or empty mask with ValueError.
-Average over selected positions AND D features. Do not mutate arrays."""
+Average over selected positions AND D features. Do not mutate arrays.
+Convert prediction and target to floating point before arithmetic."""
     raise NotImplementedError('Implement this function, then run the checks.')
 
 def ema_target(target, online, momentum):

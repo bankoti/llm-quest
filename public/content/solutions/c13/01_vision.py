@@ -6,8 +6,10 @@ def conv_valid(image, kernel):
     """Valid stride-one cross-correlation, no kernel flip, bias, or activation.
 
     Finite 2D image [H,W], finite kernel [Kh,Kw] fitting the image, valid shapes
-    assumed. Return [H-Kh+1,W-Kw+1]. Do not mutate inputs.
+    assumed. Return floating-point [H-Kh+1,W-Kw+1], computing products in
+    floating point even for integer inputs. Do not mutate inputs.
     """
+    image, kernel = np.asarray(image, float), np.asarray(kernel, float)
     kh, kw = kernel.shape
     return np.array([[np.sum(image[i:i+kh,j:j+kw]*kernel) for j in range(image.shape[1]-kw+1)] for i in range(image.shape[0]-kh+1)])
 

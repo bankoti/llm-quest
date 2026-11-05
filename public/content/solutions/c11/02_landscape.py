@@ -8,8 +8,9 @@ def landscape(x, y, first_weights, second_weights):
     Finite nonempty 1D x,y of equal length and finite 1D weight grids assumed.
     Rows vary w1, columns vary w2. Average over examples only.
     """
-    predictions = np.tanh(np.asarray(first_weights)[:, None, None] * np.asarray(x)[None, None, :]) * np.asarray(second_weights)[None, :, None]
-    return ((predictions - np.asarray(y))**2).mean(axis=-1)
+    x, y, first_weights, second_weights = [np.asarray(values, float) for values in (x, y, first_weights, second_weights)]
+    predictions = np.tanh(first_weights[:, None, None] * x[None, None, :]) * second_weights[None, :, None]
+    return ((predictions - y)**2).mean(axis=-1)
 
 
 def numerical_gradient(loss, theta, epsilon=1e-5):

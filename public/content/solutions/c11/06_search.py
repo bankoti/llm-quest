@@ -22,7 +22,8 @@ def viterbi(log_initial, log_transition, log_emission):
     T,S>=1; finite or -inf log scores, valid shapes assumed. First-ID tie break.
     Include emission at t=0; backtrack globally, not greedy per-step choices.
     """
-    scores = np.asarray(log_initial) + log_emission[0]
+    log_initial, log_transition, log_emission = [np.asarray(values, float) for values in (log_initial, log_transition, log_emission)]
+    scores = log_initial + log_emission[0]
     parents = []
     for emissions in log_emission[1:]:
         candidate = scores[:, None] + log_transition

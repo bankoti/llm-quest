@@ -7,8 +7,11 @@ def imitation_l1(states, actions, weights, bias):
 
     states finite [N,D], binary actions [N], weights [D], scalar bias; N>0.
     Mean L1 between sigmoid probabilities and binary expert actions.
-    Assume valid shapes/values. Stable at extreme logits; no input mutation.
+    Assume valid shapes/values. Compute in floating point, including for
+    integer inputs. Stable at extreme logits; no input mutation.
     """
+    states, actions, weights = [np.asarray(value, float) for value in (states, actions, weights)]
+    bias = float(bias)
     logits = states @ weights + bias
     p = np.exp(-np.logaddexp(0., -logits))
     slope = (1-2*actions)*p*(1-p)

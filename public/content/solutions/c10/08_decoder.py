@@ -15,7 +15,9 @@ def decoder_logits(ids, embedding, positions, blocks, heads):
     Each block: residual attention(norm(x)); then residual MLP(norm(x)).
     MLP uses GELU approximation h/(1+exp(-1.702*h)). Final norm, then @E.T.
     Assume valid finite shapes/IDs. Do not modify any inputs or parameters.
+    Compute numeric parameters in floating point; IDs remain integers.
     """
+    embedding, positions = np.asarray(embedding, float), np.asarray(positions, float)
     batch, length = ids.shape
     width = embedding.shape[1]
     head_width = width // heads

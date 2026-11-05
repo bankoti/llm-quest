@@ -22,7 +22,9 @@ def bias_variance(predictions, truth):
 
     Fixed noiseless truth; population variance over runs. MSE averages all runs
     and points. Thus mse = bias2 + variance (no observation-noise term here).
-    Valid finite nonempty shapes assumed.
+    Valid finite nonempty shapes assumed. Compute in floating point, including
+    for integer inputs. Do not mutate inputs.
     """
+    predictions, truth = np.asarray(predictions, float), np.asarray(truth, float)
     mean = predictions.mean(axis=0)
     return dict(bias2=float(((mean-truth)**2).mean()), variance=float(((predictions-mean)**2).mean()), mse=float(((predictions-truth)**2).mean()))
