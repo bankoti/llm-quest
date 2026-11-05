@@ -3,7 +3,7 @@
 from collections import Counter
 
 def _merge(ids, pair, new_id):
-    (result, i) = ([], 0)
+    result, i = ([], 0)
     while i < len(ids):
         if i + 1 < len(ids) and (ids[i], ids[i + 1]) == pair:
             result.append(new_id)

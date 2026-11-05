@@ -112,7 +112,8 @@ npm run dev
 npm test
 npm run build
 node scripts/test_expansion_progress.mjs
-node scripts/build_expansion.mjs --check
+uv run --python 3.12 python scripts/test_expansion_authoring.py
+uv run --python 3.12 node scripts/build_expansion.mjs --check
 uv run --with numpy python scripts/test_paper_labs.py
 uv run python scripts/build_paper_notebooks.py --check
 uv run --with numpy --with torch python scripts/test_paper_notebooks.py
@@ -137,8 +138,17 @@ experiment cells. The `--check` mode detects stale notebooks. General
 
 Continuation source text and interactive checks live in `src/data/expansion/`.
 Reference functions, public graders, and measured experiment scripts remain
-ordinary editable Python files. Run `node scripts/build_expansion.mjs` after
-editing those sources. It emits readable lesson Markdown, starter scaffolds,
+ordinary editable Python files. Use Python 3.12 to author continuation artifacts:
+run `uv run --python 3.12 node scripts/build_expansion.mjs` after editing those
+sources, and add `--check` to verify generated-artifact freshness. The generator
+rejects other Python minor versions before reading curriculum input or writing
+artifacts because `ast.unparse` output can change between Python versions.
+You can also set `PYTHON` to the path of a Python 3.12 executable when invoking
+`node scripts/build_expansion.mjs`. This authoring requirement applies to
+generation and exact freshness checks; student notebooks retain their own
+NumPy/PyTorch runtime setup, and browser exercises run through Pyodide.
+
+The generator emits readable lesson Markdown, starter scaffolds,
 self-contained notebooks, and the manifest. Do not manually edit generated
 starters/notebooks: change the reference function's public docstring/contract or
 the authored unit, then regenerate. The notebook test executes the actual

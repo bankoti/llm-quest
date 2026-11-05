@@ -3,6 +3,7 @@
 Authored sources: src/data/expansion/*.ts, solutions, graders, experiments.
 Generated outputs: lessons, starters, notebooks, expansion manifest. --check
 verifies their exact emitted artifact contract without editing them.
+Artifact authoring and freshness checks require Python 3.12.
 """
 import ast
 import json
@@ -107,6 +108,14 @@ def emit(path, text):
 
 
 def main():
+    if sys.version_info[:2] != (3,12):
+        found = '.'.join(map(str,sys.version_info[:2]))
+        raise SystemExit(
+            f'Expansion artifact authoring requires Python 3.12; found {found}. '
+            'Generate with: uv run --python 3.12 node scripts/build_expansion.mjs\n'
+            'Check with: uv run --python 3.12 node scripts/build_expansion.mjs --check\n'
+            'Alternatively, set PYTHON to a Python 3.12 executable.'
+        )
     tracks = json.load(sys.stdin)
     manifest = []
     for track in tracks:

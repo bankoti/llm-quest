@@ -24,6 +24,7 @@ jobs:
       - run: pip install numpy
       - run: python scripts/test_paper_labs.py
       - run: python scripts/build_paper_notebooks.py --check
+      - run: python scripts/test_expansion_authoring.py
       - run: node scripts/build_expansion.mjs --check
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: python scripts/test_byte_experiment.py
