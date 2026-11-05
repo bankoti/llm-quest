@@ -4,6 +4,7 @@ import path from 'node:path'
 import { createServer } from 'vite'
 import { chromium } from 'playwright'
 import { lessonGeometry, codeGeometry, workspaceRegression } from './workspace_ui_checks.mjs'
+import { shiftedTargetsRegression } from './shifted_targets_ui_checks.mjs'
 
 const root=path.resolve(import.meta.dirname,'..')
 const server=await createServer({root,server:{host:'127.0.0.1',port:0}})
@@ -96,6 +97,7 @@ try {
           assert.equal(await page.getByRole('button',{name:'Continue',exact:true}).count(),0)
           await click(page,"I'm sure");await click(page,'Continue')
         } else if(step.kind==='widget') {
+          if(slug==='scratch-05_instruction')await shiftedTargetsRegression(page,layout)
           if(expansionSlugs.includes(slug)) {
             const controls=page.getByRole('slider')
             await controls.first().waitFor()
