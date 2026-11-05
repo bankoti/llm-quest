@@ -2,6 +2,30 @@
 import numpy as np
 
 
+def _group_advantages(rewards):
+    """Normalize finite group rewards while retaining additive epsilon units.
+
+    Center reference differences before scaling to preserve representable gaps.
+    Scale original rewards only if subtraction, mean, or centering is nonfinite.
+    This float64 helper is supplied so the exercise focuses on GRPO composition.
+    """
+    with np.errstate(over='ignore', invalid='ignore', under='ignore'):
+        differences = rewards-rewards[0]
+        centered = differences-differences.mean()
+        epsilon = 1e-8
+        if not np.isfinite(centered).all():
+            original_scale = max(float(np.abs(rewards).max()), epsilon)
+            differences = rewards/original_scale
+            differences = differences-differences[0]
+            centered = differences-differences.mean()
+            epsilon /= original_scale
+        scale = max(float(np.abs(centered).max()), epsilon)
+        if scale == 0:
+            return np.zeros_like(rewards)
+        centered = centered/scale
+        return centered/(np.sqrt(np.mean(centered**2))+epsilon/scale)
+
+
 def clipped_grpo(logp, old_logp, reference_logp, rewards, mask, epsilon=.2, beta=.01):
     """Return dict loss, advantages, ratios, kl, clip_fraction.
 
@@ -12,6 +36,8 @@ def clipped_grpo(logp, old_logp, reference_logp, rewards, mask, epsilon=.2, beta
     ratios/kl are zero, and must not be exponentiated. clip_fraction is the
     fraction of valid ratios outside [1-epsilon,1+epsilon]. No input mutation.
     Zero advantages contribute zero surrogate, and beta=0 omits the KL penalty.
+    The supplied normalization helper centers reference reward differences
+    before scaling and preserves +1e-8 in the original reward units.
     Ratios/KL diagnostics may be +inf when their float64 arithmetic overflows.
     An overflowing ratio is supported only for zero/positive advantages; an
     overflowing KL only when beta=0. Otherwise raise FloatingPointError, even
@@ -24,10 +50,7 @@ def clipped_grpo(logp, old_logp, reference_logp, rewards, mask, epsilon=.2, beta
         raise ValueError('invalid group shapes or masks')
     if not 0 < epsilon < 1 or not np.isfinite(beta) or beta < 0 or not all(np.isfinite(v).all() for v in (z, old, ref, rewards)):
         raise ValueError('invalid objective inputs')
-    scale = max(float(np.abs(rewards).max()), 1e-8)
-    scaled_rewards = rewards / scale
-    centered = scaled_rewards - scaled_rewards.mean()
-    advantages = centered / (np.sqrt(np.mean(centered**2)) + 1e-8 / scale)
+    advantages = _group_advantages(rewards)
     ratios, kl = np.zeros_like(z), np.zeros_like(z)
     with np.errstate(over='ignore', invalid='ignore'):
         ratios[m] = np.exp(z[m]-old[m])

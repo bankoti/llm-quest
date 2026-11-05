@@ -26,6 +26,8 @@ One common design uses a stop-gradient target encoder updated by exponential mov
 
 LeWorldModel uses a different end-to-end recipe: next-embedding prediction plus SIGReg, which encourages Gaussian-like latent distributions through random projections. It does not require EMA or stop-gradient. Our toy variance regularizer is not SIGReg. The comparison notebook labels these differences explicitly and treats collapse diagnostics, prediction error, and downstream planning success as distinct tests.
 
+For masked latent MSE, convert predictions and targets to floating point before subtraction and squaring. Select Boolean target positions, then average over both selected positions and feature dimensions. An int16 value of 200 has squared error 40000 against zero; unsigned subtraction must also preserve negative differences before squaring. An empty selection is an error, and neither targets nor the mask should be modified.
+
 ## Worked Example: Update a slowly moving target
 
 Old target weight=2, online weight=6, momentum=.9.

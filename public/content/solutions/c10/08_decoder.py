@@ -5,12 +5,21 @@ import numpy as np
 def _norm(x):
     if not np.isfinite(x).all():
         raise FloatingPointError('Nonfinite decoder residual')
-    with np.errstate(over='ignore', invalid='ignore'):
-        scale = np.maximum(np.max(np.abs(x), axis=-1, keepdims=True), np.sqrt(1e-5))
-        scaled = x / scale
-        centered = scaled - scaled.mean(axis=-1, keepdims=True)
-        denominator = np.hypot(np.sqrt(np.mean(centered**2, axis=-1, keepdims=True)), np.sqrt(1e-5)/scale)
-        normalized = np.divide(centered, denominator, out=np.zeros_like(centered), where=denominator != 0)
+    with np.errstate(over='ignore', invalid='ignore', under='ignore'):
+        shifted = x - x[..., :1]
+        mean = shifted.mean(axis=-1, keepdims=True)
+        centered = shifted - mean
+        regular = np.isfinite(shifted).all(axis=-1) & np.isfinite(mean).all(axis=-1) & np.isfinite(centered).all(axis=-1)
+        scale = np.maximum(np.max(np.abs(centered), axis=-1, keepdims=True), np.sqrt(1e-5))
+        scaled = centered / scale
+        if not regular.all():
+            fallback = x[~regular]
+            fallback_scale = np.maximum(np.max(np.abs(fallback), axis=-1, keepdims=True), np.sqrt(1e-5))
+            fallback_scaled = fallback / fallback_scale
+            scaled[~regular] = fallback_scaled - fallback_scaled.mean(axis=-1, keepdims=True)
+            scale[~regular] = fallback_scale
+        denominator = np.hypot(np.sqrt(np.mean(scaled**2, axis=-1, keepdims=True)), np.sqrt(1e-5)/scale)
+        normalized = np.divide(scaled, denominator, out=np.zeros_like(scaled), where=denominator != 0)
     if not np.isfinite(normalized).all():
         raise FloatingPointError('Decoder normalization exceeds float64 range')
     return normalized
@@ -29,7 +38,8 @@ def decoder_logits(ids, embedding, positions, blocks, heads):
     Negative infinite MLP preactivations from overflow use the activation
     limit zero. Raise FloatingPointError for nonrepresentable attention
     intermediates, NaN preactivations, nonfinite active activations, residuals,
-    or output logits. Row normalization scales before measuring variance.
+    or output logits. Row normalization centers finite reference differences
+    before scaling deviations; overflowing differences use scaled original rows.
     """
     embedding, positions = np.asarray(embedding, float), np.asarray(positions, float)
     batch, length = ids.shape

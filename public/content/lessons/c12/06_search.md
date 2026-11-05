@@ -18,7 +18,7 @@ Course 12. Entry course: 10. Budget about 75 minutes for reading, code, and one 
 
 In a large branching game, exhaustive search grows roughly as branching_factor^depth. A policy prior can concentrate search on promising moves; a value estimate can score nonterminal states without rolling every path to the end. AlphaGo combined supervised and reinforcement-trained policies, value estimation, and tree search. A prior is guidance, not proof that a move is best.
 
-Our PUCT-style score for action a is Q(a)+c*P(a)*sqrt(1+sum_b N(b))/(1+N(a)). Q is a mean value from the current player's perspective, P is a normalized prior, N is a visit count. The lab uses this explicit teaching convention; variants differ in initialization and exploration constants. In alternating zero-sum games, flip the sign when backing a leaf value through each turn. In single-agent planning, no player-sign flip is needed.
+Our PUCT-style score for action a is Q(a)+c*P(a)*sqrt(1+sum_b N(b))/(1+N(a)). Q is a mean value from the current player's perspective, P is a normalized prior, N is a visit count. The lab uses this explicit teaching convention; variants differ in initialization and exploration constants. Convert visit counts to floating point before adding one or summing, so fixed-width integer counters do not wrap during score arithmetic. In alternating zero-sum games, flip the sign when backing a leaf value through each turn. In single-agent planning, no player-sign flip is needed.
 
 ## Search needs a model or executable transition rule
 

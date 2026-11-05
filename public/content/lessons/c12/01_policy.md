@@ -18,7 +18,7 @@ Course 12. Entry course: 10. Budget about 75 minutes for reading, code, and one 
 
 A binary policy sets p(action=1|s)=sigmoid(w dot s+b). Sampling chooses 1 with probability p and 0 otherwise. The p=0.5 decision boundary is w dot s+b=0. For CartPole the observation has cart position, cart velocity, pole angle, and angular velocity; the actions apply left or right force. A stochastic policy can explore alternatives, but randomness alone does not solve sparse rewards.
 
-Imitation learning trains on labeled expert actions. For binary label y, L1 loss |p-y| equals 1 minus the probability assigned to the demonstrated action. Its derivative with respect to the logit is (1-2y)*p*(1-p). Multiply by each feature to obtain the weight gradient and average over examples. This differs from binary cross-entropy, whose logit derivative is p-y. Do not silently substitute one loss for the other.
+Imitation learning trains on labeled expert actions. For binary label y, L1 loss |p-y| equals 1 minus the probability assigned to the demonstrated action. Its derivative with respect to the logit is (1-2y)*p*(1-p). Multiply by each feature to obtain the weight gradient and average over examples. This differs from binary cross-entropy, whose logit derivative is p-y. Do not silently substitute one loss for the other. For float64 arithmetic, compute p=sigmoid(z) and q=sigmoid(-z) independently: use p*q for the derivative and select q or p for the demonstrated-action L1 loss. Promote integer inputs before arithmetic. Computed infinite logits use sigmoid limits; NaN logits or nonfinite results raise FloatingPointError. Tiny tails can underflow before later feature scaling.
 
 ## The deployed policy changes its own data
 

@@ -18,13 +18,13 @@ Course 12. Entry course: 10. Budget about 75 minutes for reading, code, and one 
 
 The current policy is optimized. The old rollout policy generated the sampled completions and is fixed during their update epochs. A separate frozen reference policy anchors drift, often to an SFT checkpoint. The importance ratio is exp(logp_current-logp_old), not exp(logp_current-logp_reference). Refreshing old probabilities inside each update removes the intended trust-region comparison.
 
-For rewards R_i within one prompt group, A_i=(R_i-mean(R))/(population_std(R)+1e-8). With outcome rewards this scalar is shared across valid response tokens. The surrogate is min(ratio*A, clip(ratio,1-epsilon,1+epsilon)*A). The minimum must be taken after multiplying by signed advantages: negative advantages reverse which ratio direction is harmful.
+For rewards R_i within one prompt group, A_i=(R_i-mean(R))/(population_std(R)+1e-8). With outcome rewards this scalar is shared across valid response tokens. The surrogate is min(ratio*A, clip(ratio,1-epsilon,1+epsilon)*A). The minimum must be taken after multiplying by signed advantages: negative advantages reverse which ratio direction is harmful. The supplied _group_advantages helper first centers reference reward differences, then scales centered deviations for the population norm while keeping +1e-8 in original reward units. It scales original rewards only when the initial subtraction, mean, or centering is nonfinite; this avoids erasing representable gaps atop a large common offset in the ordinary path.
 
 ## Normalize and regularize explicitly
 
 The lab follows the original per-response then per-group averaging: mean_i mean_valid_tokens [surrogate-beta*KL_sample]. Loss is its negative. Variable response lengths therefore receive equal response-level weight. Padding and prompt tokens must not enter these means. Reject a response with no valid target tokens.
 
-The nonnegative sampled KL term is exp(logp_reference-logp_current)-(logp_reference-logp_current)-1. Under samples from the current policy its expectation estimates KL(current||reference); with old-policy rollouts it is used within a surrogate update, not an exact on-policy KL measurement at arbitrary drift. Equal-reward groups have zero task advantages, although KL can still act. The notebook performs actual updates on a tiny categorical task, comparing vanilla REINFORCE and clipped group updates at a disclosed sample budget. Neither method is a universal winner.
+The nonnegative sampled KL term is exp(logp_reference-logp_current)-(logp_reference-logp_current)-1. Under samples from the current policy its expectation estimates KL(current||reference); with old-policy rollouts it is used within a surrogate update, not an exact on-policy KL measurement at arbitrary drift. Equal-reward groups have zero task advantages, although KL can still act. The notebook performs actual updates on a tiny categorical task, comparing vanilla REINFORCE and clipped group updates at a disclosed sample budget. Neither method is a universal winner. Zero advantages contribute zero surrogate without multiplying an overflowing ratio, and beta=0 omits KL penalty arithmetic. Float64 diagnostics may be infinite while the loss remains finite; the function contract declares which active overflows raise FloatingPointError rather than silently capping the objective.
 
 ## Worked Example: Clipping depends on advantage sign
 
@@ -45,6 +45,29 @@ Implement the public functions below. Private helpers are supplied where the exe
 """One prompt group, original response-weighted clipped GRPO surrogate."""
 import numpy as np
 
+def _group_advantages(rewards):
+    """Normalize finite group rewards while retaining additive epsilon units.
+
+    Center reference differences before scaling to preserve representable gaps.
+    Scale original rewards only if subtraction, mean, or centering is nonfinite.
+    This float64 helper is supplied so the exercise focuses on GRPO composition.
+    """
+    with np.errstate(over='ignore', invalid='ignore', under='ignore'):
+        differences = rewards - rewards[0]
+        centered = differences - differences.mean()
+        epsilon = 1e-08
+        if not np.isfinite(centered).all():
+            original_scale = max(float(np.abs(rewards).max()), epsilon)
+            differences = rewards / original_scale
+            differences = differences - differences[0]
+            centered = differences - differences.mean()
+            epsilon /= original_scale
+        scale = max(float(np.abs(centered).max()), epsilon)
+        if scale == 0:
+            return np.zeros_like(rewards)
+        centered = centered / scale
+        return centered / (np.sqrt(np.mean(centered ** 2)) + epsilon / scale)
+
 def clipped_grpo(logp, old_logp, reference_logp, rewards, mask, epsilon=0.2, beta=0.01):
     """Return dict loss, advantages, ratios, kl, clip_fraction.
 
@@ -55,6 +78,8 @@ KL=exp(reference_logp-logp)-(reference_logp-logp)-1. Padded entries in
 ratios/kl are zero, and must not be exponentiated. clip_fraction is the
 fraction of valid ratios outside [1-epsilon,1+epsilon]. No input mutation.
 Zero advantages contribute zero surrogate, and beta=0 omits the KL penalty.
+The supplied normalization helper centers reference reward differences
+before scaling and preserves +1e-8 in the original reward units.
 Ratios/KL diagnostics may be +inf when their float64 arithmetic overflows.
 An overflowing ratio is supported only for zero/positive advantages; an
 overflowing KL only when beta=0. Otherwise raise FloatingPointError, even

@@ -20,11 +20,15 @@ Self-supervised learning creates training signals from data rather than requirin
 
 Barlow Twins standardizes each feature across the batch and forms cross-correlation C=Z_a.T@Z_b/N. Its objective sums (1-C_ii)^2 on the diagonal and lambda*C_ij^2 off the diagonal. Diagonal terms encourage matched-view agreement; off-diagonal terms reduce redundant features. Our lab uses population variance plus epsilon inside the square root. Constant features therefore produce zero correlation and a positive diagonal penalty rather than numerical NaNs.
 
+Use the supplied _standardize_columns helper: subtract a reference row before taking the mean, so a huge shared offset does not erase a small representable spread. Keep those centered differences when finite; fall back to scaled original columns only if the differences, mean, or centered deviations overflow. Scale centered deviations before measuring standard deviation and combine the scaled standard deviation with sqrt(epsilon) in matching units using hypot. A valid epsilon is positive and finite in the original variance units; adding an unchanged epsilon after rescaling would define a different objective.
+
 ## Do not conflate anti-collapse recipes
 
 Barlow Twins does not require an EMA teacher or stop-gradient by definition. Other self-distillation methods use teacher/student asymmetry, centering, sharpening, or additional objectives. The recipe matters: adding an EMA alone is not a mathematical guarantee against collapse. Test a constant-encoder negative control.
 
 DINOv3 learns strong frozen visual features and addresses degradation of dense patch relationships during long training with Gram anchoring. A Gram matrix records pairwise feature similarities; matching such relations can preserve spatial structure even when global semantic objectives dominate. Our optional Gram-distance calculation illustrates that relation, not the complete DINOv3 training recipe or its benchmark results. Evaluate dense and global tasks separately before claiming one representation is better.
+
+For cosine Gram distance, promote features to float and divide each nonzero row by its maximum absolute coordinate before L2 normalization. This avoids overflow or underflow in the norm without changing cosine similarities. Feature widths may differ between the two arrays, but patch counts must match; compare the resulting patch-by-patch Gram matrices.
 
 ## Worked Example: A perfect but redundant pair
 
@@ -45,13 +49,36 @@ Implement the public functions below. Private helpers are supplied where the exe
 """Barlow Twins mechanism, not the complete training recipe."""
 import numpy as np
 
+def _standardize_columns(view, epsilon):
+    """Standardize float columns, preserving finite reference differences."""
+    view = np.asarray(view, float)
+    root_epsilon = np.sqrt(epsilon)
+    with np.errstate(over='ignore', invalid='ignore'):
+        shifted = view - view[:1]
+        shifted_mean = shifted.mean(0)
+        centered = shifted - shifted_mean
+    stable = np.isfinite(shifted).all(0) & np.isfinite(shifted_mean) & np.isfinite(centered).all(0)
+    epsilon_units = np.full(view.shape[1], root_epsilon)
+    if not stable.all():
+        fallback = view[:, ~stable]
+        fallback_scale = np.maximum(np.max(np.abs(fallback), axis=0), root_epsilon)
+        fallback = fallback / fallback_scale
+        centered[:, ~stable] = fallback - fallback.mean(0)
+        epsilon_units[~stable] = root_epsilon / fallback_scale
+    scale = np.maximum(np.max(np.abs(centered), axis=0), epsilon_units)
+    scale[scale == 0] = 1.0
+    centered = centered / scale
+    denominator = np.hypot(np.sqrt((centered ** 2).mean(0)), epsilon_units / scale)
+    return np.divide(centered, denominator, out=np.zeros_like(centered), where=denominator != 0)
+
 def barlow_loss(view_a, view_b, redundancy=0.005, epsilon=1e-05):
     """Return (loss, correlation) for matching finite [N,D] arrays, N>=2.
 
 Standardize columns with sqrt(population_variance+epsilon).
 C=Za.T@Zb/N. Loss=sum_i(1-Cii)^2 + redundancy*sum_i!=j Cij^2.
-Assume valid shapes, positive epsilon and nonnegative redundancy.
-Convert views to floating point and scale columns before standardization."""
+Assume valid shapes, finite positive epsilon and finite nonnegative redundancy.
+The supplied helper centers finite reference differences before scaling
+deviations, with a scaled-original fallback only for nonfinite centering."""
     raise NotImplementedError('Implement this function, then run the checks.')
 
 def gram_distance(features, anchor):

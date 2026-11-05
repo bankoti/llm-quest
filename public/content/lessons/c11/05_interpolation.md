@@ -22,6 +22,8 @@ For design matrix X [N,D] and targets y [N,K], the minimum-norm least-squares so
 
 For repeated training sets, average their fitted predictions at each fixed test point. Bias squared is the squared difference of that mean from noiseless truth. Variance is the mean squared deviation around that mean prediction. Averaged over test points, MSE equals bias squared plus variance; independent observation noise adds its own variance. Polynomial features [1,x,x^2,...,x^degree] let the experiment vary capacity, but high-degree monomial bases can be ill-conditioned.
 
+Promote predictions and truth to float before subtraction and squaring, not only before taking a mean. In uint8, 200 squared wraps to 64 instead of 40000, which can break the MSE=bias2+variance check. The decomposition here assumes fixed noiseless truth and squared errors representable in float64.
+
 ## An honest sweep
 
 Generate one teacher and disjoint train/test inputs. Add noise only according to a declared recipe. Sweep D around N using nested random features, fit on train, and report both train and test MSE over several seeds. Random-label experiments remove meaningful signal; near-zero training loss then indicates memorization, not useful learning. More data moves the interpolation threshold and can change the entire curve.

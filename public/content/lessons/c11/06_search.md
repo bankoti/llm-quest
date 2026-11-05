@@ -20,6 +20,8 @@ A constrained speech system can enumerate allowed word sequences and expand each
 
 HARPY is a historical example of integrated search with substantial language and pronunciation structure. A hidden Markov model instead gives a probabilistic sequence model with hidden states, transition probabilities, and observation likelihoods. A phone graph is not automatically an HMM: it needs probabilities and a defined emission model. Viterbi finds the highest-probability hidden-state path using dynamic programming; it does not enumerate every path independently.
 
+Convert the initial, transition, and emission log-score arrays to floating point before adding them. Small integer storage can wrap -100 plus -100 into a positive score and select the wrong path. The value -infinity remains a valid impossible transition; log-domain inference avoids probability underflow but does not make bounded integer sums safe.
+
 ## The lesson is a research strategy, not a ban on engineering
 
 Sutton's Bitter Lesson argues that methods exploiting computation through search and learning have repeatedly overtaken systems dominated by manually encoded domain knowledge. This is a historical argument about scalable approaches, not a theorem that the largest model always wins under a fixed latency, data, safety, or energy budget. Useful inductive biases and reliable interfaces can coexist with general-purpose learning.

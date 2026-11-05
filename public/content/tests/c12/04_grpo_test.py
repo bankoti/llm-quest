@@ -27,6 +27,41 @@ else:
     raise AssertionError('Reject empty responses')
 extreme = np.zeros((2, 1))
 valid = np.ones((2, 1), bool)
+large_offset = 3*2**53
+offset_rewards = np.array([large_offset, large_offset-8], dtype=float)
+before = offset_rewards.copy()
+offset_group = clipped_grpo(extreme, extreme, extreme, offset_rewards, valid, beta=0.)
+expected_offset_advantages = np.array([4., -4.])/(4.+1e-8)
+np.testing.assert_allclose(offset_group['advantages'], expected_offset_advantages, rtol=1e-14, atol=0.)
+assert offset_group['loss'] == 0., 'A common reward offset must not introduce a task loss at unit ratios'
+assert np.array_equal(offset_rewards, before)
+for base in [np.array([0., -8.]), np.array([0., -8., 4.])]:
+    zeros = np.zeros((len(base), 1))
+    mask = np.ones_like(zeros, dtype=bool)
+    expected = (base-base.mean())/(base.std()+1e-8)
+    baseline = clipped_grpo(zeros, zeros, zeros, base, mask, beta=0.)
+    for offset in [large_offset, -large_offset, 2**54]:
+        rewards = base+offset
+        before = rewards.copy()
+        shifted = clipped_grpo(zeros, zeros, zeros, rewards, mask, beta=0.)
+        np.testing.assert_allclose(shifted['advantages'], expected, rtol=1e-14, atol=0.)
+        np.testing.assert_allclose(shifted['advantages'], baseline['advantages'], rtol=1e-14, atol=0.)
+        assert np.isclose(shifted['loss'], baseline['loss'], rtol=0., atol=1e-15)
+        assert np.array_equal(rewards, before)
+for rewards, stable_values in [
+    (np.array([-1e308, 1e308]), np.array([-1., 1.])),
+    (np.array([0., 1e308, 1e308]), np.array([0., 1., 1.])),
+    (np.array([0., -1.7e308, 1.7e308, 1.7e308]), np.array([0., -1., 1., 1.])),
+]:
+    before = rewards.copy()
+    zeros = np.zeros((len(rewards), 1))
+    mask = np.ones_like(zeros, dtype=bool)
+    expected = (stable_values-stable_values.mean())/stable_values.std()
+    with np.errstate(over='raise', invalid='raise'):
+        normalized = clipped_grpo(zeros, zeros, zeros, rewards, mask, beta=0.)
+    np.testing.assert_allclose(normalized['advantages'], expected, rtol=1e-14, atol=0.)
+    assert abs(normalized['loss']) < 1e-15
+    assert np.array_equal(rewards, before)
 with np.errstate(over='raise', invalid='raise'):
     equal = clipped_grpo(extreme, extreme-1000, extreme, [1., 1.], valid)
     assert equal['loss'] == 0 and np.array_equal(equal['advantages'], [0., 0.])

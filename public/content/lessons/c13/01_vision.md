@@ -20,6 +20,8 @@ A convolution uses the same small kernel at every spatial location. For a single
 
 A vision Transformer splits the image into fixed-size patches, flattens each patch, linearly projects it to a token vector, and adds position information. Attention can connect distant patches within one layer, while a small convolution expands its receptive field over layers. Neither architecture universally wins: data, compute, resolution, and task matter. The lab patch order is row-major across patches and row-major within each patch.
 
+Convert image and kernel arrays to floating point before multiplying and summing each window. Integer storage is appropriate for pixels, but int16 or uint8 convolution can wrap before a later float conversion. Keep the output in floating point and leave both inputs unchanged.
+
 ## A residual token can become workspace
 
 The register-token study found unusually high-norm patch tokens in some trained vision Transformers, often in low-information image regions. These tokens could serve internal computation rather than local image description. Additional learned register tokens provide non-spatial workspace and improved feature behavior in the reported settings. A large norm is a diagnostic clue, not proof of a universal defect.

@@ -20,6 +20,8 @@ A state or latent dynamics model predicts z_next=f(z,a). Training examples must 
 
 Our cost sums squared goal distances at every predicted step plus action_penalty times squared action magnitudes. Other tasks use terminal-only costs, obstacles, discounting, or uncertainty penalties; they produce different plans. Return the full predicted rollout and each candidate cost, not only the winning index. Tie-breaking is first index so results are reproducible.
 
+Promote initial state, dynamics matrices, candidate actions, and goal to floating point before rollout products or costs. With zero action penalty, skip effort arithmetic entirely: huge actions can produce finite states even when their unweighted squares overflow. With a positive penalty, every active float64 intermediate must remain finite, including action squares and their sum even if a tiny coefficient could rescue the mathematical result. This lab deliberately rejects unrepresentable intermediates with FloatingPointError before argmin rather than selecting from NaN or infinite costs.
+
 ## The planner can discover the model's mistakes
 
 Small one-step errors can compound over a long horizon. A planner may select actions outside the training distribution where the model is overoptimistic. Evaluate selected plans in the actual simulator, not only in the learned model. Compare in-distribution and out-of-distribution actions, and report both predicted and observed costs.

@@ -22,7 +22,7 @@ For a modular-addition model, record one neuron over all a,b pairs as a p-by-p g
 
 ## Restricted and excluded components
 
-Given a declared frequency mask, reconstruct selected components by zeroing all other Fourier coefficients. The excluded reconstruction retains the complement. Their sum must recover the original grid. In this lab the grid can be an activation or a logit slice. Restricted loss uses predictions built only from selected components; excluded loss uses the complement. Compute loss against the same held-out targets and document which tensor was altered.
+Given a declared frequency mask, reconstruct selected components by zeroing all other Fourier coefficients. The excluded reconstruction retains the complement. Their sum must recover the original grid. When measuring Fourier energy across output channels, square each coefficient magnitude before summing channels: sum(abs(spectrum)**2). Squaring a sum of magnitudes adds cross terms that are not signal energy. In this lab the grid can be an activation or a logit slice. Restricted loss uses predictions built only from selected components; excluded loss uses the complement. Compute loss against the same held-out targets and document which tensor was altered.
 
 In the grokking case study, circuit-specific progress measures exposed changes not obvious from accuracy alone. Our generic Fourier filter teaches the intervention mechanics, not an automatic discovery of that circuit in any model. A low restricted loss with high excluded loss supports the importance of the chosen component under the intervention; distribution shift and nonlinear downstream compensation still limit causal claims.
 

@@ -16,9 +16,9 @@ Course 10. Entry course: 1. Budget about 75 minutes for reading, code, and one C
 
 ## The tensor path from IDs to logits
 
-Input IDs are [B,T]. Token lookup E[ids] and learned position lookup P[:T] are [B,T,D]. Add them, pass through pre-norm Transformer blocks, apply final layer normalization, and project to vocabulary logits [B,T,V]. This lab ties the output matrix to E: logits=hidden@E.T. Tied weights share parameters; they are not two independently trained copies.
+Input IDs are [B,T]. Token lookup E[ids] and learned position lookup P[:T] are [B,T,D]. Convert numeric embedding and position arrays to float before adding them; keep IDs integer. Pass through pre-norm Transformer blocks, apply final layer normalization, and project to vocabulary logits [B,T,V]. This lab ties the output matrix to E: logits=hidden@E.T. Tied weights share parameters; they are not two independently trained copies.
 
-Each block computes x <- x + attention(norm(x)), then x <- x + FFN(norm(x)). Attention projects Q,K,V, splits D into H heads of size D/H, masks future keys before softmax, mixes values, concatenates heads, and applies the output projection. The MLP uses the same documented GELU approximation as Course 1. Layer normalization is per token across features, with population variance and epsilon 1e-5. Learned scale and shift are omitted from this small browser contract.
+Each block computes x <- x + attention(norm(x)), then x <- x + FFN(norm(x)). Attention projects Q,K,V, splits D into H heads of size D/H, masks future keys before softmax, mixes values, concatenates heads, and applies the output projection. The supplied _norm centers differences from a reference coordinate before scaling deviations, preserving small gaps under large common offsets; it falls back to scaling original rows only when centering overflows. Layer normalization is per token across features, with population variance and epsilon 1e-5. The MLP uses the same documented GELU approximation as Course 1: a negative infinite preactivation has activation limit zero. Unsupported nonrepresentable attention intermediates, active activations, residuals, or output logits raise FloatingPointError. Learned scale and shift are omitted from this small browser contract.
 
 ## Train the same mechanism, then defend its limits
 
@@ -48,12 +48,21 @@ import numpy as np
 def _norm(x):
     if not np.isfinite(x).all():
         raise FloatingPointError('Nonfinite decoder residual')
-    with np.errstate(over='ignore', invalid='ignore'):
-        scale = np.maximum(np.max(np.abs(x), axis=-1, keepdims=True), np.sqrt(1e-05))
-        scaled = x / scale
-        centered = scaled - scaled.mean(axis=-1, keepdims=True)
-        denominator = np.hypot(np.sqrt(np.mean(centered ** 2, axis=-1, keepdims=True)), np.sqrt(1e-05) / scale)
-        normalized = np.divide(centered, denominator, out=np.zeros_like(centered), where=denominator != 0)
+    with np.errstate(over='ignore', invalid='ignore', under='ignore'):
+        shifted = x - x[..., :1]
+        mean = shifted.mean(axis=-1, keepdims=True)
+        centered = shifted - mean
+        regular = np.isfinite(shifted).all(axis=-1) & np.isfinite(mean).all(axis=-1) & np.isfinite(centered).all(axis=-1)
+        scale = np.maximum(np.max(np.abs(centered), axis=-1, keepdims=True), np.sqrt(1e-05))
+        scaled = centered / scale
+        if not regular.all():
+            fallback = x[~regular]
+            fallback_scale = np.maximum(np.max(np.abs(fallback), axis=-1, keepdims=True), np.sqrt(1e-05))
+            fallback_scaled = fallback / fallback_scale
+            scaled[~regular] = fallback_scaled - fallback_scaled.mean(axis=-1, keepdims=True)
+            scale[~regular] = fallback_scale
+        denominator = np.hypot(np.sqrt(np.mean(scaled ** 2, axis=-1, keepdims=True)), np.sqrt(1e-05) / scale)
+        normalized = np.divide(scaled, denominator, out=np.zeros_like(scaled), where=denominator != 0)
     if not np.isfinite(normalized).all():
         raise FloatingPointError('Decoder normalization exceeds float64 range')
     return normalized
@@ -71,7 +80,8 @@ Compute numeric parameters in floating point; IDs remain integers.
 Negative infinite MLP preactivations from overflow use the activation
 limit zero. Raise FloatingPointError for nonrepresentable attention
 intermediates, NaN preactivations, nonfinite active activations, residuals,
-or output logits. Row normalization scales before measuring variance."""
+or output logits. Row normalization centers finite reference differences
+before scaling deviations; overflowing differences use scaled original rows."""
     raise NotImplementedError('Implement this function, then run the checks.')
 ```
 

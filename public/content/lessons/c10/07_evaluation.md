@@ -16,7 +16,7 @@ Course 10. Entry course: 1. Budget about 75 minutes for reading, code, and one C
 
 ## Sampling is a policy over logits
 
-For positive temperature tau, divide logits by tau before stable softmax. A smaller temperature sharpens the distribution; it does not add knowledge. Our decoding_probs applies top-k first (if k is provided), renormalizes, then nucleus filtering. Sort by descending probability, breaking ties by smaller token ID. Keep the smallest prefix whose cumulative mass reaches p, including the crossing token, then renormalize. Require 0<p<=1 and positive temperature.
+For positive temperature tau, softmax uses logits divided by tau. Compute finite centered logit differences before dividing so large common offsets do not erase small gaps. Only when a centered difference overflows and tau>=1, recover that entry by dividing the logits before subtracting. Smaller temperatures can saturate lower scores to zero probability. A smaller temperature sharpens the distribution; it does not add knowledge. Our decoding_probs applies top-k first (if k is provided), renormalizes, then nucleus filtering. Sort by descending probability, breaking ties by smaller token ID. Keep the smallest prefix whose cumulative mass reaches p, including the crossing token, then renormalize. Require 0<p<=1 and positive temperature.
 
 This order is part of the API. Applying top-p before top-k can yield a different distribution. Greedy decoding is a separate argmax mode, not a division by temperature zero. The generation loop samples using a seeded generator, appends each chosen token, and stops at EOS or a maximum new-token budget. Context cropping must match the architecture's positional assumptions.
 

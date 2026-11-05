@@ -73,4 +73,26 @@ with np.errstate(over='raise', invalid='raise'):
     result = decoder_logits(ids, huge_embedding, positions, [], 1)
     np.testing.assert_allclose(result, [[[2e200]]])
     assert np.array_equal(huge_embedding, [[1e200, -1e200]])
+common = 3*2**53
+ids, embedding = np.array([[0]]), np.array([[0., 0.], [1., 1.]])
+positions = np.array([[common, common-8]], dtype=float)
+before = [value.copy() for value in (ids, embedding, positions)]
+np.testing.assert_allclose(decoder_logits(ids, embedding, positions, [], 1), [[[0., 0.]]], rtol=0., atol=0.)
+assert all(np.array_equal(value, original) for value, original in zip((ids, embedding, positions), before))
+embedding = np.vstack([np.zeros((1, 4)), np.ones((1, 4)), np.eye(4)])
+base_positions = np.array([[0., -8., -4., 4.]])
+expected = _independent_decoder(ids, embedding, base_positions, [], 1)
+for offset in [0., float(common), -float(common)]:
+    positions = base_positions+offset
+    before = positions.copy()
+    result = decoder_logits(ids, embedding, positions, [], 1)
+    np.testing.assert_allclose(result, expected, rtol=1e-14, atol=1e-15)
+    assert abs(result[0, 0, 1]) < 1e-15
+    assert np.array_equal(positions, before)
+embedding = np.vstack([np.zeros((1, 2)), np.ones((1, 2)), np.eye(2)])
+with np.errstate(over='raise', invalid='raise'):
+    positions = np.array([[1e308, -1e308]])
+    np.testing.assert_allclose(decoder_logits(ids, embedding, positions, [], 1), [[[0., 0., 1., -1.]]], rtol=1e-14, atol=0.)
+    positions = np.array([[1e308, 1e308]])
+    np.testing.assert_allclose(decoder_logits(ids, embedding, positions, [], 1), np.zeros((1, 1, 4)), rtol=0., atol=0.)
 print('Complete decoder checks passed.')
