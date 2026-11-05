@@ -2,8 +2,8 @@
 // Admin activates via ?admin=<SITE.adminKey>; grant links unlock chosen
 // courses in a user's localStorage via ?grant=<code>.
 //
-// Honesty note: the key ships in the JS bundle, so this deters casual
-// skipping only. Real gating needs a backend (Supabase upgrade path).
+// Security note: the key ships in the JS bundle, so admin/grant links are not
+// an authorization boundary. Protected content needs a backend (Supabase upgrade path).
 
 import { COURSES, ALL_LEVELS } from '@/data/curriculum'
 import { loadProgress, saveProgress } from '@/engine/progress'

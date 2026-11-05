@@ -8,6 +8,7 @@ import { getProgressSummary, nextRecommendedLevel, ProgressState } from '@/engin
 import { ALL_LEVELS, COURSES, MAX_XP } from '@/data/curriculum'
 import { isAdminMode } from '@/engine/admin'
 import { AdminPanel } from '@/components/AdminPanel'
+import { LearningAccessSetting } from '@/components/LearningAccessSetting'
 import { dueCount } from '@/engine/review'
 import { WARMUPS, warmupDone } from '@/interactive/warmups'
 
@@ -36,6 +37,7 @@ export function MapPage({ progress, onProgressChange }: Props) {
 
     <div className="max-w-4xl mx-auto px-5 sm:px-6 py-8 sm:py-10">
       {isAdminMode() && <AdminPanel onProgressChange={onProgressChange}/>} 
+      <div className="mb-5 border-b border-gray-800"><LearningAccessSetting /></div>
       {next ? <Link to={resumeHref} className="block mb-8 p-5 rounded-xl border border-violet-700 bg-violet-950/25 hover:bg-violet-950/40"><p className="text-xs font-mono uppercase text-violet-400">Recommended next</p><h2 className="text-lg font-semibold mt-1">{next.title} →</h2><p className="text-sm text-gray-400 mt-1">{WARMUPS[next.id] ? 'Start with a standalone 3–5 minute concept warm-up, then apply it in code.' : next.description}</p></Link>
       : <Link to="/cert" className="block mb-8 p-5 rounded-xl border border-emerald-700 bg-emerald-950/20"><h2 className="font-semibold">Coding journey complete →</h2><p className="text-sm text-gray-400 mt-1">View your specializations, transcript, and completion card.</p></Link>}
 
