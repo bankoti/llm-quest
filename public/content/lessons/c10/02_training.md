@@ -57,7 +57,8 @@ def clip_gradient(gradient, max_norm):
     """Return a fresh array with global L2 norm at most positive max_norm.
 
 gradient is any finite float array; reject nonpositive/nonfinite max_norm.
-Zero gradients stay zero. Preserve direction; do not clip coordinates."""
+Zero gradients stay zero. Preserve direction; do not clip coordinates.
+Scale magnitudes before measuring the norm to avoid overflow/underflow."""
     raise NotImplementedError('Implement this function, then run the checks.')
 
 def learning_rate(step, total, warmup, peak, floor=0.0):

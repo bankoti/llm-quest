@@ -53,7 +53,13 @@ each response has >=1 valid token. 0<epsilon<1, beta>=0; invalid: ValueError.
 Population std with +1e-8. Loss=-mean_G(mean_valid(min(r*A,clip(r)*A)-beta*KL)).
 KL=exp(reference_logp-logp)-(reference_logp-logp)-1. Padded entries in
 ratios/kl are zero, and must not be exponentiated. clip_fraction is the
-fraction of valid ratios outside [1-epsilon,1+epsilon]. No input mutation."""
+fraction of valid ratios outside [1-epsilon,1+epsilon]. No input mutation.
+Zero advantages contribute zero surrogate, and beta=0 omits the KL penalty.
+Ratios/KL diagnostics may be +inf when their float64 arithmetic overflows.
+An overflowing ratio is supported only for zero/positive advantages; an
+overflowing KL only when beta=0. Otherwise raise FloatingPointError, even
+if a smaller advantage/beta could make the weighted term representable.
+Nonfinite token objectives/loss also raise; never silently cap these terms."""
     raise NotImplementedError('Implement this function, then run the checks.')
 ```
 

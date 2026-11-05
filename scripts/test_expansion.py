@@ -3,6 +3,8 @@ import contextlib
 import io
 import json
 from pathlib import Path
+import runpy
+import sys
 import numpy as np
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -63,10 +65,21 @@ def negative_controls():
     reject_mutation('c13/04_latents',lambda s:s.update(latent_mse=lambda p,t,m:float(((p-t)**2).mean())))
 
 
-def notebooks():
+def numeric_regressions():
+    for name in ('c10/02_training', 'c12/04_grpo'):
+        scope={'__name__':'__test__'}
+        exec(compile((CONTENT/'solutions'/f'{name}.py').read_text(),name,'exec'),scope)
+        exec(compile((CONTENT/'tests'/f'{name}_test.py').read_text(),name+'_test','exec'),scope)
+    for script in ('test_dynamics_numerics.py', 'test_scratch_updates.py'):
+        runpy.run_path(str(ROOT/'scripts'/script),run_name='__main__')
+
+
+def notebooks(names=None):
     manifest=json.loads((CONTENT/'expansion-manifest.json').read_text())
     for entry in manifest:
         name=entry['name']
+        if names is not None and name not in names:
+            continue
         notebook=json.loads((ROOT/'colab'/f'{name}.ipynb').read_text())
         scope={'__name__':'__main__'}
         captured=io.StringIO()
@@ -79,5 +92,13 @@ def notebooks():
 
 
 if __name__=='__main__':
-    negative_controls()
-    notebooks()
+    if '--numerics' in sys.argv:
+        numeric_regressions()
+        manifest=json.loads((CONTENT/'expansion-manifest.json').read_text())
+        affected={entry['name'] for entry in manifest if entry['experiment'] in
+                  ('scratch_training.py','scratch_adaptation.py','dynamics_modular.py')}
+        notebooks(affected | {'c12/04_grpo'})
+    else:
+        negative_controls()
+        numeric_regressions()
+        notebooks()

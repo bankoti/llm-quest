@@ -26,12 +26,22 @@ def clip_gradient(gradient, max_norm):
 
     gradient is any finite float array; reject nonpositive/nonfinite max_norm.
     Zero gradients stay zero. Preserve direction; do not clip coordinates.
+    Scale magnitudes before measuring the norm to avoid overflow/underflow.
     """
     g = np.asarray(gradient, float)
     if not np.isfinite(g).all() or not np.isfinite(max_norm) or max_norm <= 0:
         raise ValueError('finite gradient and positive limit required')
-    norm = np.linalg.norm(g.ravel())
-    return g * (min(1., max_norm / norm) if norm else 1.)
+    magnitude = np.max(np.abs(g), initial=0.)
+    if magnitude == 0:
+        return g.copy()
+    scaled = g / magnitude
+    norm = np.linalg.norm(scaled.ravel())
+    if magnitude <= max_norm / norm:
+        return g.copy()
+    factor = (max_norm / norm) / magnitude
+    if factor >= np.finfo(float).tiny:
+        return g * factor
+    return scaled * (max_norm / norm)
 
 
 def learning_rate(step, total, warmup, peak, floor=0.):

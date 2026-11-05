@@ -51,21 +51,28 @@ def scratch_pretrain(seed=7, updates=140):
             logits, _ = model(rows[:, :-1])
             return float(F.cross_entropy(logits.flatten(0, 1), rows[:, 1:].flatten()))
 
+    def next_update(m, opt, gen):
+        m.train()
+        indices = torch.randint(len(train), (24,), generator=gen)
+        batch = train[indices]
+        opt.zero_grad(set_to_none=True)
+        # Unequal microbatch sizes still implement the full token-average gradient.
+        tokens = batch[:, 1:].numel()
+        total_loss = 0.
+        for micro in (batch[:7], batch[7:]):
+            logits, _ = m(micro[:, :-1])
+            loss_sum = F.cross_entropy(logits.flatten(0, 1), micro[:, 1:].flatten(), reduction='sum')
+            loss = loss_sum / tokens
+            loss.backward()
+            total_loss += float(loss.detach())
+        torch.nn.utils.clip_grad_norm_(m.parameters(), 1.)
+        opt.step()
+        return total_loss
+
     initial = evaluate(validation)
     history = []
     for step in range(updates):
-        model.train()
-        indices = torch.randint(len(train), (24,), generator=generator)
-        batch = train[indices]
-        optimizer.zero_grad(set_to_none=True)
-        # Unequal microbatch sizes still implement the full token-average gradient.
-        tokens = batch[:, 1:].numel()
-        for micro in (batch[:7], batch[7:]):
-            logits, _ = model(micro[:, :-1])
-            loss_sum = F.cross_entropy(logits.flatten(0, 1), micro[:, 1:].flatten(), reduction='sum')
-            (loss_sum / tokens).backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.)
-        optimizer.step()
+        next_update(model, optimizer, generator)
         if (step + 1) % 35 == 0:
             history.append({'update': step + 1, 'train_nll': evaluate(train), 'validation_nll': evaluate(validation)})
 
@@ -78,24 +85,22 @@ def scratch_pretrain(seed=7, updates=140):
     serialized.seek(0)
     checkpoint = torch.load(serialized, weights_only=True)
 
-    def next_update(m, opt, gen):
-        m.train()
-        batch = train[torch.randint(len(train), (24,), generator=gen)]
-        opt.zero_grad(set_to_none=True)
-        _, loss = m(batch[:, :-1], batch[:, 1:])
-        loss.backward(); opt.step()
-        return float(loss.detach())
-
-    uninterrupted = next_update(model, optimizer, generator)
-    restored = GPT(ModelConfig(**checkpoint['config']))
-    restored.load_state_dict(checkpoint['model'])
-    resumed_optimizer = torch.optim.AdamW(restored.parameters(), lr=.006, weight_decay=.01)
-    resumed_optimizer.load_state_dict(checkpoint['optimizer'])
-    resumed_rng = torch.Generator(); resumed_rng.set_state(checkpoint['rng'])
-    torch.set_rng_state(checkpoint['torch_rng'])
-    resumed = next_update(restored, resumed_optimizer, resumed_rng)
+    continued = copy.deepcopy(model)
+    continued_optimizer = torch.optim.AdamW(continued.parameters(), lr=.006, weight_decay=.01)
+    continued_optimizer.load_state_dict(copy.deepcopy(optimizer.state_dict()))
+    continued_rng = torch.Generator(); continued_rng.set_state(generator.get_state())
+    with torch.random.fork_rng(devices=[]):
+        restored = GPT(ModelConfig(**checkpoint['config']))
+        restored.load_state_dict(checkpoint['model'])
+        resumed_optimizer = torch.optim.AdamW(restored.parameters(), lr=.006, weight_decay=.01)
+        resumed_optimizer.load_state_dict(checkpoint['optimizer'])
+        resumed_rng = torch.Generator(); resumed_rng.set_state(checkpoint['rng'])
+        torch.set_rng_state(checkpoint['torch_rng'])
+        uninterrupted = next_update(continued, continued_optimizer, continued_rng)
+        torch.set_rng_state(checkpoint['torch_rng'])
+        resumed = next_update(restored, resumed_optimizer, resumed_rng)
     assert uninterrupted == resumed
-    assert all(torch.equal(a, b) for a, b in zip(model.parameters(), restored.parameters()))
+    assert all(torch.equal(a, b) for a, b in zip(continued.parameters(), restored.parameters()))
 
     # Independent gradient-equivalence check before clipping/optimizer state.
     model.eval()

@@ -46,7 +46,7 @@ def modular_experiment(steps=300):
         shuffled_weights = np.linalg.solve(h.T@h + np.eye(64), h.T@shuffled)
         shuffled_accuracy = float(((features[test]@shuffled_weights).argmax(-1)==targets[test].numpy()).mean())
         spectrum = np.fft.fft2(logits, axes=(0, 1))
-        energy = np.abs(spectrum).sum(-1)**2
+        energy = (np.abs(spectrum)**2).sum(-1)
         # Predeclared illustrative diagonal frequencies, not a discovered circuit.
         mask = np.eye(modulus, dtype=bool)
         restricted = np.fft.ifft2(np.where(mask[..., None], spectrum, 0), axes=(0, 1)).real

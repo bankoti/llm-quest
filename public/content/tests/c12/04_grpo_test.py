@@ -25,4 +25,37 @@ except ValueError:
     pass
 else:
     raise AssertionError('Reject empty responses')
+extreme = np.zeros((2, 1))
+valid = np.ones((2, 1), bool)
+with np.errstate(over='raise', invalid='raise'):
+    equal = clipped_grpo(extreme, extreme-1000, extreme, [1., 1.], valid)
+    assert equal['loss'] == 0 and np.array_equal(equal['advantages'], [0., 0.])
+    assert np.isposinf(equal['ratios']).all() and equal['clip_fraction'] == 1.
+    assert np.array_equal(equal['kl'], extreme)
+    no_penalty = clipped_grpo(extreme, extreme-1000, extreme+1000, [1., 1.], valid, beta=0.)
+    assert no_penalty['loss'] == 0 and np.isposinf(no_penalty['kl']).all()
+    positive = clipped_grpo(extreme, [[-1000.], [0.]], extreme, [2., 0.], valid)
+    expected_adv = np.array([1., -1.])/(1+1e-8)
+    assert np.allclose(positive['advantages'], expected_adv)
+    assert np.isclose(positive['loss'], -(1.2*expected_adv[0]+expected_adv[1])/2)
+    underflow = clipped_grpo(extreme, [[1000.], [0.]], extreme, [0., 2.], valid)
+    assert underflow['ratios'][0, 0] == 0
+    assert np.isclose(underflow['loss'], -(.8*expected_adv[1]+expected_adv[0])/2)
+    huge_rewards = clipped_grpo(extreme, extreme, extreme, [-1e308, 1e308], valid)
+    assert np.allclose(huge_rewards['advantages'], [-1., 1.]) and huge_rewards['loss'] == 0
+    huge_equal = clipped_grpo(extreme, extreme-1000, extreme, [1e308, 1e308], valid)
+    assert huge_equal['loss'] == 0 and np.array_equal(huge_equal['advantages'], [0., 0.])
+    for thunk in [
+        lambda: clipped_grpo(extreme, [[-1000.], [0.]], extreme, [0., 2.], valid),
+        lambda: clipped_grpo(extreme, extreme, extreme+1000, [1., 1.], valid),
+        lambda: clipped_grpo(extreme, extreme, extreme+700, [1., 1.], valid, beta=1e100),
+        lambda: clipped_grpo(extreme, [[-710.], [0.]], extreme, [0., 1e-308], valid),
+        lambda: clipped_grpo(extreme, extreme, extreme+710, [1., 1.], valid, beta=1e-308),
+    ]:
+        try:
+            thunk()
+        except FloatingPointError:
+            pass
+        else:
+            raise AssertionError('Documented float64 range violations must fail explicitly')
 print('Full clipped GRPO checks passed.')

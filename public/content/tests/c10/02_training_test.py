@@ -18,6 +18,19 @@ assert np.allclose(clip_gradient(g, 2), [1.2, 1.6]), 'Clip global norm, not coor
 assert np.array_equal(g, [3, 4])
 assert np.allclose(clip_gradient(np.zeros((2, 2)), 1), 0)
 assert np.allclose(clip_gradient(g, 10), g)
+for magnitude, limit in [(1e200, 1.), (1e308, 1.), (1e-200, 1e-201)]:
+    gradient = np.array([[magnitude, -magnitude], [0., 0.]])
+    before = gradient.copy()
+    clipped = clip_gradient(gradient, limit)
+    expected = np.array([[1., -1.], [0., 0.]]) * (limit / np.sqrt(2.))
+    assert np.allclose(clipped, expected, rtol=1e-14, atol=0), 'Preserve direction across finite magnitude ranges'
+    assert np.array_equal(gradient, before) and not np.shares_memory(clipped, gradient)
+large = np.array([1e308, -1e308])
+assert np.array_equal(clip_gradient(large, 1.5e308), large), 'Large representable norms below the limit must stay unchanged'
+mixed = np.array([1e308, 1e-308])
+assert np.allclose(clip_gradient(mixed, 5e307), [5e307, 5e-309], rtol=1e-14, atol=0), 'Retain small coordinates when their clipped values are representable'
+empty = np.empty((0, 2))
+assert clip_gradient(empty, 1).shape == empty.shape
 assert np.allclose([learning_rate(i, 6, 2, 1, .1) for i in range(6)], [.5, 1, 1, .775, .325, .1])
 assert learning_rate(0, 1, 0, 1, .2) == .2
 for thunk in [lambda: loss_totals(np.zeros((1, 2, 3)), np.zeros((1, 2), int), np.zeros((1, 2), bool)), lambda: clip_gradient(g, 0), lambda: learning_rate(6, 6, 2, 1)]:

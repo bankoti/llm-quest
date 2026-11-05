@@ -11,6 +11,12 @@ def clipped_grpo(logp, old_logp, reference_logp, rewards, mask, epsilon=.2, beta
     KL=exp(reference_logp-logp)-(reference_logp-logp)-1. Padded entries in
     ratios/kl are zero, and must not be exponentiated. clip_fraction is the
     fraction of valid ratios outside [1-epsilon,1+epsilon]. No input mutation.
+    Zero advantages contribute zero surrogate, and beta=0 omits the KL penalty.
+    Ratios/KL diagnostics may be +inf when their float64 arithmetic overflows.
+    An overflowing ratio is supported only for zero/positive advantages; an
+    overflowing KL only when beta=0. Otherwise raise FloatingPointError, even
+    if a smaller advantage/beta could make the weighted term representable.
+    Nonfinite token objectives/loss also raise; never silently cap these terms.
     """
     z, old, ref = [np.asarray(v, float) for v in (logp, old_logp, reference_logp)]
     rewards, m = np.asarray(rewards, float), np.asarray(mask)
@@ -18,13 +24,31 @@ def clipped_grpo(logp, old_logp, reference_logp, rewards, mask, epsilon=.2, beta
         raise ValueError('invalid group shapes or masks')
     if not 0 < epsilon < 1 or not np.isfinite(beta) or beta < 0 or not all(np.isfinite(v).all() for v in (z, old, ref, rewards)):
         raise ValueError('invalid objective inputs')
-    advantages = (rewards-rewards.mean())/(rewards.std()+1e-8)
+    scale = max(float(np.abs(rewards).max()), 1e-8)
+    scaled_rewards = rewards / scale
+    centered = scaled_rewards - scaled_rewards.mean()
+    advantages = centered / (np.sqrt(np.mean(centered**2)) + 1e-8 / scale)
     ratios, kl = np.zeros_like(z), np.zeros_like(z)
-    ratios[m] = np.exp(z[m]-old[m])
-    delta = ref[m]-z[m]
-    kl[m] = np.expm1(delta)-delta
-    a = advantages[:, None]
-    objective = np.minimum(ratios*a, np.clip(ratios,1-epsilon,1+epsilon)*a)-beta*kl
-    loss = -np.mean(np.where(m, objective, 0).sum(-1)/m.sum(-1))
+    with np.errstate(over='ignore', invalid='ignore'):
+        ratios[m] = np.exp(z[m]-old[m])
+        delta = ref[m]-z[m]
+        valid_kl = np.full_like(delta, np.inf)
+        finite_delta = np.isfinite(delta)
+        valid_kl[finite_delta] = np.expm1(delta[finite_delta])-delta[finite_delta]
+        kl[m] = valid_kl
+        a = np.broadcast_to(advantages[:, None], z.shape)[m]
+        signed_ratio = np.where(a > 0, np.minimum(ratios[m], 1+epsilon),
+                                np.maximum(ratios[m], 1-epsilon))
+        surrogate = np.zeros_like(a)
+        np.multiply(signed_ratio, a, out=surrogate, where=a != 0)
+        penalty = beta*valid_kl if beta else np.zeros_like(valid_kl)
+        objective = surrogate-penalty
+        if not all(np.isfinite(v).all() for v in (surrogate, penalty, objective)):
+            raise FloatingPointError('GRPO objective exceeds float64 range')
+        terms = np.zeros_like(z)
+        terms[m] = objective
+        loss = -np.sum((terms/m.sum(-1)[:, None])/len(rewards))
+    if not np.isfinite(loss):
+        raise FloatingPointError('GRPO loss exceeds float64 range')
     fraction = np.mean((ratios[m] < 1-epsilon) | (ratios[m] > 1+epsilon))
     return dict(loss=float(loss), advantages=advantages, ratios=ratios, kl=kl, clip_fraction=float(fraction))
