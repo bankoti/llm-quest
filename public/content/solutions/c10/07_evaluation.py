@@ -9,7 +9,7 @@ def decoding_probs(logits, temperature=1., top_k=None, top_p=1.):
     Apply temperature, top-k, normalize, then top-p and normalize again.
     Descending ties prefer smaller IDs. Include the nucleus crossing token.
     Reject invalid arguments with ValueError; do not mutate logits.
-    Negative score overflow and exponential underflow yield zero probability.
+    Scores below the float64 range and exponential underflow yield zero probability.
     """
     z = np.asarray(logits, float)
     if z.ndim != 1 or not z.size or not np.isfinite(z).all() or not np.isfinite(temperature) or temperature <= 0 or not np.isfinite(top_p) or not 0 < top_p <= 1:
@@ -20,11 +20,11 @@ def decoding_probs(logits, temperature=1., top_k=None, top_p=1.):
     if top_k is not None:
         order = order[:top_k]
     with np.errstate(over='ignore', under='ignore'):
+        centered = z[order] - z[order[0]]
+        scores = centered / temperature
         if temperature >= 1:
-            scaled = z[order] / temperature
-            scores = scaled - scaled[0]
-        else:
-            scores = (z[order] - z[order[0]]) / temperature
+            overflowed = np.isneginf(centered)
+            scores[overflowed] = z[order[overflowed]] / temperature - z[order[0]] / temperature
         probs = np.exp(scores)
         probs /= probs.sum()
         count = min(len(probs), int(np.searchsorted(np.cumsum(probs), top_p, side='left')) + 1)

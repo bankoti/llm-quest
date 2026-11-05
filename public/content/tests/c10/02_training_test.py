@@ -33,6 +33,11 @@ empty = np.empty((0, 2))
 assert clip_gradient(empty, 1).shape == empty.shape
 assert np.allclose([learning_rate(i, 6, 2, 1, .1) for i in range(6)], [.5, 1, 1, .775, .325, .1])
 assert learning_rate(0, 1, 0, 1, .2) == .2
+assert learning_rate(1, 3, 2, 1e308) == 1e308, 'The final warmup update must reach the finite peak'
+for peak in (1.,1e308,np.finfo(float).max):
+    rates = np.array([learning_rate(step,5,4,peak) for step in range(4)])
+    expected = peak*np.array([.25,.5,.75,1.])
+    assert np.isfinite(rates).all() and np.allclose(rates,expected,rtol=1e-14,atol=0.)
 for thunk in [lambda: loss_totals(np.zeros((1, 2, 3)), np.zeros((1, 2), int), np.zeros((1, 2), bool)), lambda: clip_gradient(g, 0), lambda: learning_rate(6, 6, 2, 1)]:
     try:
         thunk()

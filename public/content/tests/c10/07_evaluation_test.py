@@ -39,6 +39,25 @@ with np.errstate(over='raise', under='raise', invalid='raise'):
     np.testing.assert_allclose(decoding_probs([1e308, 1e308, 1e308], temperature=.25, top_k=2, top_p=.6), [.5, .5, 0.], rtol=0., atol=0.)
     np.testing.assert_allclose(decoding_probs([1e308, 1e308, 1e308], temperature=.25, top_k=2, top_p=.4), [1., 0., 0.], rtol=0., atol=0.)
 assert np.array_equal(huge, before)
+offset_logits = np.array([2**54, 2**54-2], dtype=float)
+before = offset_logits.copy()
+expected = np.array([1., np.exp(-2/3)])/(1+np.exp(-2/3))
+np.testing.assert_allclose(decoding_probs(offset_logits, temperature=3., top_p=1.), expected, rtol=1e-14, atol=0.)
+np.testing.assert_allclose(decoding_probs(offset_logits, temperature=3., top_p=.7), expected, rtol=1e-14, atol=0.)
+np.testing.assert_allclose(decoding_probs(offset_logits, temperature=3., top_p=.6), [1., 0.], rtol=0., atol=0.)
+assert np.array_equal(offset_logits, before)
+base_logits = np.array([-2., 0., -2., -4.])
+offset_logits = base_logits + 2**54
+before = offset_logits.copy()
+for top_k in [None, 1, 2, 3]:
+    for top_p in [.6, .7, 1.]:
+        expected = _decoding_oracle(base_logits, 3., top_k, top_p)
+        np.testing.assert_allclose(decoding_probs(offset_logits, 3., top_k, top_p), expected, rtol=1e-14, atol=0.)
+        np.testing.assert_allclose(decoding_probs(offset_logits, 3., top_k, top_p), decoding_probs(base_logits, 3., top_k, top_p), rtol=1e-14, atol=0.)
+expected = np.array([np.exp(-2/3), 1., 0., 0.])/(1+np.exp(-2/3))
+np.testing.assert_allclose(decoding_probs(offset_logits, temperature=3., top_k=2, top_p=.7), expected, rtol=1e-14, atol=0.)
+np.testing.assert_allclose(decoding_probs(offset_logits, temperature=3., top_k=2, top_p=.6), [0., 1., 0., 0.], rtol=0., atol=0.)
+assert np.array_equal(offset_logits, before)
 rng = np.random.default_rng(717)
 for logits in [rng.normal(size=7)*3, np.array([2., 2., -1., 0., 2., -4., .5])]:
     before = logits.copy()

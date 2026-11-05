@@ -56,7 +56,7 @@ def learning_rate(step, total, warmup, peak, floor=0.):
     if not 0 <= step < total or not 0 <= warmup < total or not 0 <= floor <= peak or not np.isfinite([peak, floor]).all():
         raise ValueError('invalid schedule')
     if step < warmup:
-        return peak * (step + 1) / warmup
+        return peak * ((step + 1) / warmup)
     length = total - warmup
     phase = (step - warmup) / (length - 1) if length > 1 else 1.
     return float(floor + .5 * (peak - floor) * (1 + np.cos(np.pi * phase)))
