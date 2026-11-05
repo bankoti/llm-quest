@@ -2,14 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { COURSES, ALL_LEVELS } from '@/data/curriculum'
 import { ProgressState } from '@/engine/progress'
-import { isAdminMode } from '@/engine/admin'
+import { usePrerequisiteLocks } from '@/engine/learningAccess'
 import clsx from 'clsx'
 
 interface Props { progress: ProgressState; recommendedId?: string }
 
 export function WorldMap({ progress, recommendedId }: Props) {
   const navigate = useNavigate()
-  const admin = isAdminMode()
+  const locksEnabled = usePrerequisiteLocks()
 
   return (
     <div className="flex flex-col gap-8 pb-16">
@@ -76,7 +76,7 @@ export function WorldMap({ progress, recommendedId }: Props) {
               {course.levels.map((level, li) => {
                 const state = progress.levels[level.id]
                 const status = state?.status ?? 'locked'
-                const isLocked = status === 'locked' && !admin
+                const isLocked = status === 'locked' && locksEnabled
                 const isComplete = status === 'complete'
                 const isBoss = level.type === 'boss'
                 const isDebug = level.type === 'debug'

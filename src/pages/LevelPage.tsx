@@ -11,7 +11,8 @@ import { XPBar } from '@/components/Progress/XPBar'
 import { GoDeeper } from '@/components/GoDeeper'
 import { WorkedSolution } from '@/components/Lesson/WorkedSolution'
 import { SplitPane } from '@/components/SplitPane'
-import { isAdminMode } from '@/engine/admin'
+import { usePrerequisiteLocks } from '@/engine/learningAccess'
+import { LearningAccessSetting } from '@/components/LearningAccessSetting'
 import { HINTS } from '@/data/hints'
 import { hintXpMultiplier } from '@/components/Arena/xpUtils'
 import { WARMUPS, warmupDone } from '@/interactive/warmups'
@@ -19,6 +20,7 @@ import { WARMUPS, warmupDone } from '@/interactive/warmups'
 interface Props { onProgressChange: (p: ProgressState) => void }
 
 export function LevelPage({ onProgressChange }: Props) {
+  const locksEnabled = usePrerequisiteLocks()
   const { levelId } = useParams<{ levelId: string }>()
   const navigate = useNavigate()
   const level = levelId ? getLevel(levelId) : undefined
@@ -96,13 +98,14 @@ export function LevelPage({ onProgressChange }: Props) {
   }
 
   const levelState = progress.levels[level.id]
-  if (levelState?.status === 'locked' && !isAdminMode()) {
+  if (levelState?.status === 'locked' && locksEnabled) {
     const prerequisite = requiredPredecessor(progress, level.id)
     return (
       <div className="flex items-center justify-center h-screen text-gray-500 font-mono">
-        <div className="text-center">
+        <div className="text-center px-5 max-w-xl">
           <div className="text-4xl mb-4">🔒</div>
           <div>Complete the prerequisite before opening this challenge.</div>
+          <LearningAccessSetting />
           {prerequisite && <button onClick={() => navigate(`/level/${prerequisite.id}`)} className="mt-5 block mx-auto px-5 py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm">Complete {prerequisite.title} →</button>}
           <button onClick={() => navigate('/map')} className="mt-4 text-gray-400 text-sm underline">Back to map</button>
         </div>

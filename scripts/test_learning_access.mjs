@@ -1,0 +1,47 @@
+import assert from 'node:assert/strict'
+import { chromium } from 'playwright'
+
+const base = process.env.TEST_BASE_URL ?? 'http://127.0.0.1:5190'
+const browser = await chromium.launch()
+try {
+  for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    const context = await browser.newContext({ viewport })
+    const page = await context.newPage()
+    await page.goto(`${base}/map`)
+    const toggle = page.getByRole('checkbox', { name: 'Prerequisite locks' })
+    await toggle.waitFor()
+    assert.equal(await toggle.isChecked(), true)
+    const locked = await page.locator('button[disabled][aria-label]').count()
+    assert.ok(locked > 0)
+    const progress = await page.evaluate(() => localStorage.getItem('llmquest_progress_v1'))
+    await toggle.uncheck()
+    assert.equal(await page.locator('button[disabled][aria-label]').count(), 0)
+    await page.reload()
+    await toggle.waitFor()
+    assert.equal(await toggle.isChecked(), false)
+    const second = await context.newPage()
+    await second.goto(`${base}/map`)
+    await second.getByRole('checkbox', { name: 'Prerequisite locks' }).check()
+    await page.waitForFunction(() => document.querySelector('input[type=checkbox]')?.checked === true)
+    assert.equal(await page.locator('button[disabled][aria-label]').count(), locked)
+    await page.goto(`${base}/level/c13-l6`)
+    await page.getByText('Complete the prerequisite before opening this challenge.').waitFor()
+    await page.getByRole('checkbox', { name: 'Prerequisite locks' }).click({ noWaitAfter: true })
+    await page.getByRole('button', { name: 'Map', exact: false }).first().waitFor()
+    assert.equal(await page.getByText('Complete the prerequisite before opening this challenge.').count(), 0)
+    assert.equal(await page.evaluate(() => localStorage.getItem('llmquest_progress_v1')), progress)
+    await page.goto(`${base}/map`)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+    await page.screenshot({ path: `/tmp/llm-quest-access-${viewport.width}.png` })
+    await context.close()
+  }
+  const admin = await browser.newPage()
+  await admin.goto(`${base}/?admin=quest-master-42`)
+  await admin.goto(`${base}/map`)
+  const toggle = admin.getByRole('checkbox', { name: 'Prerequisite locks' })
+  await toggle.waitFor()
+  assert.equal(await toggle.isChecked(), false)
+  await toggle.check()
+  assert.ok(await admin.locator('button[disabled][aria-label]').count() > 0)
+  console.log('PASS: desktop/mobile access, direct routes, persistence, cross-tab sync, unchanged progress, admin default and override')
+} finally { await browser.close() }

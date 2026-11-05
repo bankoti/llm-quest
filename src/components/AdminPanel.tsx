@@ -28,7 +28,7 @@ export function AdminPanel({ onProgressChange }: Props) {
           ADMIN
         </span>
         <span className="text-xs text-gray-500 font-mono">
-          All levels are playable while admin mode is on.
+          Admin tools
         </span>
         <button
           onClick={() => { exitAdminMode(); location.reload() }}
