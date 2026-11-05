@@ -108,6 +108,35 @@ try {
     await page.getByRole('link', { name: '← Map', exact: true }).click()
     await assertLocks(page, true)
     assert.equal(await page.locator('button[disabled][aria-label]').count(), locked)
+
+    await page.evaluate(key => {
+      const setItem = Storage.prototype.setItem
+      Storage.prototype.setItem = function (name, value) {
+        if (name === key) throw new DOMException('Storage full', 'QuotaExceededError')
+        return setItem.call(this, name, value)
+      }
+    }, preferenceKey)
+    await toggle(page).uncheck()
+    await assertLocks(page, false)
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), preferenceKey), 'on')
+    await page.getByRole('link', { name: 'Concepts', exact: true }).click()
+    await page.getByRole('heading', { name: 'Interactive Course', exact: true }).waitFor()
+    assert.equal(await toggle(page).count(), 0)
+    await page.evaluate(key => {
+      window.preferenceChanges = []
+      window.addEventListener('storage', event => {
+        if (event.key === key) window.preferenceChanges.push(event.newValue)
+      })
+    }, preferenceKey)
+    await toggle(second).uncheck()
+    await page.waitForFunction(() => window.preferenceChanges.length === 1)
+    await toggle(second).check()
+    await page.waitForFunction(() => window.preferenceChanges.length === 2)
+    assert.deepEqual(await page.evaluate(() => window.preferenceChanges), ['off', 'on'])
+    assert.equal(await page.evaluate(key => localStorage.getItem(key), preferenceKey), 'on')
+    await page.getByRole('link', { name: '← Map', exact: true }).click()
+    await assertLocks(page, true)
+    assert.equal(await page.locator('button[disabled][aria-label]').count(), locked)
     await second.close()
 
     await page.goto(`${base}/level/c13-l1`)
@@ -169,6 +198,9 @@ try {
   await assertLocks(admin, true)
   await toggle(admin).uncheck()
   await assertLocks(admin, false)
+  await admin.getByRole('link', { name: 'Concepts', exact: true }).click()
+  await admin.getByRole('heading', { name: 'Interactive Course', exact: true }).waitFor()
+  assert.equal(await toggle(admin).count(), 0)
   await admin.evaluate(() => {
     window.adminChangeObserved = false
     const changed = event => {
@@ -181,12 +213,10 @@ try {
   await second.getByRole('button', { name: 'exit admin', exact: true }).click()
   await admin.waitForFunction(() => window.adminChangeObserved)
   await assertLocks(second, true)
-  assert.equal(await toggle(admin).isChecked(), false)
-  assert.equal(await admin.locator('button[disabled][aria-label]').count(), 0)
   assert.equal(await admin.evaluate(key => localStorage.getItem(key), preferenceKey), null)
-  await admin.getByRole('link', { name: 'Concepts', exact: true }).click()
   await admin.getByRole('link', { name: '← Map', exact: true }).click()
   await assertLocks(admin, false)
+  assert.equal(await admin.locator('button[disabled][aria-label]').count(), 0)
   await admin.getByRole('button', { name: 'Compare Architectures Without a Winner Narrative: available', exact: true }).click()
   await admin.getByRole('button', { name: '← Map', exact: true }).waitFor()
   await assertPane(admin, { width: 1280 })

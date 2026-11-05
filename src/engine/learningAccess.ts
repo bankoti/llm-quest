@@ -14,19 +14,21 @@ function locksEnabled(): boolean {
   return !isAdminMode()
 }
 
-function subscribe(notify: () => void): () => void {
-  const storageChanged = (event: StorageEvent) => {
-    if (event.key === KEY || event.key === null || event.key === 'llmquest_admin_v1') {
-      if (event.key === KEY || event.key === null) sessionPreference = undefined
-      notify()
-    }
+function storageChanged(event: StorageEvent): void {
+  if (event.key === KEY || event.key === null || event.key === 'llmquest_admin_v1') {
+    if (event.key === KEY || event.key === null) sessionPreference = undefined
+    window.dispatchEvent(new Event(EVENT))
   }
-  window.addEventListener(EVENT, notify)
+}
+
+if (typeof window !== 'undefined') {
   window.addEventListener('storage', storageChanged)
-  return () => {
-    window.removeEventListener(EVENT, notify)
-    window.removeEventListener('storage', storageChanged)
-  }
+  import.meta.hot?.dispose(() => window.removeEventListener('storage', storageChanged))
+}
+
+function subscribe(notify: () => void): () => void {
+  window.addEventListener(EVENT, notify)
+  return () => window.removeEventListener(EVENT, notify)
 }
 
 export function setPrerequisiteLocks(enabled: boolean): void {
