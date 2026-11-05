@@ -49,6 +49,10 @@ try {
       const {ALL_LEVELS}=await import('/src/data/curriculum.ts')
       return {lessons:INTERACTIVE_LESSONS.map(l=>({...l,steps:l.steps.map(s=>({...s,widget:undefined}))})),levels:ALL_LEVELS}
     })
+    await page.goto(base)
+    await page.getByText(`No signup · progress stays in this browser · ${data.levels.length} coding levels · ${data.lessons.length} concept lessons`,{exact:true}).waitFor({state:'visible'})
+    await page.getByRole('link',{name:/Concept course/}).getByText(`${data.lessons.length} tap-first lessons with manipulatives, worked examples, and numeric traces.`,{exact:true}).waitFor({state:'visible'})
+    console.log(`PASS ${viewport.width}px homepage: both lesson counts match assembled curriculum`)
     // Validate the actual assembled curriculum as data, including graph edges.
     const bySlug=new Map(data.lessons.map(l=>[l.slug,l]))
     const visiting=new Set(), visited=new Set()
