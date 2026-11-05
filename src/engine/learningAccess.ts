@@ -17,7 +17,7 @@ function locksEnabled(): boolean {
 function subscribe(notify: () => void): () => void {
   const storageChanged = (event: StorageEvent) => {
     if (event.key === KEY || event.key === null || event.key === 'llmquest_admin_v1') {
-      sessionPreference = undefined
+      if (event.key === KEY || event.key === null) sessionPreference = undefined
       notify()
     }
   }
@@ -30,8 +30,10 @@ function subscribe(notify: () => void): () => void {
 }
 
 export function setPrerequisiteLocks(enabled: boolean): void {
-  sessionPreference = enabled
-  try { localStorage.setItem(KEY, enabled ? 'on' : 'off') } catch { /* Session-only fallback. */ }
+  try {
+    localStorage.setItem(KEY, enabled ? 'on' : 'off')
+    sessionPreference = undefined
+  } catch { sessionPreference = enabled }
   window.dispatchEvent(new Event(EVENT))
 }
 

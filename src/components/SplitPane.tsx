@@ -1,14 +1,20 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 const MIN_PCT=15, MAX_PCT=75, DEFAULT_PCT=40
 interface Props { storageKey:string; left:ReactNode; right:ReactNode }
+function readPanePreference(key:string):string|null {
+  try { return localStorage.getItem(key) } catch { return null }
+}
+function savePanePreference(key:string,value:string):void {
+  try { localStorage.setItem(key,value) } catch {}
+}
 export function SplitPane({ storageKey,left,right }:Props) {
   const containerRef=useRef<HTMLDivElement>(null)
-  const [pct,setPct]=useState(()=>{const n=Number(localStorage.getItem(storageKey));return n>=MIN_PCT&&n<=MAX_PCT?n:DEFAULT_PCT})
-  const [collapsed,setCollapsed]=useState(()=>localStorage.getItem(`${storageKey}:collapsed`)==='1')
+  const [pct,setPct]=useState(()=>{const n=Number(readPanePreference(storageKey));return n>=MIN_PCT&&n<=MAX_PCT?n:DEFAULT_PCT})
+  const [collapsed,setCollapsed]=useState(()=>readPanePreference(`${storageKey}:collapsed`)==='1')
   const [dragging,setDragging]=useState(false)
   const [mobileTab,setMobileTab]=useState<'lesson'|'code'>('lesson')
-  useEffect(()=>localStorage.setItem(storageKey,String(pct)),[pct,storageKey])
-  useEffect(()=>localStorage.setItem(`${storageKey}:collapsed`,collapsed?'1':'0'),[collapsed,storageKey])
+  useEffect(()=>savePanePreference(storageKey,String(pct)),[pct,storageKey])
+  useEffect(()=>savePanePreference(`${storageKey}:collapsed`,collapsed?'1':'0'),[collapsed,storageKey])
   function down(e:React.PointerEvent<HTMLDivElement>){if(collapsed)return;e.preventDefault();try{e.currentTarget.setPointerCapture(e.pointerId)}catch{}setDragging(true)}
   function move(e:React.PointerEvent<HTMLDivElement>){if(!dragging||!containerRef.current)return;const r=containerRef.current.getBoundingClientRect();setPct(Math.min(MAX_PCT,Math.max(MIN_PCT,((e.clientX-r.left)/r.width)*100)))}
   function up(e:React.PointerEvent<HTMLDivElement>){try{e.currentTarget.releasePointerCapture(e.pointerId)}catch{}setDragging(false)}
