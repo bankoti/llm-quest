@@ -1,9 +1,7 @@
-// Progress state stored locally. Course prerequisites form a graph: after C3,
-// learners may continue into production engineering (C4-C8) or frontier
-// training (C9). Course 0 is an always-open optional toolkit.
+// Progress state is stored locally; COURSES owns the prerequisite graph.
 import { beacon } from './beacon'
 import {
-  ALL_LEVELS, COURSES, FRONTIER_LEVELS, GATED_LEVELS, PRODUCTION_LEVELS,
+  ALL_LEVELS, COURSES, FRONTIER_LEVELS, GATED_LEVELS, LEGACY_CERTIFICATE_LEVELS, PRODUCTION_LEVELS,
   getCourse, getLevel, getRank,
 } from '@/data/curriculum'
 
@@ -167,7 +165,7 @@ export function getCompletionSummary(state: ProgressState): CompletionSummary {
     const completed = levels.filter(l => isComplete(state, l.id)).length
     return { completed, total: levels.length, done: completed === levels.length }
   }
-  return { production: summarize(PRODUCTION_LEVELS), frontier: summarize(FRONTIER_LEVELS), full: summarize(GATED_LEVELS) }
+  return { production: summarize(PRODUCTION_LEVELS), frontier: summarize(FRONTIER_LEVELS), full: summarize(LEGACY_CERTIFICATE_LEVELS) }
 }
 
 export function getProgressSummary(state: ProgressState) {

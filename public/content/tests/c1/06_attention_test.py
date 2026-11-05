@@ -29,6 +29,22 @@ changed_out, _ = causal_attention(q, k, changed_v)
 assert np.allclose(output[:, :-1], changed_out[:, :-1], atol=1e-5), \
     "Causality violated: modifying a future position changed earlier outputs."
 
+# Numerical reference rejects causal-looking uniform/identity attention.
+for seed, shape in [(18, (1, 3, 2)), (24, (2, 6, 4))]:
+    rng = np.random.default_rng(seed)
+    q, k, v = [rng.normal(size=shape) for _ in range(3)]
+    expected_weights = np.zeros((shape[0], shape[1], shape[1]))
+    expected_output = np.zeros(shape)
+    for batch in range(shape[0]):
+        for time in range(shape[1]):
+            scores = np.array([np.dot(q[batch,time], k[batch,j])/np.sqrt(shape[2]) for j in range(time+1)])
+            probabilities = np.exp(scores-scores.max()); probabilities /= probabilities.sum()
+            expected_weights[batch,time,:time+1] = probabilities
+            expected_output[batch,time] = sum(probabilities[j]*v[batch,j] for j in range(time+1))
+    actual, weights = causal_attention(q,k,v)
+    assert np.allclose(weights,expected_weights), 'Scaled QK scores must determine attention weights'
+    assert np.allclose(actual,expected_output), 'Output must mix values using those weights'
+
 print("✓ Shape check passed")
 print("✓ Rows sum to 1")
 print("✓ Causal mask correct")

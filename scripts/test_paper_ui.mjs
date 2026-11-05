@@ -3,6 +3,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { createServer } from 'vite'
 import { chromium } from 'playwright'
+import { lessonGeometry, codeGeometry, workspaceRegression } from './workspace_ui_checks.mjs'
+import { shiftedTargetsRegression } from './shifted_targets_ui_checks.mjs'
 
 const root=path.resolve(import.meta.dirname,'..')
 const server=await createServer({root,server:{host:'127.0.0.1',port:0}})
@@ -13,6 +15,9 @@ let browser
 const shots=process.env.PAPER_EVIDENCE_DIR ?? path.join(root,'.paper-test-output')
 fs.mkdirSync(shots,{recursive:true})
 const slugs=['scaling-laws','flash-attention','zero-sharding','switch-transformer','paged-attention','byte-boundaries','byte-distillation','byte-model-evaluation']
+// Optional selectors keep local validation focused; CI retains the full default.
+const selectedLessons=process.env.PAPER_LESSONS?.split(',').filter(Boolean)
+const selectedLevels=process.env.PAPER_LEVELS?.split(',').filter(Boolean)
 
 async function layout(page,name) {
   await page.waitForTimeout(500)
@@ -32,7 +37,8 @@ async function slider(page,id,value) {
   for(let i=0;i<Math.round((value-min)/step);i++)await input.press('ArrowRight')
 }
 try {
-  browser=await chromium.launch({headless:true,...(fs.existsSync(chrome)?{executablePath:chrome}:{})})
+  const executablePath=process.env.PAPER_BROWSER_EXECUTABLE ?? (fs.existsSync(chrome)?chrome:undefined)
+  browser=await chromium.launch({headless:true,...(executablePath?{executablePath}:{})})
   for (const viewport of [{width:1280,height:900},{width:390,height:844}]) {
     const page=await browser.newPage({viewport,reducedMotion:'reduce'})
     const errors=[]
@@ -43,6 +49,10 @@ try {
       const {ALL_LEVELS}=await import('/src/data/curriculum.ts')
       return {lessons:INTERACTIVE_LESSONS.map(l=>({...l,steps:l.steps.map(s=>({...s,widget:undefined}))})),levels:ALL_LEVELS}
     })
+    await page.goto(base)
+    await page.getByText(`No signup · progress stays in this browser · ${data.levels.length} coding levels · ${data.lessons.length} concept lessons`,{exact:true}).waitFor({state:'visible'})
+    await page.getByRole('link',{name:/Concept course/}).getByText(`${data.lessons.length} tap-first lessons with manipulatives, worked examples, and numeric traces.`,{exact:true}).waitFor({state:'visible'})
+    console.log(`PASS ${viewport.width}px homepage: both lesson counts match assembled curriculum`)
     // Validate the actual assembled curriculum as data, including graph edges.
     const bySlug=new Map(data.lessons.map(l=>[l.slug,l]))
     const visiting=new Set(), visited=new Set()
@@ -59,8 +69,11 @@ try {
       localStorage.setItem('llmquest_interactive_v2',JSON.stringify(seed))
       localStorage.setItem('llmquest_progress_v1',JSON.stringify({levels:Object.fromEntries(levels.map(l=>[l.id,{status:'unlocked',xpEarned:0,attempts:0}])),totalXp:0,streakDays:0,lastActiveDate:''}))
     },{seed,levels:data.levels})
-    for(const slug of slugs) {
+    if(viewport.width===1280)await workspaceRegression(page,base,fs.readFileSync(path.join(root,'public/content/solutions/c10/08_decoder.py'),'utf8'),layout)
+    const expansionSlugs=data.lessons.filter(l=>['scratch','dynamics','rl','embodied'].includes(l.moduleId)).map(l=>l.slug)
+    for(const slug of selectedLessons??[...slugs,...expansionSlugs]) {
       const lesson=bySlug.get(slug)
+      assert.ok(lesson,`unknown selected lesson ${slug}`)
       await page.evaluate(slug=>{
         const state=JSON.parse(localStorage.getItem('llmquest_interactive_v2'))
         delete state[slug]
@@ -88,6 +101,17 @@ try {
           assert.equal(await page.getByRole('button',{name:'Continue',exact:true}).count(),0)
           await click(page,"I'm sure");await click(page,'Continue')
         } else if(step.kind==='widget') {
+          if(slug==='scratch-05_instruction')await shiftedTargetsRegression(page,layout)
+          if(expansionSlugs.includes(slug)) {
+            const controls=page.getByRole('slider')
+            await controls.first().waitFor()
+            assert.ok(await controls.count()>0,`${slug}: no manipulable controls`)
+            const before=await page.locator('dl').innerText()
+            const control=controls.first()
+            const atMinimum=Number(await control.inputValue())===Number(await control.getAttribute('min'))
+            await control.focus();await control.press(atMinimum?'End':'Home')
+            assert.notEqual(await page.locator('dl').innerText(),before,`${slug}: control did not affect result`)
+          }
           if(slug==='scaling-laws') {
             for(const i of [0,4,2]){await slider(page,'parameter-ratio',i);assert.equal(await page.getByTestId('budget-ratio').innerText(),'1.000')}
           } else if(slug==='flash-attention') {
@@ -138,20 +162,33 @@ try {
       assert.equal(completed.firstTries,completed.scored,`${slug}: score must persist`)
       console.log(`PASS ${viewport.width}px ${slug}: completed and scored`)
     }
-    for(const id of ['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10']) {
+    for(const id of selectedLevels??['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
+      const level=data.levels.find(l=>l.id===id)
+      assert.ok(level,`unknown selected level ${id}`)
       await page.goto(`${base}/level/${id}`)
+      if(level.courseId>=10) {
+        if(viewport.width<768)await page.getByRole('tab',{name:'lesson',exact:true}).click()
+        await page.getByRole('heading',{name:'Check Your Understanding',exact:true}).waitFor()
+        const answers=page.getByRole('heading',{name:'Worked Answers',exact:true})
+        assert.equal(await answers.count(),1,`${id}: worked answers must render as a lesson heading`)
+        await lessonGeometry(page,`${viewport.width}-${id}-answers`)
+        assert.doesNotMatch(await page.locator('body').innerText(),/<\/?(?:details|summary)>/,`${id}: disclosure tags must not appear as lesson text`)
+        await answers.scrollIntoViewIfNeeded()
+        await layout(page,`${viewport.width}-${id}-answers`)
+        console.log(`PASS ${viewport.width}px ${id}: worked answers rendered`)
+      }
       if(viewport.width<768)await page.getByRole('tab',{name:'code',exact:true}).click()
       await click(page,'Show worked solution')
       await page.getByText('Loading solution...',{exact:true}).waitFor({state:'hidden'})
-      const level=data.levels.find(l=>l.id===id)
       const expected=fs.readFileSync(path.join(root,'public/content/solutions',level.challengeFile),'utf8')
       assert.equal((await page.locator('section pre').innerText()).trimEnd(),expected.trimEnd())
       assert.ok((await page.getByRole('link',{name:'Open in Colab'}).getAttribute('href')).includes(level.challengeFile.replace('.py','.ipynb')))
       await page.locator('section pre').scrollIntoViewIfNeeded()
+      await codeGeometry(page,`${viewport.width}-${id}-solution`)
       await layout(page,`${viewport.width}-${id}-solution`)
     }
     if(process.env.PAPER_PYODIDE==='1' && viewport.width===1280) {
-      for(const id of ['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8','c9-l9','c9-l10']) {
+      for(const id of selectedLevels??['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
         const level=data.levels.find(l=>l.id===id)
         const result=await page.evaluate(async file=>{
           const {runChallenge}=await import('/src/engine/pyodide.ts')

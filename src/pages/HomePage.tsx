@@ -5,6 +5,7 @@ import { ALL_LEVELS, COURSES, MAX_XP } from '@/data/curriculum'
 import { ProgressState, getProgressSummary, nextRecommendedLevel } from '@/engine/progress'
 import { dueCount } from '@/engine/review'
 import { WARMUPS, warmupDone } from '@/interactive/warmups'
+import { INTERACTIVE_LESSONS } from '@/interactive/curriculum'
 
 interface Props { progress: ProgressState }
 
@@ -38,7 +39,7 @@ export function HomePage({ progress }: Props) {
             </button>
             {due > 0 && <button onClick={() => navigate('/review')} className="px-6 py-3.5 rounded-xl border border-amber-700 text-amber-200 hover:bg-amber-950/40">Review {due} due →</button>}
           </div>
-          <p className="mt-4 text-xs text-gray-600 font-mono">No signup · progress stays in this browser · {ALL_LEVELS.length} coding levels · 49 concept lessons</p>
+          <p className="mt-4 text-xs text-gray-600 font-mono">No signup · progress stays in this browser · {ALL_LEVELS.length} coding levels · {INTERACTIVE_LESSONS.length} concept lessons</p>
         </div>
 
         <section aria-labelledby="choose-path" className="mt-16">
@@ -49,7 +50,7 @@ export function HomePage({ progress }: Props) {
               <p className="text-xs font-mono uppercase text-violet-400">Recommended</p><h3 className="font-semibold text-lg mt-1">Guided route</h3><p className="text-sm text-gray-400 mt-2">A short concept warm-up, one graded coding challenge, then spaced review.</p>
             </Link>
             <Link to="/interactive" className="p-5 rounded-xl border border-gray-800 bg-gray-900/50 hover:border-sky-700">
-              <p className="text-xs font-mono uppercase text-sky-400">No keyboard needed</p><h3 className="font-semibold text-lg mt-1">Concept course</h3><p className="text-sm text-gray-400 mt-2">49 tap-first lessons with manipulatives, worked examples, and numeric traces.</p>
+              <p className="text-xs font-mono uppercase text-sky-400">No keyboard needed</p><h3 className="font-semibold text-lg mt-1">Concept course</h3><p className="text-sm text-gray-400 mt-2">{INTERACTIVE_LESSONS.length} tap-first lessons with manipulatives, worked examples, and numeric traces.</p>
             </Link>
             <Link to="/map" className="p-5 rounded-xl border border-gray-800 bg-gray-900/50 hover:border-emerald-700">
               <p className="text-xs font-mono uppercase text-emerald-400">Build directly</p><h3 className="font-semibold text-lg mt-1">Coding course</h3><p className="text-sm text-gray-400 mt-2">{COURSES.length} courses, {ALL_LEVELS.length} tested challenges, entirely in-browser.</p>

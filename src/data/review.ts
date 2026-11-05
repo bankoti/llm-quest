@@ -11,7 +11,10 @@ export interface ReviewQuestion {
   explain: string
 }
 
+import { EXPANSION_REVIEW } from './expansion'
+
 export const REVIEW_QUESTIONS: ReviewQuestion[] = [
+  ...EXPANSION_REVIEW,
   { id:'c9-l9-q1', levelId:'c9-l9', prompt:'Why preserve a completed token with EOT when converting probabilities?', options:['It compresses all text into one byte','It keeps probability mass that would otherwise be discarded','It replaces the teacher optimizer','It guarantees the student matches the teacher'], answer:1, explain:'A terminal token is still a possible branch. EOT represents it; exact targets do not guarantee exact learned behavior.' },
   { id:'c9-l9-q2', levelId:'c9-l9', prompt:'Which test checks exact token-to-byte conversion?', options:['A vector has 257 entries','Targets sum to one','Training loss decreases once','The product of byte and final EOT conditionals recovers each token probability'], answer:3, explain:'Normalization can hold despite losing a branch. Complete path probabilities test the preservation contract.' },
   { id:'c9-l10-q1', levelId:'c9-l10', prompt:'What denominator belongs in BPB for byte-plus-EOT training?', options:['Raw UTF-8 content bytes, excluding markers','All prediction positions including padding','Unicode character count','Teacher token count'], answer:0, explain:'Keep the content denominator fixed and disclose which representation is scored by the summed loss.' },

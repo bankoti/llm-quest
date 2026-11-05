@@ -2,6 +2,30 @@
 
 Interactive LLM lessons and graded Python exercises: [open the course](https://bankoti.github.io/llm-quest/).
 
+## Complete learning continuations
+
+Continuation courses extend the original interactive and coding routes without
+renumbering old levels or changing existing certificate requirements:
+
+| Course | Entry | What the learner builds |
+| --- | --- | --- |
+| 10: From Components to a Trained LLM | Course 1 | Byte BPE, token-weighted training, serialized checkpoint recovery, weight import, classification, response-only SFT, LoRA, evaluation, full decoder |
+| 11: Learning Dynamics and Mechanisms | Course 1 | Residual paths, loss landscapes, modular learning, probes/Fourier ablations, interpolation, grammar/HMM search |
+| 12: Reinforcement Learning for Language Models | Course 10 | Hand policy gradients, trajectory scores, real CartPole training, full clipped GRPO, verifier attacks, policy/value search |
+| 13: Vision, Action, and World Models | Course 12; optional | CNN/ViT tensors, collapse controls, VLA masks/flow matching, latent prediction, learned dynamics/planning, paired evidence |
+
+Each new unit includes a detailed lesson, worked calculation, interactive checks,
+coding contract, independent grader, worked solution, hints, review, a CPU
+notebook, transfer problems, and an AI-assisted coding route. No paid model API,
+downloaded model, robot, or GPU is required; see the
+[experiment and compute boundaries](docs/curriculum-expansion.md#experiments-and-compute).
+
+Read the [implementation scope](docs/curriculum-expansion.md) and the
+[exercise/from-scratch coverage crosswalk](docs/coverage-crosswalk.md). The latter
+maps all 102 visible Volume II prompts and records what is deliberately not
+claimed: unseen figure answers, guaranteed grokking, full paper reproductions,
+or physical deployment safety. Existing adequate foundations are reused.
+
 ## Six papers, both learning modes
 
 These are concept and implementation labs, not reproductions of large-scale
@@ -49,12 +73,12 @@ Neither notebook establishes the paper's scaling predictions or production wins.
 
 ### Solutions and experiments
 
-Nine core exercises have a **Show worked solution** control below the coding
-arena and an original-paper link. Reference code lives in
-`public/content/solutions/` and is tested against the learner's exact grader.
+Exercises in the [lab registry](src/data/paperLabs.ts) have a **Show worked
+solution** control below the coding arena and a primary-source link. Reference
+code lives in `public/content/solutions/` and is tested against the learner's exact grader.
 Revealing a solution does not run it or overwrite the editor.
 
-Seven notebooks add the starter, grader, solution, and experiment in one file:
+Seven original paper notebooks add the starter, grader, solution, and experiment in one file:
 
 - [FlashAttention](colab/c2/05_flash_io.ipynb)
 - [Switch routing](colab/c2/03_sparse_moe.ipynb)
@@ -63,6 +87,11 @@ Seven notebooks add the starter, grader, solution, and experiment in one file:
 - [Paged KV cache](colab/c7/09_paged_cache.ipynb)
 - [Byte-student distillation](colab/c9/09_byte_distillation.ipynb)
 - [Byte-model evidence audit](colab/c9/10_byte_evaluation.ipynb)
+
+Continuation notebooks are indexed by the
+[generated manifest](public/content/expansion-manifest.json) and available under
+`colab/c10` through `colab/c13`. Repeated experiment files intentionally connect
+adjacent exercises into one complete training or evaluation workflow.
 
 They run on CPU with NumPy and PyTorch. CUDA measurements are optional and
 explicitly skipped without supported hardware. GPU speedups, cluster memory
@@ -81,18 +110,23 @@ bun install --frozen-lockfile
 npm run dev
 npm test
 npm run build
+node scripts/test_expansion_progress.mjs
+uv run --python 3.12 python scripts/test_expansion_authoring.py
+uv run --python 3.12 node scripts/build_expansion.mjs --check
 uv run --with numpy python scripts/test_paper_labs.py
 uv run python scripts/build_paper_notebooks.py --check
 uv run --with numpy --with torch python scripts/test_paper_notebooks.py
 uv run --with numpy --with torch python scripts/test_byte_experiment.py
+uv run --with numpy --with torch --with gymnasium python scripts/test_expansion.py
 npx playwright install chromium
 npm run test:paper-ui
 ```
 
-`PAPER_PYODIDE=1 npm run test:paper-ui` also runs the nine reference exercises
+`PAPER_PYODIDE=1 npm run test:paper-ui` also runs the reference exercises
 through the browser's real Pyodide runner; it requires access to the Pyodide CDN.
-The focused UI test completes eight lessons at desktop and phone sizes, checks
-scoring, solution display, and notebook links, and saves screenshots under
+The [UI suite](scripts/test_paper_ui.mjs) selects paper and continuation lessons
+at desktop and phone sizes, checks scoring, lesson geometry, worked-answer
+headings, solution display, and notebook links, and saves screenshots under
 `.paper-test-output/`. The default CI avoids requiring Pyodide's external CDN.
 
 After changing a paper lesson, starter, grader, reference solution, or experiment,
@@ -101,6 +135,25 @@ regenerate its self-contained notebook with
 than the generated notebooks; the generator owns their mapping and notebook-only
 experiment cells. The `--check` mode detects stale notebooks. General
 `build_colab.py` delegates these notebooks to that generator.
+
+Continuation source text and interactive checks live in `src/data/expansion/`.
+Reference functions, public graders, and measured experiment scripts remain
+ordinary editable Python files. Use Python 3.12 to author continuation artifacts:
+run `uv run --python 3.12 node scripts/build_expansion.mjs` after editing those
+sources, and add `--check` to verify generated-artifact freshness. The generator
+rejects other Python minor versions before reading curriculum input or writing
+artifacts because `ast.unparse` output can change between Python versions.
+You can also set `PYTHON` to the path of a Python 3.12 executable when invoking
+`node scripts/build_expansion.mjs`. This authoring requirement applies to
+generation and exact freshness checks; student notebooks retain their own
+NumPy/PyTorch runtime setup, and browser exercises run through Pyodide.
+
+The generator emits readable lesson Markdown, starter scaffolds,
+self-contained notebooks, and the manifest. Do not manually edit generated
+lessons, starters, notebooks, or the manifest: change the reference function's
+public docstring/contract or the authored unit, then regenerate. The notebook
+test executes the actual reference, grader, setup, and experiment cells in a
+fresh namespace per file.
 
 ## Primary sources
 

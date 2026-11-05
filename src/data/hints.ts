@@ -4,7 +4,10 @@
 // Tier 3 (-10% XP): near-answer — the key line or formula in words.
 // XP cost keeps the testing effect intact: help is available, not free.
 
+import { EXPANSION_HINTS } from './expansion'
+
 export const HINTS: Record<string, [string, string, string]> = {
+  ...EXPANSION_HINTS,
   'c9-l9': [
     'Filter byte strings by prefix. A token ending exactly at the prefix maps to symbol 256 with EOT; without EOT it is discarded.',
     'Normalize eligible logits with their own maximum, then sum by next byte. Multiply all byte conditionals AND the final EOT to reconstruct a token probability.',

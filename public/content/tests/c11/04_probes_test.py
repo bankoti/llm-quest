@@ -1,0 +1,16 @@
+import numpy as np
+h = np.array([[1., 0.], [0., 1.], [1., 1.]])
+y = np.array([[2.], [3.], [5.]])
+assert np.allclose(fit_probe(h, y), [[2], [3]])
+got = fit_probe(h, y, .4)
+assert np.allclose((h.T@h+.4*np.eye(2)) @ got, h.T@y)
+grid = np.array([[1., 3.], [5., 7.]])
+mask = np.array([[1, 0], [0, 0]], bool)
+restricted, excluded = fourier_parts(grid, mask)
+assert np.allclose(restricted, 4) and np.allclose(excluded, grid-4)
+rng = np.random.default_rng(6)
+grid = rng.normal(size=(5, 5)); mask = rng.random((5, 5)) > .6
+a, b = fourier_parts(grid, mask)
+assert np.allclose(a+b, grid)
+assert np.allclose(np.fft.fft2(a)[~mask], 0, atol=1e-10)
+print('Probe and Fourier checks passed.')

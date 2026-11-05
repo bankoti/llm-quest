@@ -17,14 +17,19 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: npm test
       - run: npm run build
+      - run: node scripts/test_expansion_progress.mjs
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install numpy
       - run: python scripts/test_paper_labs.py
       - run: python scripts/build_paper_notebooks.py --check
+      - run: python scripts/test_expansion_authoring.py
+      - run: node scripts/build_expansion.mjs --check
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: python scripts/test_byte_experiment.py
       - run: python scripts/test_paper_notebooks.py
+      - run: pip install 'gymnasium>=1,<2'
+      - run: python scripts/test_expansion.py
       - run: npx playwright install --with-deps chromium
       - run: npm run test:paper-ui

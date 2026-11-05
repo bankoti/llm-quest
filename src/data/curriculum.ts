@@ -1,8 +1,6 @@
-// Curriculum: course 0 (open reference) + 9 gated courses
-// XP calibrated: harder = more. Boss fights = 3x normal.
-// challengeFile: path to the numpy/pure-python challenge (C1-3)
-//   or the mini_llm workbook (C4-8)
-// runtime: 'pyodide' for all (C1-3 use numpy rewrites, C4-8 use mini_llm bundle)
+import { EXPANSION_COURSES } from './expansion'
+
+// Existing routes retain their IDs; continuation tracks append after Course 9.
 
 export type LevelType = 'challenge' | 'boss' | 'debug'
 
@@ -281,13 +279,16 @@ export const COURSES: Course[] = [
       { id:'c9-l10', courseId:9, index:11, title:'Byte Model Evidence Audit', description:'Compare likelihood, target storage, content throughput, and extrapolation.', xp:250, type:'challenge', lessonFile:'c9/10_byte_evaluation.md', challengeFile:'c9/10_byte_evaluation.py', estimateMinutes:70 },
     ],
   },
+  ...EXPANSION_COURSES,
 ]
 
-// Flat lists. Course 0 is an optional toolkit; the two gated routes branch
+// Flat lists. Course 0 is an optional toolkit; the two original routes branch
 // after Course 3 into production engineering (C4-C8) and frontier training (C9).
 export const ALL_LEVELS: Level[] = COURSES.flatMap(c => c.levels)
 export const TOOLKIT_LEVELS = COURSES.find(c => c.id === 0)?.levels ?? []
 export const GATED_LEVELS = ALL_LEVELS.filter(l => l.courseId !== 0)
+// Adding optional continuations must not revoke an earned legacy certificate.
+export const LEGACY_CERTIFICATE_LEVELS = GATED_LEVELS.filter(l => l.courseId <= 9)
 export const PRODUCTION_LEVELS = COURSES.filter(c => c.id >= 1 && c.id <= 8).flatMap(c => c.levels)
 export const FRONTIER_LEVELS = COURSES.filter(c => [1, 2, 3, 9].includes(c.id)).flatMap(c => c.levels)
 
