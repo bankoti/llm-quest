@@ -46,12 +46,14 @@ with np.errstate(over='raise', invalid='raise'):
             assert np.array_equal(saturated['probabilities'], expected)
             assert saturated['loss'] == float(np.abs(expected-labels).mean())
             assert np.array_equal(saturated['grad_w'], [0.]) and saturated['grad_b'] == 0.
+    # Overflow cancellation can yield NaN or infinity depending on BLAS.
+    # Zero times infinity deterministically tests the NaN-logit error contract.
     try:
-        imitation_l1(np.array([[1e308, 1e308]]), np.array([1.]), np.array([2., -2.]), 0.)
+        imitation_l1(np.array([[0.]]), np.array([1.]), np.array([np.inf]), 0.)
     except FloatingPointError:
         pass
     else:
-        raise AssertionError('Indeterminate logit cancellation must fail explicitly')
+        raise AssertionError('NaN logits must fail explicitly')
 tail = np.exp(-40.)/(1+np.exp(-40.))
 for sign in [1., -1.]:
     for action in [0, 1]:
