@@ -49,4 +49,18 @@ for states, actions, weights, bias in [
     assert all(np.array_equal(value, original) for value, original in zip((states, actions, weights), before))
 empty = trajectory_score(np.empty((0,2)), np.array([]), w, b)
 assert empty[0] == 0 and np.allclose(empty[1], 0) and empty[2] == 0
+tail = np.exp(-40.)/(1+np.exp(-40.))
+for sign in [1., -1.]:
+    for action in [0, 1]:
+        states, actions, weights = np.array([[1e18]]), np.array([action]), np.array([sign*4e-17])
+        before = [value.copy() for value in (states, actions, weights)]
+        log_probability, gradient, bias_gradient = trajectory_score(states, actions, weights, 0.)
+        matching = action == int(sign > 0)
+        expected_score = (1. if action else -1.)*(tail if matching else 1-tail)
+        expected_log_probability = -np.log1p(np.exp(-40.)) if matching else -40.-np.log1p(np.exp(-40.))
+        np.testing.assert_allclose(log_probability, expected_log_probability, rtol=1e-14, atol=0.)
+        np.testing.assert_allclose(gradient, [1e18*expected_score], rtol=1e-14, atol=0.)
+        np.testing.assert_allclose(bias_gradient, expected_score, rtol=1e-14, atol=0.)
+        assert log_probability < 0 and gradient[0] != 0 and bias_gradient != 0
+        assert all(np.array_equal(value, original) for value, original in zip((states, actions, weights), before))
 print('Trajectory-score checks passed.')

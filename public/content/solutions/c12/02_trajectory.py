@@ -10,8 +10,11 @@ def trajectory_score(states, actions, weights, bias):
     over time. Compute in floating point, including for integer inputs.
     Stable for extreme logits, including signed infinite logits from overflow
     when the selected actions have representable log probabilities and scores.
-    Raise FloatingPointError for NaN logits or nonrepresentable returned log
-    probability or gradients. Do not mutate inputs.
+    Raise FloatingPointError for NaN logits or nonfinite computed log
+    probability or gradients in float64. Do not mutate inputs.
+    Evaluate both sigmoid tails independently in float64. Tails below its
+    subnormal range underflow to zero before later score-gradient scaling,
+    even when an exact tail times a large state would be representable.
     """
     states, actions, weights = [np.asarray(value, float) for value in (states, actions, weights)]
     bias = float(bias)
@@ -22,7 +25,8 @@ def trajectory_score(states, actions, weights, bias):
         selected_logits = np.where(actions == 1, logits, -logits)
         log_probability = float((-np.logaddexp(0., -selected_logits)).sum())
         p = np.exp(-np.logaddexp(0., -logits))
-        scores = actions-p
+        q = np.exp(-np.logaddexp(0., logits))
+        scores = np.where(actions == 1, q, -p)
         grad_w, grad_b = states.T@scores, float(scores.sum())
     if not np.isfinite(log_probability) or not np.isfinite(grad_w).all() or not np.isfinite(grad_b):
         raise FloatingPointError('trajectory outputs exceed the supported numeric range')

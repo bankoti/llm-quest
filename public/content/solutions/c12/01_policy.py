@@ -11,16 +11,20 @@ def imitation_l1(states, actions, weights, bias):
     integer inputs. Stable at extreme logits; no input mutation.
     Infinite logits from overflow use the sigmoid limits 0/1. Raise
     FloatingPointError for indeterminate NaN logits or nonfinite results.
+    Evaluate both sigmoid tails independently in float64. Tails below its
+    subnormal range underflow to zero before later gradient scaling, even
+    when an exact tail times a large state would be representable.
     """
     states, actions, weights = [np.asarray(value, float) for value in (states, actions, weights)]
     bias = float(bias)
-    with np.errstate(over='ignore', invalid='ignore'):
+    with np.errstate(over='ignore', invalid='ignore', under='ignore'):
         logits = states @ weights + bias
         if np.isnan(logits).any():
             raise FloatingPointError('Indeterminate imitation logits')
         p = np.exp(-np.logaddexp(0., -logits))
-        slope = (1-2*actions)*p*(1-p)
-        loss = float(np.abs(p-actions).mean())
+        q = np.exp(-np.logaddexp(0., logits))
+        slope = (1-2*actions)*p*q
+        loss = float(np.where(actions == 1, q, p).mean())
         contributions = states*slope[:, None]
         scale = np.max(np.abs(contributions), axis=0)
         scaled = np.divide(contributions, scale, out=np.zeros_like(contributions), where=scale != 0)

@@ -52,4 +52,19 @@ with np.errstate(over='raise', invalid='raise'):
         pass
     else:
         raise AssertionError('Indeterminate logit cancellation must fail explicitly')
+tail = np.exp(-40.)/(1+np.exp(-40.))
+for sign in [1., -1.]:
+    for action in [0, 1]:
+        states, actions, weights = np.array([[1e18]]), np.array([action]), np.array([sign*4e-17])
+        before = [value.copy() for value in (states, actions, weights)]
+        result = imitation_l1(states, actions, weights, 0.)
+        matching = action == int(sign > 0)
+        expected_loss = tail if matching else 1-tail
+        expected_slope = (1-2*action)*tail*(1-tail)
+        np.testing.assert_allclose(result['loss'], expected_loss, rtol=1e-14, atol=0.)
+        np.testing.assert_allclose(result['grad_w'], [1e18*expected_slope], rtol=1e-14, atol=0.)
+        np.testing.assert_allclose(result['grad_b'], expected_slope, rtol=1e-14, atol=0.)
+        assert result['grad_w'][0] != 0 and result['grad_b'] != 0
+        assert result['loss'] > 0
+        assert all(np.array_equal(value, original) for value, original in zip((states, actions, weights), before))
 print('Sigmoid imitation checks passed.')

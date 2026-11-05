@@ -5,6 +5,41 @@ assert index == 1 and np.allclose(costs,[1,0,4])
 assert np.allclose(states[:,:,0],[[1,2],[2,2],[0,2]])
 index,costs,_ = plan_candidates(np.array([0.]),np.ones((1,1)),np.ones((1,1)),candidates,np.array([2.]),2)
 assert index == 0 and np.allclose(costs,[5,8,12])
+inputs = (np.zeros(1),np.zeros((1,1)),np.full((1,1),1e-100),np.array([[[1e200]],[[1e199]]]),np.zeros(1))
+originals = [value.copy() for value in inputs]
+for penalty in (0.,-0.):
+    with np.errstate(over='raise',invalid='raise'):
+        index,costs,states = plan_candidates(*inputs,action_penalty=penalty)
+    assert index == 1 and np.allclose(costs,[1e200,1e198]) and np.allclose(states,[[[1e100]],[[1e99]]]), 'Zero penalty must skip overflowing action effort'
+    assert all(np.array_equal(value,before) for value,before in zip(inputs,originals))
+for penalty in (1.,1e-300):
+    try:
+        plan_candidates(*inputs,action_penalty=penalty)
+    except FloatingPointError:
+        pass
+    else:
+        raise AssertionError('Active action-square overflow must fail before candidate selection')
+    assert all(np.array_equal(value,before) for value,before in zip(inputs,originals))
+positive_inputs = (np.zeros(1),np.zeros((1,1)),np.full((1,1),.01),np.array([[[100.]],[[10.]]]),np.zeros(1))
+originals = [value.copy() for value in positive_inputs]
+index,costs,states = plan_candidates(*positive_inputs,action_penalty=.5)
+assert index == 1 and np.allclose(costs,[5001.,50.01]) and np.allclose(states,[[[1.]],[[.1]]])
+assert all(np.array_equal(value,before) for value,before in zip(positive_inputs,originals))
+for overflowing in [
+    lambda: plan_candidates(np.array([1e308]),np.array([[2.]]),np.zeros((1,1)),np.zeros((2,1,1)),np.zeros(1),1.),
+    lambda: plan_candidates(np.zeros(1),np.zeros((1,1)),np.ones((1,1)),np.array([[[1e200]],[[1e199]]]),np.zeros(1)),
+    lambda: plan_candidates(np.array([-1e308]),np.ones((1,1)),np.zeros((1,1)),np.zeros((2,1,1)),np.array([1e308])),
+    lambda: plan_candidates(np.zeros(2),np.zeros((2,2)),np.full((2,1),1e154),np.ones((2,1,1)),np.zeros(2)),
+    lambda: plan_candidates(np.zeros(1),np.zeros((1,1)),np.zeros((1,2)),np.full((2,1,2),1e154),np.zeros(1),1.),
+    lambda: plan_candidates(np.zeros(1),np.zeros((1,1)),np.zeros((1,1)),np.full((2,1,1),1e100),np.zeros(1),1e200),
+    lambda: plan_candidates(np.zeros(1),np.zeros((1,1)),np.ones((1,1)),np.full((2,1,1),1e154),np.zeros(1),1.),
+]:
+    try:
+        overflowing()
+    except FloatingPointError:
+        pass
+    else:
+        raise AssertionError('Nonfinite active rollout, squared-distance, reduction, or objective intermediates must fail explicitly')
 for dtype in (np.int16,np.uint8):
     initial = np.array([0],dtype=dtype)
     a,b = np.zeros((1,1),dtype=dtype),np.ones((1,1),dtype=dtype)
