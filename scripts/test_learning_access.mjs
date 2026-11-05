@@ -1,16 +1,22 @@
 import assert from 'node:assert/strict'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 import { chromium } from 'playwright'
 
 const preferenceKey = 'llmquest_prerequisite_locks_v1'
 const progressKey = 'llmquest_progress_v1'
-const output = new URL('../.paper-test-output/', import.meta.url)
+const output = process.env.PAPER_EVIDENCE_DIR ?? fileURLToPath(new URL('../.paper-test-output/', import.meta.url))
 const server = process.env.TEST_BASE_URL ? undefined : await createServer({ server: { host: '127.0.0.1', port: 5190, strictPort: true } })
 let browser
 
 const toggle = page => page.getByRole('checkbox', { name: 'Prerequisite locks' })
+async function screenshot(page, name) {
+  await page.waitForFunction(() => [...document.querySelectorAll('[id^="course-"]')]
+    .every(course => Number(getComputedStyle(course).opacity) > 0.99))
+  await page.screenshot({ path: join(output, `${name}.png`), animations: 'disabled' })
+}
 async function assertLocks(page, enabled) {
   await toggle(page).waitFor()
   await page.waitForFunction(expected => [...document.querySelectorAll('input[type="checkbox"]')]
@@ -52,7 +58,7 @@ try {
   await mkdir(output, { recursive: true })
   await server?.listen()
   const base = process.env.TEST_BASE_URL ?? server.resolvedUrls.local[0].replace(/\/$/, '')
-  browser = await chromium.launch()
+  browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH })
   async function newContext(options = {}) {
     const context = await browser.newContext(options)
     await context.route('**/*', route => {
@@ -88,6 +94,7 @@ try {
     assert.equal(certificates.length, 3)
     const locked = await page.locator('button[disabled][aria-label]').count()
     assert.ok(locked > 0)
+    await screenshot(page, `learning-access-locked-map-${viewport.width}`)
     await toggle(page).uncheck()
     assert.equal(await page.locator('button[disabled][aria-label]').count(), 0)
     await page.reload()
@@ -139,19 +146,37 @@ try {
     assert.equal(await page.locator('button[disabled][aria-label]').count(), locked)
     await second.close()
 
+    await page.goto(`${base}/interactive/numbers-to-tensors`)
+    await page.getByRole('button', { name: 'Read a shape', exact: true }).click()
+    await page.getByRole('button', { name: 'Walk through it', exact: true }).waitFor()
+    assert.equal(await page.getByText('Complete the prerequisite before opening this challenge.').count(), 0)
+    await screenshot(page, `learning-access-interactive-${viewport.width}`)
+
     await page.goto(`${base}/level/c13-l1`)
     await page.getByRole('button', { name: '← Map', exact: true }).waitFor()
     await page.goto(`${base}/level/c13-l6`)
     await page.getByText('Complete the prerequisite before opening this challenge.').waitFor()
+    await screenshot(page, `learning-access-locked-lesson-${viewport.width}`)
     await page.getByRole('checkbox', { name: 'Prerequisite locks' }).click({ noWaitAfter: true })
     await page.getByRole('button', { name: 'Map', exact: false }).first().waitFor()
     assert.equal(await page.getByText('Complete the prerequisite before opening this challenge.').count(), 0)
+    if (viewport.width < 768) await page.getByRole('tab', { name: 'code', exact: true }).click()
+    await page.locator('.monaco-editor').waitFor()
+    await page.waitForFunction(() => document.querySelector('.monaco-editor .view-lines')?.textContent.includes('paired_success'))
+    await screenshot(page, `learning-access-open-lesson-${viewport.width}`)
     assert.equal(await page.evaluate(key => localStorage.getItem(key), progressKey), progress)
     await page.goto(`${base}/map`)
     await toggle(page).waitFor()
-    assert.deepEqual(await certificateProgress(page), certificates)
+    const certificatesAfter = await certificateProgress(page)
+    assert.deepEqual(certificatesAfter, certificates)
+    await writeFile(join(output, `learning-access-progress-${viewport.width}.json`), JSON.stringify({
+      before: JSON.parse(progress),
+      after: JSON.parse(await page.evaluate(key => localStorage.getItem(key), progressKey)),
+      certificateProgressBefore: certificates,
+      certificateProgressAfter: certificatesAfter,
+    }, null, 2))
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
-    await page.screenshot({ path: new URL(`learning-access-${viewport.width}.png`, output).pathname })
+    await screenshot(page, `learning-access-${viewport.width}`)
     assert.deepEqual(errors, [])
     await context.close()
 
@@ -167,11 +192,16 @@ try {
     await toggle(lesson).click({ noWaitAfter: true })
     await lesson.getByRole('button', { name: '← Map', exact: true }).waitFor()
     await assertPane(lesson, viewport)
+    await lesson.locator('.monaco-editor').waitFor({ state: 'attached' })
+    await screenshot(lesson, `learning-access-storage-denied-${viewport.width}`)
     await lesson.getByRole('button', { name: '← Map', exact: true }).click()
     await assertLocks(lesson, false)
     assert.equal(await lesson.locator('button[disabled][aria-label]').count(), 0)
     await toggle(lesson).check()
     assert.ok(await lesson.locator('button[disabled][aria-label]').count() > 0)
+    await toggle(lesson).uncheck()
+    await lesson.reload()
+    await assertLocks(lesson, true)
     assert.deepEqual(deniedErrors, [])
     await denied.close()
     console.log(`PASS ${viewport.width}px: navigation sync, denied storage, direct routes, persisted progress, grants and certificates`)

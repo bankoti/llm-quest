@@ -13,8 +13,9 @@ unlocks remain intact. Interactive lessons remain freely accessible.
 Without a saved preference, locks are on for learners and off for legacy admin
 mode. An explicit learner choice takes precedence over admin mode. When browser
 storage is unavailable, the choice lasts for the current page session only.
-Run `node scripts/test_learning_access.mjs` against the local server on port 5190
-(or set `TEST_BASE_URL`) for desktop/mobile access regression checks.
+Run `node scripts/test_learning_access.mjs` for desktop/mobile access regression
+checks. It starts a local server on port 5190 unless `TEST_BASE_URL` points to an
+existing server.
 
 ## Complete learning continuations
 
@@ -55,8 +56,8 @@ paper benchmarks. Read the assumptions and limitations in each lesson.
 | PagedAttention | [Block tables and sharing](https://bankoti.github.io/llm-quest/interactive/paged-attention) | [Paged KV cache](https://bankoti.github.io/llm-quest/level/c7-l9) | Bounded allocator, copy-on-write, reuse, and scalar decode equivalence; no GPU kernel |
 
 Lessons follow prerequisite concepts. The six papers do not form a mandatory
-chronological build order. With prerequisite locks on, a direct coding lesson
-link may lead to the preceding required work. Existing completed records and XP
+chronological build order; see [Learning access](#learning-access) for coding
+lesson access options. Existing completed records and XP
 are preserved; new levels start incomplete and unlock through the course graph.
 Learners who previously completed an expanded exercise can reopen it to try the
 new requirements; old completion records are not silently revoked.
