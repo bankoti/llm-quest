@@ -18,7 +18,7 @@ Course 12. Entry course: 10. Budget about 75 minutes for reading, code, and one 
 
 In a large branching game, exhaustive search grows roughly as branching_factor^depth. A policy prior can concentrate search on promising moves; a value estimate can score nonterminal states without rolling every path to the end. AlphaGo combined supervised and reinforcement-trained policies, value estimation, and tree search. A prior is guidance, not proof that a move is best.
 
-Our PUCT-style score for action a is Q(a)+c*P(a)*sqrt(1+sum_b N(b))/(1+N(a)). Q is a mean value from the current player's perspective, P is a normalized prior, N is a visit count. The lab uses this explicit teaching convention; variants differ in initialization and exploration constants. Convert visit counts to floating point before adding one or summing, so fixed-width integer counters do not wrap during score arithmetic. In alternating zero-sum games, flip the sign when backing a leaf value through each turn. In single-agent planning, no player-sign flip is needed.
+Our PUCT-style score for action a is Q(a)+c*P(a)*sqrt(1+sum_b N(b))/(1+N(a)). Q is a mean value from the current player's perspective, P is a normalized prior, N is a visit count. The lab uses this explicit teaching convention; variants differ in initialization and exploration constants. Convert visit counts to floating point before adding one or summing, so fixed-width integer counters do not wrap during score arithmetic. Form P*sqrt(1+sum(N))/(1+N) before multiplying by the exploration coefficient, so a large coefficient does not overflow a numerator whose final bonus is finite. Reject nonfinite computed float64 scores with FloatingPointError before selection; bonuses that underflow to zero remain zero before coefficient scaling. In alternating zero-sum games, flip the sign when backing a leaf value through each turn. In single-agent planning, no player-sign flip is needed.
 
 ## Search needs a model or executable transition rule
 
@@ -50,7 +50,10 @@ def puct_select(priors, values, visits, exploration=1.0):
 
 Valid finite matching 1D arrays assumed: priors>=0 sum=1, visits>=0,
 exploration>=0. values are action mean values in the parent's perspective.
-Convert priors, values, and visits to floating point before score arithmetic."""
+Convert priors, values, and visits to floating point before score arithmetic.
+Normalize each exploration bonus by visits before multiplying by exploration.
+Nonfinite computed float64 scores raise FloatingPointError before selection;
+underflowed bonuses are zero before coefficient scaling."""
     raise NotImplementedError('Implement this function, then run the checks.')
 
 def backup_values(leaf_value, edges, alternating=True):
