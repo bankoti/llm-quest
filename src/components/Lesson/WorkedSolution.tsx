@@ -19,7 +19,7 @@ export function WorkedSolution({ challengeFile }: { challengeFile: string }) {
   return <section className="mt-4 border-t border-gray-700 pt-4 text-sm">
     <div className="flex gap-4 flex-wrap">
       <button className="text-sky-300 underline" onClick={() => open ? setOpen(false) : reveal()}>{open ? 'Hide worked solution' : 'Show worked solution'}</button>
-      <a href={lab.paper} target="_blank" rel="noopener noreferrer" className="text-gray-300 underline">Original paper</a>
+      <a href={lab.paper} target="_blank" rel="noopener noreferrer" className="text-gray-300 underline">{lab.sourceLabel ?? 'Original paper'}</a>
     </div>
     {open && <div className="mt-3">
       <p className="text-gray-300 mb-3">{lab.explanation}</p>

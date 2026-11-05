@@ -25,7 +25,11 @@ def kl_penalty(log_pi: float, log_pi_ref: float) -> float:
 def grpo_loss(log_probs: List[float], advantages: List[float],
               log_probs_ref: List[float], kl_coeff: float) -> float:
     """
-    GRPO objective for one response (list of per-token log-probs).
+    Introductory policy-gradient surrogate for one response.
     loss = -mean(advantage_i * log_prob_i) + kl_coeff * mean(kl_penalty_i)
+
+    This is component practice, NOT the full clipped GRPO objective. It
+    omits the old-policy importance ratio, clipping, rollout collection,
+    and parameter updates. The full algorithm is taught in the RL track.
     """
     raise NotImplementedError

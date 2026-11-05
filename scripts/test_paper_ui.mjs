@@ -59,7 +59,8 @@ try {
       localStorage.setItem('llmquest_interactive_v2',JSON.stringify(seed))
       localStorage.setItem('llmquest_progress_v1',JSON.stringify({levels:Object.fromEntries(levels.map(l=>[l.id,{status:'unlocked',xpEarned:0,attempts:0}])),totalXp:0,streakDays:0,lastActiveDate:''}))
     },{seed,levels:data.levels})
-    for(const slug of slugs) {
+    const expansionSlugs=data.lessons.filter(l=>['scratch','dynamics','rl','embodied'].includes(l.moduleId)).map(l=>l.slug)
+    for(const slug of [...slugs,...expansionSlugs]) {
       const lesson=bySlug.get(slug)
       await page.evaluate(slug=>{
         const state=JSON.parse(localStorage.getItem('llmquest_interactive_v2'))
@@ -88,6 +89,15 @@ try {
           assert.equal(await page.getByRole('button',{name:'Continue',exact:true}).count(),0)
           await click(page,"I'm sure");await click(page,'Continue')
         } else if(step.kind==='widget') {
+          if(expansionSlugs.includes(slug)) {
+            const controls=page.getByRole('slider')
+            assert.ok(await controls.count()>0,`${slug}: no manipulable controls`)
+            const before=await page.locator('dl').innerText()
+            const control=controls.first()
+            const atMinimum=Number(await control.inputValue())===Number(await control.getAttribute('min'))
+            await control.focus();await control.press(atMinimum?'End':'Home')
+            assert.notEqual(await page.locator('dl').innerText(),before,`${slug}: control did not affect result`)
+          }
           if(slug==='scaling-laws') {
             for(const i of [0,4,2]){await slider(page,'parameter-ratio',i);assert.equal(await page.getByTestId('budget-ratio').innerText(),'1.000')}
           } else if(slug==='flash-attention') {
@@ -138,7 +148,7 @@ try {
       assert.equal(completed.firstTries,completed.scored,`${slug}: score must persist`)
       console.log(`PASS ${viewport.width}px ${slug}: completed and scored`)
     }
-    for(const id of ['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10']) {
+    for(const id of ['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
       await page.goto(`${base}/level/${id}`)
       if(viewport.width<768)await page.getByRole('tab',{name:'code',exact:true}).click()
       await click(page,'Show worked solution')
@@ -151,7 +161,7 @@ try {
       await layout(page,`${viewport.width}-${id}-solution`)
     }
     if(process.env.PAPER_PYODIDE==='1' && viewport.width===1280) {
-      for(const id of ['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8','c9-l9','c9-l10']) {
+      for(const id of ['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
         const level=data.levels.find(l=>l.id===id)
         const result=await page.evaluate(async file=>{
           const {runChallenge}=await import('/src/engine/pyodide.ts')

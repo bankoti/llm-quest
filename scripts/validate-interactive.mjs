@@ -20,6 +20,7 @@ try {
     ['paperSystemsLessons', 'PAPER_SYSTEMS_LESSONS'], ['applicationLessons', 'APPLICATION_LESSONS'],
     ['extensionLessons', 'EXTENSION_LESSONS'], ['papersLessons', 'PAPERS_LESSONS'],
     ['byteLessons', 'BYTE_LESSONS'],
+    ['expansionLessons', 'EXPANSION_LESSONS'],
   ]) {
     const module = await server.ssrLoadModule(`/src/interactive/${file}.ts`)
     for (const lesson of module[name]) assert.ok(lessons.includes(lesson), `curriculum omits ${lesson.slug}`)
@@ -31,6 +32,7 @@ try {
     answers.add(question.answer)
   }
   for (const lesson of lessons) {
+    for (const prerequisite of lesson.prerequisites) assert.ok(slugs.has(prerequisite), `${lesson.slug}: unknown prerequisite ${prerequisite}`)
     for (const field of ['moduleId', 'moduleTitle']) assert.ok(lesson[field], `${lesson.slug}: missing ${field}`)
     for (const field of ['prerequisites', 'outcomes', 'concepts', 'steps']) assert.ok(Array.isArray(lesson[field]), `${lesson.slug}: missing ${field}`)
     assert.ok(lesson.steps.some(s => s.kind === 'concept'), `${lesson.slug}: no concept orientation`)
@@ -46,6 +48,16 @@ try {
       }
     }
   }
+  const visiting = new Set(), visited = new Set()
+  const bySlug = new Map(lessons.map(l => [l.slug, l]))
+  function visit(slug) {
+    assert.ok(!visiting.has(slug), `dependency cycle at ${slug}`)
+    if (visited.has(slug)) return
+    visiting.add(slug)
+    for (const p of bySlug.get(slug).prerequisites) visit(p)
+    visiting.delete(slug); visited.add(slug)
+  }
+  lessons.forEach(l => visit(l.slug))
   assert.ok(choiceAnswers.size >= 3, 'choice answers must use at least three positions')
   assert.equal(Object.keys(WARMUPS).length, levels.length, 'warm-up count differs from level count')
   const covered = new Set(review.map(q => q.levelId))

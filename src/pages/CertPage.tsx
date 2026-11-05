@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SITE } from '@/config/site'
-import { COURSES, FRONTIER_LEVELS, GATED_LEVELS, MAX_XP, PRODUCTION_LEVELS, getRank } from '@/data/curriculum'
+import { COURSES, FRONTIER_LEVELS, LEGACY_CERTIFICATE_LEVELS as GATED_LEVELS, MAX_XP, PRODUCTION_LEVELS, getRank } from '@/data/curriculum'
 import { getCompletionSummary, loadProgress } from '@/engine/progress'
 import { getDefense, loadReview } from '@/engine/review'
 import { renderShareCard } from '@/engine/shareCard'

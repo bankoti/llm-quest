@@ -29,6 +29,48 @@ assert blk.shape==(B,T,C), f"block shape: {blk.shape}"
 x2=x.copy(); x2[:,-1]+=10
 blk2=transformer_block(x2,Wq,Wk,Wv,Wo,W1,W2,H)
 assert np.allclose(blk[:,:-1],blk2[:,:-1],atol=1e-4), "block causality violated"
+
+# Numerical references are independent of the learner's helpers. Shape and
+# causality alone also accept an identity block or all-zero attention.
+def _reference_attention(q, k, v):
+    scores = q @ k.swapaxes(-1, -2) / np.sqrt(q.shape[-1])
+    scores = np.where(np.tri(q.shape[-2], dtype=bool), scores, -np.inf)
+    probabilities = np.exp(scores - scores.max(axis=-1, keepdims=True))
+    probabilities /= probabilities.sum(axis=-1, keepdims=True)
+    return probabilities @ v
+
+def _reference_norm(a):
+    return (a - a.mean(axis=-1, keepdims=True)) / np.sqrt(a.var(axis=-1, keepdims=True) + 1e-5)
+
+def _reference_heads(a, wq, wk, wv, wo, heads):
+    b, t, c = a.shape
+    split = lambda w: (a @ w).reshape(b, t, heads, c // heads).transpose(0, 2, 1, 3)
+    attended = _reference_attention(split(wq), split(wk), split(wv))
+    return attended.transpose(0, 2, 1, 3).reshape(b, t, c) @ wo
+
+def _reference_ff(a, w1, w2):
+    z = a @ w1
+    return (z / (1 + np.exp(-1.702 * z))) @ w2
+
+for seed, shape, heads in [(23, (1, 1, 4), 1), (31, (2, 5, 12), 3), (47, (1, 3, 8), 2)]:
+    rng = np.random.default_rng(seed)
+    a = rng.normal(size=shape)
+    original = a.copy()
+    c = shape[-1]
+    weights = [rng.normal(scale=0.2, size=(c, c)) for _ in range(4)]
+    w1 = rng.normal(scale=0.2, size=(c, 3*c))
+    w2 = rng.normal(scale=0.2, size=(3*c, c))
+    q, k, v = [rng.normal(size=shape) for _ in range(3)]
+    assert np.allclose(causal_attention(q,k,v), _reference_attention(q,k,v), atol=1e-7), "attention must use scaled QK scores and V"
+    assert np.allclose(multihead_attention(a,*weights,heads), _reference_heads(a,*weights,heads), atol=1e-7), "head split/merge or output projection is incorrect"
+    assert np.allclose(feed_forward(a,w1,w2), _reference_ff(a,w1,w2), atol=1e-7), "FFN must apply the documented GELU approximation"
+    mid = a + _reference_heads(_reference_norm(a), *weights, heads)
+    expected = mid + _reference_ff(_reference_norm(mid), w1, w2)
+    actual = transformer_block(a,*weights,w1,w2,heads)
+    assert np.allclose(actual,expected,atol=1e-7), "block must apply both pre-norm sublayers and both residual additions"
+    assert np.array_equal(a,original), "block must not mutate its input"
+    zero = np.zeros((c,c))
+    assert np.allclose(transformer_block(a,zero,zero,zero,zero,w1,np.zeros_like(w2),heads),a), "zero sublayers must preserve the residual stream"
 print("✓ causal_attention correct")
 print("✓ transformer_block correct")
 print("\n+500 XP — THE TRANSFORMER. Boss fight won. 🏆")

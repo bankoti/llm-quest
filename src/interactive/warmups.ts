@@ -2,7 +2,10 @@
 // and one check from the interactive curriculum but deliberately ignore the
 // full interactive prerequisite graph: a warm-up is a just-in-time refresher,
 // not a second course gate.
+import { EXPANSION_WARMUPS } from '../data/expansion'
+
 export const WARMUPS: Record<string, string> = {
+  ...EXPANSION_WARMUPS,
   'c9-l9':'byte-distillation','c9-l10':'byte-model-evaluation',
   'c7-l9':'paged-attention','c9-l8':'zero-sharding',
   'c0-l1':'numbers-to-tensors','c0-l2':'axes-and-slices','c0-l3':'next-token-prediction','c0-l4':'axes-and-slices','c0-l5':'matmul',
@@ -14,7 +17,7 @@ export const WARMUPS: Record<string, string> = {
   'c6-l1':'retrieval-quality','c6-l5':'validation-generalization','c6-l3':'calibration','c6-l4':'rlhf-reward-models','c6-l2':'distillation','c6-d1':'calibration','c6-l6':'validation-generalization',
   'c7-l1':'agent-reliability','c7-l2':'kv-cache','c7-l3':'token-economics','c7-l4':'agent-reliability','c7-l5':'agent-reliability','c7-d1':'agent-reliability','c7-l7':'precision-quantization','c7-l8':'speculative-decoding','c7-l6':'agent-reliability',
   'c8-l1':'validation-generalization','c8-l2':'application-capstone','c8-l3':'calibration','c8-l4':'reading-model-cards','c8-l5':'application-capstone','c8-d1':'calibration','c8-l6':'application-capstone',
-  'c9-l1':'scaling-laws','c9-l2':'training-data','c9-l3':'direct-preference-optimization','c9-l4':'direct-preference-optimization','c9-l5':'reading-model-cards','c9-l7':'speculative-decoding','c9-d1':'scaling-laws','c9-l6':'scaling-laws',
+  'c9-l1':'scaling-laws','c9-l2':'training-data','c9-l3':'direct-preference-optimization','c9-l4':'rl-04_grpo','c9-l5':'reading-model-cards','c9-l7':'speculative-decoding','c9-d1':'scaling-laws','c9-l6':'scaling-laws',
 }
 
 const KEY = 'llmquest_warmups_v1'

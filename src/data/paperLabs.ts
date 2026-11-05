@@ -1,5 +1,8 @@
 // Explicit artifacts: do not advertise notebooks or solutions that do not exist.
-export const PAPER_LABS: Record<string, { paper: string; explanation: string; experiment: boolean }> = {
+import { EXPANSION_LABS } from './expansion'
+
+export const PAPER_LABS: Record<string, { paper: string; sourceLabel?: string; explanation: string; experiment: boolean }> = {
+  ...EXPANSION_LABS,
   'c9/09_byte_distillation.py': { paper: 'https://arxiv.org/abs/2609.12303', explanation: 'Condition on the eligible token prefix before stable normalization. Keep terminal probability in EOT, then verify complete path products. Forward KL uses the student log-softmax and ignores zero teacher terms.', experiment: true },
   'c9/10_byte_evaluation.py': { paper: 'https://arxiv.org/abs/2609.12303', explanation: 'Normalize summed loss by content bytes, count both sparse values and indices, aggregate sequential work over total time, and label the evidence range without turning a forecast into a measured result.', experiment: true },
   'c1/06_attention.py': { paper: 'https://arxiv.org/abs/1706.03762', explanation: 'Mask before row-wise softmax. Future keys receive zero probability, then values are mixed with those same weights.', experiment: false },

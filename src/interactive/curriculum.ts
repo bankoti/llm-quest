@@ -11,6 +11,7 @@ import { EXTENSION_LESSONS } from './extensionLessons'
 import { PAPERS_LESSONS } from './papersLessons'
 import { PAPER_SYSTEMS_LESSONS } from './paperSystemsLessons'
 import { BYTE_LESSONS } from './byteLessons'
+import { EXPANSION_LESSONS } from './expansionLessons'
 export { WARMUPS } from './warmups'
 
 export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
@@ -23,6 +24,7 @@ export const INTERACTIVE_LESSONS: InteractiveLesson[] = [
   ...EXTENSION_LESSONS,
   ...PAPERS_LESSONS,
   ...BYTE_LESSONS,
+  ...EXPANSION_LESSONS,
 ]
 
 export const LESSON_BY_SLUG = new Map(INTERACTIVE_LESSONS.map(l => [l.slug, l]))
@@ -44,6 +46,10 @@ export const MODULE_META: Record<string, { builds: string; short: string; option
   frontier: { short: 'Frontier', builds: 'Optional deep dives past the core build.', optional: true },
   papers: { short: 'Papers', builds: 'Optional history: the papers where these ideas first appeared, read with the concepts you now have.', optional: true },
   'byte-models': { short: 'Byte models', builds: 'A token teacher converted into byte targets, a trained student, and an evidence-based quality/cost comparison.', optional: true },
+  scratch: { short: 'Train your LLM', builds: 'A reproducible decoder training run, checkpoint recovery, classification, instruction tuning, and adapters.', optional: true },
+  dynamics: { short: 'Learning dynamics', builds: 'Measured residual learning, modular circuits, probes, interpolation, and search trade-offs.', optional: true },
+  rl: { short: 'Policy learning', builds: 'Policy-gradient derivations, real CartPole training, clipped group updates, verifier attacks, and search.', optional: true },
+  embodied: { short: 'Embodied AI', builds: 'Optional vision, continuous-action, and latent-planning mechanisms with explicit evidence limits.', optional: true },
 }
 
 export const MODULES = [...new Map(INTERACTIVE_LESSONS.map(l => [l.moduleId, { id: l.moduleId, title: l.moduleTitle }])).values()]
