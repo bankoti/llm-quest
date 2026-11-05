@@ -103,4 +103,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [Progress Measures for Grokking](https://arxiv.org/abs/2301.05217). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

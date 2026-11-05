@@ -118,4 +118,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [Karpathy: minbpe](https://github.com/karpathy/minbpe). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

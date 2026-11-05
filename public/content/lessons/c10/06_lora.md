@@ -100,4 +100,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [LoRA](https://arxiv.org/abs/2106.09685). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

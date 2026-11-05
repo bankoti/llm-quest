@@ -98,4 +98,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [The Curious Case of Neural Text Degeneration](https://arxiv.org/abs/1904.09751). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

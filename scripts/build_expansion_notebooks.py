@@ -77,7 +77,7 @@ def lesson(track, unit, scaffold):
     for source in unit.get('references', []):
         lines += [f"- [{source['title']}]({source['url']})"]
     lines += ['']
-    return '\n'.join(lines)
+    return '\n'.join(lines).rstrip() + '\n'
 
 
 def notebook(name, prose, scaffold, solution, grader, experiment):

@@ -97,4 +97,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [Scaling Laws for Reward Model Overoptimization](https://arxiv.org/abs/2210.10760). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

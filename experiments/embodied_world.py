@@ -32,8 +32,7 @@ def world_experiment():
     for action in candidates[choice]:
         z_true=true_a@z_true+true_b@action;z_model=learned_a@z_model+learned_b@action
         error_by_horizon.append(float(((z_true-z_model)**2).mean()))
-    # A biased model overestimates action effectiveness. Compare closed/open loop
-    # using the same candidate count and planning calls per executed step.
+    # The replanning trace has a different budget; see the returned limitation.
     bad_b=learned_b*1.8
     state=initial.copy();closed=[]
     for _ in range(8):

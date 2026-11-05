@@ -1,6 +1,4 @@
-// Progress state stored locally. Course prerequisites form a graph: after C3,
-// learners may continue into production engineering (C4-C8) or frontier
-// training (C9). Course 0 is an always-open optional toolkit.
+// Progress state is stored locally; COURSES owns the prerequisite graph.
 import { beacon } from './beacon'
 import {
   ALL_LEVELS, COURSES, FRONTIER_LEVELS, GATED_LEVELS, LEGACY_CERTIFICATE_LEVELS, PRODUCTION_LEVELS,

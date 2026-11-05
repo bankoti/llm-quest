@@ -107,4 +107,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [PyTorch: general checkpoints](https://pytorch.org/tutorials/recipes/recipes/saving_and_loading_a_general_checkpoint.html). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

@@ -107,4 +107,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [Mastering Go with Deep Neural Networks and Tree Search](https://www.nature.com/articles/nature16961). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

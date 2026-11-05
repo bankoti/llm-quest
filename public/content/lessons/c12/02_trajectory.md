@@ -103,4 +103,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [Sutton and Barto: Policy Gradient Methods](https://web.stanford.edu/class/psych209/Readings/SuttonBartoRL.pdf). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

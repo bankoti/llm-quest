@@ -24,7 +24,7 @@ Imitation learning trains on labeled expert actions. For binary label y, L1 loss
 
 An imitation dataset comes from the expert's visited states. A small mistake can take the learned policy to a state absent from that dataset, where another mistake becomes more likely. This is rollout distribution shift. Evaluate complete trajectories, not only offline action accuracy. Reinforcement learning instead uses rewards from the learner's interaction, introducing exploration, variance, and credit-assignment problems.
 
-The lab returns probabilities, mean L1 loss, and gradients for a batch. The notebook verifies them against autograd and finite differences. It also compares demonstration action accuracy with rollout reward in a deliberately small discrete task; the CartPole unit uses the real Gymnasium simulator. None of these tests authorizes control of physical hardware.
+The lab returns probabilities, mean L1 loss, and gradients for a batch. The notebook verifies them against autograd and finite differences. It also illustrates compounding action errors with a simplified q^H model that assumes independent local correctness; the CartPole unit uses the real Gymnasium simulator. None of these tests authorizes control of physical hardware.
 
 ## Worked Example: One sigmoid update
 
@@ -102,4 +102,3 @@ A passing grader establishes this small function contract, not research reproduc
 ## Primary Source
 
 [A Reduction of Imitation Learning and Structured Prediction](https://arxiv.org/abs/1011.0686). The numerical examples, code, and synthetic datasets here are original teaching material; the source is for the underlying mechanism and its research context.
-

@@ -13,6 +13,9 @@ let browser
 const shots=process.env.PAPER_EVIDENCE_DIR ?? path.join(root,'.paper-test-output')
 fs.mkdirSync(shots,{recursive:true})
 const slugs=['scaling-laws','flash-attention','zero-sharding','switch-transformer','paged-attention','byte-boundaries','byte-distillation','byte-model-evaluation']
+// Optional selectors keep local validation focused; CI retains the full default.
+const selectedLessons=process.env.PAPER_LESSONS?.split(',').filter(Boolean)
+const selectedLevels=process.env.PAPER_LEVELS?.split(',').filter(Boolean)
 
 async function layout(page,name) {
   await page.waitForTimeout(500)
@@ -32,7 +35,8 @@ async function slider(page,id,value) {
   for(let i=0;i<Math.round((value-min)/step);i++)await input.press('ArrowRight')
 }
 try {
-  browser=await chromium.launch({headless:true,...(fs.existsSync(chrome)?{executablePath:chrome}:{})})
+  const executablePath=process.env.PAPER_BROWSER_EXECUTABLE ?? (fs.existsSync(chrome)?chrome:undefined)
+  browser=await chromium.launch({headless:true,...(executablePath?{executablePath}:{})})
   for (const viewport of [{width:1280,height:900},{width:390,height:844}]) {
     const page=await browser.newPage({viewport,reducedMotion:'reduce'})
     const errors=[]
@@ -60,8 +64,9 @@ try {
       localStorage.setItem('llmquest_progress_v1',JSON.stringify({levels:Object.fromEntries(levels.map(l=>[l.id,{status:'unlocked',xpEarned:0,attempts:0}])),totalXp:0,streakDays:0,lastActiveDate:''}))
     },{seed,levels:data.levels})
     const expansionSlugs=data.lessons.filter(l=>['scratch','dynamics','rl','embodied'].includes(l.moduleId)).map(l=>l.slug)
-    for(const slug of [...slugs,...expansionSlugs]) {
+    for(const slug of selectedLessons??[...slugs,...expansionSlugs]) {
       const lesson=bySlug.get(slug)
+      assert.ok(lesson,`unknown selected lesson ${slug}`)
       await page.evaluate(slug=>{
         const state=JSON.parse(localStorage.getItem('llmquest_interactive_v2'))
         delete state[slug]
@@ -91,6 +96,7 @@ try {
         } else if(step.kind==='widget') {
           if(expansionSlugs.includes(slug)) {
             const controls=page.getByRole('slider')
+            await controls.first().waitFor()
             assert.ok(await controls.count()>0,`${slug}: no manipulable controls`)
             const before=await page.locator('dl').innerText()
             const control=controls.first()
@@ -148,7 +154,8 @@ try {
       assert.equal(completed.firstTries,completed.scored,`${slug}: score must persist`)
       console.log(`PASS ${viewport.width}px ${slug}: completed and scored`)
     }
-    for(const id of ['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
+    for(const id of selectedLevels??['c2-l5','c2-l3','c7-l9','c9-l8','c9-l1','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
+      assert.ok(data.levels.some(l=>l.id===id),`unknown selected level ${id}`)
       await page.goto(`${base}/level/${id}`)
       if(viewport.width<768)await page.getByRole('tab',{name:'code',exact:true}).click()
       await click(page,'Show worked solution')
@@ -161,7 +168,7 @@ try {
       await layout(page,`${viewport.width}-${id}-solution`)
     }
     if(process.env.PAPER_PYODIDE==='1' && viewport.width===1280) {
-      for(const id of ['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
+      for(const id of selectedLevels??['c1-l6','c1-l7','c2-l3','c2-l5','c7-l9','c9-l1','c9-l8','c9-l9','c9-l10',...data.levels.filter(l=>l.courseId>=10).map(l=>l.id)]) {
         const level=data.levels.find(l=>l.id===id)
         const result=await page.evaluate(async file=>{
           const {runChallenge}=await import('/src/engine/pyodide.ts')
